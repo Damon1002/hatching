@@ -1,13 +1,15 @@
 {
   "expo": {
-    "name": "Hatching",
-    "slug": "Hatching",
+    "name": "Dragon Grove",
+    "slug": "dragon-grove",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0C1512",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dragongrove.focus"
     },
     "android": {
       "adaptiveIcon": {
@@ -20,6 +22,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-status-bar",
+      "expo-asset"
+    ]
   }
 }

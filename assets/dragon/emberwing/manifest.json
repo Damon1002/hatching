@@ -1,0 +1,1997 @@
+{
+  "schemaVersion": 2,
+  "id": "emberwing",
+  "name": "Emberwing",
+  "sourceMaster": {
+    "size": [
+      2048,
+      2048
+    ],
+    "format": "PNG",
+    "alpha": "straight",
+    "colorSpace": "sRGB",
+    "anchor": [
+      1024,
+      1720
+    ],
+    "canonicalForFutureExports": true,
+    "productionMethod": "Premium identity-preserving image-generation rerender from approved 2x2 animation sheets, then deterministic registration on 2048px archival canvases.",
+    "nativePremiumSheetSize": [
+      1254,
+      1254
+    ],
+    "provenanceNote": "The visual rerender authored additional facet, material and lighting detail at the built-in generator's native 1254px square sheet size. Extracted cells were then losslessly archived on 2048px canvases; the 2048 dimensions must not be interpreted as 2048px-native model output."
+  },
+  "runtime": {
+    "frameSize": [
+      512,
+      512
+    ],
+    "atlasSize": [
+      4096,
+      4096
+    ],
+    "columns": 8,
+    "rows": 8,
+    "anchor": [
+      256,
+      430
+    ],
+    "displayScale": 0.45,
+    "derivedFromSource2048": true,
+    "atlasSha256": "ef763a452de0d1ded10292b78590894110146d0ae40cf2a9da467398d7a3f498"
+  },
+  "clips": {
+    "resting": {
+      "start": 0,
+      "frameCount": 12,
+      "frameDurationMs": 100,
+      "loop": true
+    },
+    "focusing": {
+      "start": 16,
+      "frameCount": 12,
+      "frameDurationMs": 111,
+      "loop": true
+    },
+    "interrupted": {
+      "start": 32,
+      "frameCount": 8,
+      "frameDurationMs": 91,
+      "loop": false
+    },
+    "celebrating": {
+      "start": 40,
+      "frameCount": 20,
+      "frameDurationMs": 71,
+      "loop": false
+    }
+  },
+  "frames": [
+    {
+      "state": "resting",
+      "frame": 1,
+      "source": "source-2048/resting/resting-01.png",
+      "runtime": "runtime-512/resting/resting-01.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "d50c50bb4786d2f260ef03db30f41af675c6e2669a9954c2f4db41c5ba77c0e6",
+      "runtimeSha256": "864ba7664626de1a461ecebeb1a7b06de2a7e8e0e33adebe5ac1a39411f7d35f",
+      "premiumSheet": "resting-sheet-01.png",
+      "sourceCellBounds": [
+        79,
+        137,
+        585,
+        549
+      ],
+      "registeredBounds": [
+        323,
+        487,
+        1835,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        88
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "resting",
+      "frame": 2,
+      "source": "source-2048/resting/resting-02.png",
+      "runtime": "runtime-512/resting/resting-02.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "2389eb78a27e196ad8ad196ee4c96d5c4e96942c0bca9ac2ee86e7ff0a200a39",
+      "runtimeSha256": "baa526669724aff8059ba2a7f9402dcbced6856bac0f18ad0ebfecab8b83c868",
+      "premiumSheet": "resting-sheet-01.png",
+      "sourceCellBounds": [
+        43,
+        135,
+        554,
+        550
+      ],
+      "registeredBounds": [
+        216,
+        478,
+        1743,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        85
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "resting",
+      "frame": 3,
+      "source": "source-2048/resting/resting-03.png",
+      "runtime": "runtime-512/resting/resting-03.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "c48c2ca9fe0b1a1d77a35cb5ce0c8b45cb9715512f5891238188326e5f2375a5",
+      "runtimeSha256": "80a7c4760746ef6eb4a479375fde4465b862eba5358ba3a0ab805f1144acb83d",
+      "premiumSheet": "resting-sheet-01.png",
+      "sourceCellBounds": [
+        78,
+        70,
+        586,
+        494
+      ],
+      "registeredBounds": [
+        320,
+        452,
+        1838,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        251
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "resting",
+      "frame": 4,
+      "source": "source-2048/resting/resting-04.png",
+      "runtime": "runtime-512/resting/resting-04.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "6953e55bf58e5089ab0a12ed782167563353d70553ca7179987306c1ca937ea8",
+      "runtimeSha256": "f9afa1caeb2ae93627089799df83c7c2847465f0b726213d6ad519033cb30049",
+      "premiumSheet": "resting-sheet-01.png",
+      "sourceCellBounds": [
+        36,
+        69,
+        544,
+        497
+      ],
+      "registeredBounds": [
+        196,
+        440,
+        1713,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        242
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "resting",
+      "frame": 5,
+      "source": "source-2048/resting/resting-05.png",
+      "runtime": "runtime-512/resting/resting-05.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "ba737dac829cc72de1da17b062395f3a7088d7ef6500d1003763701e3b58c2e0",
+      "runtimeSha256": "207da4a1de75994ad4f44faeec6a8a132f63d5b59f2d4c9c6427353937a79f9d",
+      "premiumSheet": "resting-sheet-02.png",
+      "sourceCellBounds": [
+        83,
+        146,
+        578,
+        558
+      ],
+      "registeredBounds": [
+        335,
+        487,
+        1811,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        61
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "resting",
+      "frame": 6,
+      "source": "source-2048/resting/resting-06.png",
+      "runtime": "runtime-512/resting/resting-06.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "a49dfdb4ef23f0cd1d9fb8e1f0433ac62a84e12257c4b98bc6af61927a7dfebe",
+      "runtimeSha256": "4d854e230e0e792e4f0a1e25f6389c6c86c0548d9d49a0d6ceefe71521f3b32b",
+      "premiumSheet": "resting-sheet-02.png",
+      "sourceCellBounds": [
+        50,
+        147,
+        558,
+        560
+      ],
+      "registeredBounds": [
+        237,
+        483,
+        1752,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        55
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "resting",
+      "frame": 7,
+      "source": "source-2048/resting/resting-07.png",
+      "runtime": "runtime-512/resting/resting-07.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "d2e39c9b1698c5bb2d776d73a8c5e3bf3033270406a34751acb2b7a816f61fd0",
+      "runtimeSha256": "52bb284de9cfebcb42a2ce47cd1ea9a68a72d874cad6d522f758a488c7f74859",
+      "premiumSheet": "resting-sheet-02.png",
+      "sourceCellBounds": [
+        82,
+        63,
+        578,
+        483
+      ],
+      "registeredBounds": [
+        332,
+        463,
+        1813,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        283
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "resting",
+      "frame": 8,
+      "source": "source-2048/resting/resting-08.png",
+      "runtime": "runtime-512/resting/resting-08.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "007a6f225f6bf5239330d6ef04c5b698108815575abd7ee78b4d7c9ee89b89de",
+      "runtimeSha256": "29f521268ed45daecf2a79a0068743983d4a5879f21cc1e816b78ea5bc2c2a6c",
+      "premiumSheet": "resting-sheet-02.png",
+      "sourceCellBounds": [
+        49,
+        63,
+        553,
+        483
+      ],
+      "registeredBounds": [
+        234,
+        463,
+        1740,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        283
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "resting",
+      "frame": 9,
+      "source": "source-2048/resting/resting-09.png",
+      "runtime": "runtime-512/resting/resting-09.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "025815135ca755e6f87a41b1102e38caeaeebbe5d2612781dd899f2181681880",
+      "runtimeSha256": "e491f20de689bca76bcf57829bfd1a5bf60d81cf8fe35d676c4854ddb64adb24",
+      "premiumSheet": "resting-sheet-03.png",
+      "sourceCellBounds": [
+        86,
+        142,
+        580,
+        542
+      ],
+      "registeredBounds": [
+        344,
+        523,
+        1819,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        109
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "resting",
+      "frame": 10,
+      "source": "source-2048/resting/resting-10.png",
+      "runtime": "runtime-512/resting/resting-10.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "dff3c46f9a7ee53f2f27f92905057c913b0dad08289bb1ca5e42ed043ba0c025",
+      "runtimeSha256": "d07bdd69e47d070eb67c3ead532bb53d2fb88e1d8911c7c7a34badabe128dd3c",
+      "premiumSheet": "resting-sheet-03.png",
+      "sourceCellBounds": [
+        39,
+        141,
+        549,
+        543
+      ],
+      "registeredBounds": [
+        205,
+        517,
+        1728,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        106
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "resting",
+      "frame": 11,
+      "source": "source-2048/resting/resting-11.png",
+      "runtime": "runtime-512/resting/resting-11.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "12df2ed2cc977494002b91d394b1b74d405889817ad390e0cc917b2d22f05e79",
+      "runtimeSha256": "b5b6046d354122d601933e67dd2f281dd2425dae9de3edbbe70e9b24b80d5aba",
+      "premiumSheet": "resting-sheet-03.png",
+      "sourceCellBounds": [
+        79,
+        73,
+        579,
+        483
+      ],
+      "registeredBounds": [
+        324,
+        494,
+        1817,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        284
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "resting",
+      "frame": 12,
+      "source": "source-2048/resting/resting-12.png",
+      "runtime": "runtime-512/resting/resting-12.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "ee16c5703b2b541775039bf03a50a6de926ab61a94591c8e76044c87980e5155",
+      "runtimeSha256": "91ab3f6e856a726eda799fcfb9862892b5568af5a931b4d5555d9f8630d7fa72",
+      "premiumSheet": "resting-sheet-03.png",
+      "sourceCellBounds": [
+        41,
+        78,
+        545,
+        484
+      ],
+      "registeredBounds": [
+        210,
+        505,
+        1716,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        280
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "focusing",
+      "frame": 1,
+      "source": "source-2048/focusing/focusing-01.png",
+      "runtime": "runtime-512/focusing/focusing-01.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "9036143f9c58e5d0c404f58746bfea2c297acd37ef5488bba9ddef8a099e0832",
+      "runtimeSha256": "73aed55a35413517fa298709582a63c856f6cf9353c64bdfa0de8d9425a800cd",
+      "premiumSheet": "focusing-sheet-01.png",
+      "sourceCellBounds": [
+        52,
+        139,
+        595,
+        557
+      ],
+      "registeredBounds": [
+        246,
+        469,
+        1864,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        64
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "focusing",
+      "frame": 2,
+      "source": "source-2048/focusing/focusing-02.png",
+      "runtime": "runtime-512/focusing/focusing-02.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "1717740f247a4643fd3c9b817b6244f9c4e0b5e7a3971e52192c124df843968c",
+      "runtimeSha256": "fa2fc853163cdc5016cf5b19407d47c5304f157b492c4c48c0b1b9da53f428ef",
+      "premiumSheet": "focusing-sheet-01.png",
+      "sourceCellBounds": [
+        41,
+        138,
+        587,
+        557
+      ],
+      "registeredBounds": [
+        211,
+        467,
+        1840,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        65
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "focusing",
+      "frame": 3,
+      "source": "source-2048/focusing/focusing-03.png",
+      "runtime": "runtime-512/focusing/focusing-03.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "108b02f5304da48a5c80e6f8ee2fe5b1415f70c48646887e1cebfd3874ad32c1",
+      "runtimeSha256": "7c526f6067cdbc01aaf420df4c0140f4e9f971607f50386df1bd16d078c504f1",
+      "premiumSheet": "focusing-sheet-01.png",
+      "sourceCellBounds": [
+        55,
+        104,
+        591,
+        521
+      ],
+      "registeredBounds": [
+        252,
+        472,
+        1849,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        171
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "focusing",
+      "frame": 4,
+      "source": "source-2048/focusing/focusing-04.png",
+      "runtime": "runtime-512/focusing/focusing-04.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "738b20a3e0535215662d6e16139b3a09bd11298f18fa7d126001b33030e1447e",
+      "runtimeSha256": "a7e8c41476fdc433fa04d809bc187371a2a7ebef8f1fa9fb6d29337d388537af",
+      "premiumSheet": "focusing-sheet-01.png",
+      "sourceCellBounds": [
+        39,
+        100,
+        584,
+        521
+      ],
+      "registeredBounds": [
+        205,
+        461,
+        1831,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        171
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "focusing",
+      "frame": 5,
+      "source": "source-2048/focusing/focusing-05.png",
+      "runtime": "runtime-512/focusing/focusing-05.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "0161d989b13eba594e5bc6576c5a847a4afbc15661416bb1d45a5cba850b0170",
+      "runtimeSha256": "9a4721b68f6b809ca04587ed9bc200b258b910bc9d6864b8da38ea8ab741713a",
+      "premiumSheet": "focusing-sheet-02.png",
+      "sourceCellBounds": [
+        64,
+        156,
+        625,
+        552
+      ],
+      "registeredBounds": [
+        279,
+        534,
+        1952,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        79
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "focusing",
+      "frame": 6,
+      "source": "source-2048/focusing/focusing-06.png",
+      "runtime": "runtime-512/focusing/focusing-06.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "0437d020ce62c7b5f2970158845a3ff93bdd08d5afde1495e8619f6e067a0fe8",
+      "runtimeSha256": "eaffa749c388288c268396e13eec4403ccfd2a809538a51d8337b173b3d9d154",
+      "premiumSheet": "focusing-sheet-02.png",
+      "sourceCellBounds": [
+        41,
+        154,
+        613,
+        552
+      ],
+      "registeredBounds": [
+        211,
+        534,
+        1917,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        82
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "focusing",
+      "frame": 7,
+      "source": "source-2048/focusing/focusing-07.png",
+      "runtime": "runtime-512/focusing/focusing-07.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "4cdc59401b86e92cad908af3bb497ffd0a402342e1353762c9d366d223f8d84d",
+      "runtimeSha256": "c1a133bfd21ce4a90d726500a0f232a4904c0fb658ff814cdee99af706e71200",
+      "premiumSheet": "focusing-sheet-02.png",
+      "sourceCellBounds": [
+        54,
+        103,
+        616,
+        503
+      ],
+      "registeredBounds": [
+        250,
+        525,
+        1926,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        224
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "focusing",
+      "frame": 8,
+      "source": "source-2048/focusing/focusing-08.png",
+      "runtime": "runtime-512/focusing/focusing-08.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "07759ad4090b8a552cabbaa6b0ec8266d8b432ca7e5e2ebf5d4664ff9c342bf5",
+      "runtimeSha256": "eff75a2004c5edc305b23da58839af14e6751518f882db93b94f2629b04fc1e3",
+      "premiumSheet": "focusing-sheet-02.png",
+      "sourceCellBounds": [
+        51,
+        105,
+        611,
+        499
+      ],
+      "registeredBounds": [
+        243,
+        541,
+        1911,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        236
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "focusing",
+      "frame": 9,
+      "source": "source-2048/focusing/focusing-09.png",
+      "runtime": "runtime-512/focusing/focusing-09.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "345264b8ee4675de21f3fd81b8eb131f8961c91346fa62cd461c32bf48f5f3a7",
+      "runtimeSha256": "65d2c5a33380e997c9809d9bbef7f10ede6315a98b5b009fe7063c865fb9ad75",
+      "premiumSheet": "focusing-sheet-03.png",
+      "sourceCellBounds": [
+        73,
+        166,
+        603,
+        527
+      ],
+      "registeredBounds": [
+        305,
+        638,
+        1888,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        153
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "focusing",
+      "frame": 10,
+      "source": "source-2048/focusing/focusing-10.png",
+      "runtime": "runtime-512/focusing/focusing-10.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "edae902255b40f164bb3d54801eef25ebd2aeebf4d061bc97cc0ee635a735064",
+      "runtimeSha256": "7d8768b7f57a777b480b6ff522a4c88d05add4c8dc178d44c18af440b22234fd",
+      "premiumSheet": "focusing-sheet-03.png",
+      "sourceCellBounds": [
+        22,
+        173,
+        575,
+        526
+      ],
+      "registeredBounds": [
+        157,
+        663,
+        1805,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        157
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "focusing",
+      "frame": 11,
+      "source": "source-2048/focusing/focusing-11.png",
+      "runtime": "runtime-512/focusing/focusing-11.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "1b7901ed31f50c1ec0af13fd30c631e42477a0ca7bb375c8163be821c8c2bf5a",
+      "runtimeSha256": "fb019ef58e208e373023c5175f1693db41dd573b67db4344a08a57cf37004c41",
+      "premiumSheet": "focusing-sheet-03.png",
+      "sourceCellBounds": [
+        52,
+        101,
+        615,
+        469
+      ],
+      "registeredBounds": [
+        243,
+        617,
+        1923,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        325
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "focusing",
+      "frame": 12,
+      "source": "source-2048/focusing/focusing-12.png",
+      "runtime": "runtime-512/focusing/focusing-12.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "ff8c2eab8fb2588135a0a1c0b3a918284915507d2b9619f4e10408123cb10ab8",
+      "runtimeSha256": "327ee8f80249a9278723666a1b7a104344a26b002ee2e2f8e619e68b9e06388d",
+      "premiumSheet": "focusing-sheet-03.png",
+      "sourceCellBounds": [
+        12,
+        105,
+        577,
+        470
+      ],
+      "registeredBounds": [
+        125,
+        626,
+        1811,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        322
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "interrupted",
+      "frame": 1,
+      "source": "source-2048/interrupted/interrupted-01.png",
+      "runtime": "runtime-512/interrupted/interrupted-01.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "5a55d21e1db5b76a48736c23cfa615d95b03a32ea5159f99dd7b93ce0fdec012",
+      "runtimeSha256": "80722adae7b33574746c686b32b9da80db2f46408359dea7500448f9a7abd21f",
+      "premiumSheet": "interrupted-sheet-01.png",
+      "sourceCellBounds": [
+        106,
+        161,
+        581,
+        508
+      ],
+      "registeredBounds": [
+        403,
+        679,
+        1822,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        209
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "interrupted",
+      "frame": 2,
+      "source": "source-2048/interrupted/interrupted-02.png",
+      "runtime": "runtime-512/interrupted/interrupted-02.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "59b09989f784cef32879fdc10c93ae8e5540da4f4c944790d3d0baa604a5d4dd",
+      "runtimeSha256": "d3c16775eb0eea7ca72309e00950f82eb8d904c612b93097098529faad2ea148",
+      "premiumSheet": "interrupted-sheet-01.png",
+      "sourceCellBounds": [
+        52,
+        156,
+        551,
+        520
+      ],
+      "registeredBounds": [
+        243,
+        632,
+        1733,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        177
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "interrupted",
+      "frame": 3,
+      "source": "source-2048/interrupted/interrupted-03.png",
+      "runtime": "runtime-512/interrupted/interrupted-03.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "7120e34bb9413d8113e505d92cac975be9e27fa122803b9dfcee68ec16fd3459",
+      "runtimeSha256": "3ccafeda427a55bd05503a94b4ffd28112e56d25aa12d36b5ef9ec4f46973ab7",
+      "premiumSheet": "interrupted-sheet-01.png",
+      "sourceCellBounds": [
+        115,
+        60,
+        588,
+        467
+      ],
+      "registeredBounds": [
+        433,
+        506,
+        1843,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        332
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "interrupted",
+      "frame": 4,
+      "source": "source-2048/interrupted/interrupted-04.png",
+      "runtime": "runtime-512/interrupted/interrupted-04.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "eab3df73fe191f6a36f40d7ae1ef7c7a6df5af53df8a0eea18a1322452fdfeaf",
+      "runtimeSha256": "b40628741140228d914db83182801519dd2f1e360ddf23c03d1dc73dfa7d44f1",
+      "premiumSheet": "interrupted-sheet-01.png",
+      "sourceCellBounds": [
+        59,
+        46,
+        528,
+        473
+      ],
+      "registeredBounds": [
+        264,
+        444,
+        1666,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        314
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "interrupted",
+      "frame": 5,
+      "source": "source-2048/interrupted/interrupted-05.png",
+      "runtime": "runtime-512/interrupted/interrupted-05.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "cca3789064431f65b8a2167479cf7cce8e6a2bb23420c54abf5383a002930406",
+      "runtimeSha256": "572f4daec30f41e371a9bf77640e5ff1f01f9f23b9af796d34860b015ce87dfd",
+      "premiumSheet": "interrupted-sheet-02.png",
+      "sourceCellBounds": [
+        89,
+        156,
+        569,
+        556
+      ],
+      "registeredBounds": [
+        353,
+        522,
+        1786,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        67
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "interrupted",
+      "frame": 6,
+      "source": "source-2048/interrupted/interrupted-06.png",
+      "runtime": "runtime-512/interrupted/interrupted-06.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "56c4e388157ad06c52353da18c1a322d36e3ab76a5132ca1d9d944d8c274a58d",
+      "runtimeSha256": "2e0c0d6e78a73eeba6484fb73c1c68cb431c19dfc652b9b7835deb4b11744f13",
+      "premiumSheet": "interrupted-sheet-02.png",
+      "sourceCellBounds": [
+        54,
+        215,
+        546,
+        555
+      ],
+      "registeredBounds": [
+        249,
+        704,
+        1719,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        71
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "interrupted",
+      "frame": 7,
+      "source": "source-2048/interrupted/interrupted-07.png",
+      "runtime": "runtime-512/interrupted/interrupted-07.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "013f3b13db5b5dee8c979bc9c9d77a693fc3dba85fa199ddfbffee449d83c8d4",
+      "runtimeSha256": "0c38b277f785225bcbf6b759c1ec9263c366d6b307e23dfbac87bf358377c27a",
+      "premiumSheet": "interrupted-sheet-02.png",
+      "sourceCellBounds": [
+        95,
+        150,
+        565,
+        453
+      ],
+      "registeredBounds": [
+        373,
+        811,
+        1775,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        373
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "interrupted",
+      "frame": 8,
+      "source": "source-2048/interrupted/interrupted-08.png",
+      "runtime": "runtime-512/interrupted/interrupted-08.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "31c31ad90610cfc333f2a178d9e29da0dd6db7b9d7bb62bc75519f18de1e01af",
+      "runtimeSha256": "71a6c3d6f56b4363c1a6445689025880973c94181d2d704396e1435300dc275d",
+      "premiumSheet": "interrupted-sheet-02.png",
+      "sourceCellBounds": [
+        67,
+        170,
+        455,
+        453
+      ],
+      "registeredBounds": [
+        287,
+        869,
+        1449,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        373
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 1,
+      "source": "source-2048/celebrating/celebrating-01.png",
+      "runtime": "runtime-512/celebrating/celebrating-01.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "796c64f3a3ff31ac403ef9f34e4d2831424763236ebfaafb2d0a89616f18e254",
+      "runtimeSha256": "748f98da697dbf34ee3eed33fd599dc6e31370d787944a41613e713ab19d1bb5",
+      "premiumSheet": "celebrating-sheet-01.png",
+      "sourceCellBounds": [
+        84,
+        137,
+        575,
+        535
+      ],
+      "registeredBounds": [
+        338,
+        528,
+        1805,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        129
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 2,
+      "source": "source-2048/celebrating/celebrating-02.png",
+      "runtime": "runtime-512/celebrating/celebrating-02.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "9125af6f9aeda6b8aa3fc36ef70f8861315ea8306cf1c1e9aca15096672fce6e",
+      "runtimeSha256": "cce33fbcb3ce648659a93f509f5c598ab015325052be52fd4ff84e8ae9c1084b",
+      "premiumSheet": "celebrating-sheet-01.png",
+      "sourceCellBounds": [
+        75,
+        105,
+        554,
+        539
+      ],
+      "registeredBounds": [
+        312,
+        422,
+        1743,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        118
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 3,
+      "source": "source-2048/celebrating/celebrating-03.png",
+      "runtime": "runtime-512/celebrating/celebrating-03.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "46da42d39c4cf54673eace270c661fc79ab635680bc1b185742f2c16a7e63c9f",
+      "runtimeSha256": "743c8231de0641bf8a73f9822ea62e88c51c9cd222099940db0d7d3cb3300005",
+      "premiumSheet": "celebrating-sheet-01.png",
+      "sourceCellBounds": [
+        83,
+        57,
+        589,
+        504
+      ],
+      "registeredBounds": [
+        335,
+        383,
+        1846,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        221
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 4,
+      "source": "source-2048/celebrating/celebrating-04.png",
+      "runtime": "runtime-512/celebrating/celebrating-04.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "10c9a0030e7b283caadca991d430d03518645dc7442c7be1aace2e5621d764e0",
+      "runtimeSha256": "0a18a1cf005111f89b2210ded94d1dfcf3197a830f6755ac61ce38d0dbaa3589",
+      "premiumSheet": "celebrating-sheet-01.png",
+      "sourceCellBounds": [
+        30,
+        29,
+        567,
+        501
+      ],
+      "registeredBounds": [
+        178,
+        309,
+        1778,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        230
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 5,
+      "source": "source-2048/celebrating/celebrating-05.png",
+      "runtime": "runtime-512/celebrating/celebrating-05.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "35988fb43bea5f80cdccce65e30c31620cf3c4772846750a5c909d3286442a63",
+      "runtimeSha256": "4f197808521c7603f72aa9c7a94ae109adeefc6a39537a4b0d786d692478b2a6",
+      "premiumSheet": "celebrating-sheet-02.png",
+      "sourceCellBounds": [
+        72,
+        78,
+        587,
+        558
+      ],
+      "registeredBounds": [
+        302,
+        286,
+        1840,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        62
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 6,
+      "source": "source-2048/celebrating/celebrating-06.png",
+      "runtime": "runtime-512/celebrating/celebrating-06.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "d51cd25e95ff74814a29831daef649a11ec5fc8531f1f087047b6a9ae7782d76",
+      "runtimeSha256": "59e9414336ec3f9409b81d56c4f13ef7d25e580288e2364c74f670f47bc439a6",
+      "premiumSheet": "celebrating-sheet-02.png",
+      "sourceCellBounds": [
+        43,
+        93,
+        571,
+        558
+      ],
+      "registeredBounds": [
+        219,
+        331,
+        1793,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        62
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 7,
+      "source": "source-2048/celebrating/celebrating-07.png",
+      "runtime": "runtime-512/celebrating/celebrating-07.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "3c2bf917a79d11631ab70ed5007b6086a54ab3091a2539795977fb121b3ca6d2",
+      "runtimeSha256": "52aaa7e3ecd1a1105a15aaaeb2520511c706fe7b5853f36cadca75975958e6c0",
+      "premiumSheet": "celebrating-sheet-02.png",
+      "sourceCellBounds": [
+        31,
+        68,
+        586,
+        541
+      ],
+      "registeredBounds": [
+        181,
+        306,
+        1837,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        112
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 8,
+      "source": "source-2048/celebrating/celebrating-08.png",
+      "runtime": "runtime-512/celebrating/celebrating-08.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "93e017f38f9c849cf3e21e05bbce20c439ec9f0e7605a665c6fbff86af9d83c3",
+      "runtimeSha256": "43e544a91e72e51b28e174b5ab9c5ef86e2553407aa50ef1d7da837e03d1e47a",
+      "premiumSheet": "celebrating-sheet-02.png",
+      "sourceCellBounds": [
+        46,
+        70,
+        574,
+        541
+      ],
+      "registeredBounds": [
+        225,
+        312,
+        1802,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        112
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 9,
+      "source": "source-2048/celebrating/celebrating-09.png",
+      "runtime": "runtime-512/celebrating/celebrating-09.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "8dfeb76f9d2f6ffd9724b8e8a4ae53c8610801f1f76b1c609605c074df7bfaeb",
+      "runtimeSha256": "bd2fcf5841c947974f12461469775adc21565b1f9c682581689d468d324ebc61",
+      "premiumSheet": "celebrating-sheet-03.png",
+      "sourceCellBounds": [
+        70,
+        62,
+        592,
+        589
+      ],
+      "registeredBounds": [
+        297,
+        147,
+        1855,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        -30
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 10,
+      "source": "source-2048/celebrating/celebrating-10.png",
+      "runtime": "runtime-512/celebrating/celebrating-10.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "010e5c188e9ef017ca25183acae555844c31614c3bf1c0797ac6d82fd25b74c9",
+      "runtimeSha256": "3f85ecc94f62ea1e9ee819172145d932ee8cab54506a530c22c7ae224d51d398",
+      "premiumSheet": "celebrating-sheet-03.png",
+      "sourceCellBounds": [
+        38,
+        68,
+        574,
+        590
+      ],
+      "registeredBounds": [
+        205,
+        161,
+        1802,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        -33
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 11,
+      "source": "source-2048/celebrating/celebrating-11.png",
+      "runtime": "runtime-512/celebrating/celebrating-11.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "2e67963899df619b90543c030044d3dad0dff2933466f0c460770539186f1645",
+      "runtimeSha256": "71ff75bbeead6ca3f68162119781c63aef95aeb3fcd055f942a0e3634a38a2f6",
+      "premiumSheet": "celebrating-sheet-03.png",
+      "sourceCellBounds": [
+        86,
+        63,
+        595,
+        559
+      ],
+      "registeredBounds": [
+        344,
+        239,
+        1863,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        59
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 12,
+      "source": "source-2048/celebrating/celebrating-12.png",
+      "runtime": "runtime-512/celebrating/celebrating-12.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "16ba237c740fe07fde20eb34120bbd319ec9f96097226987f9b130e6dfa879f5",
+      "runtimeSha256": "919ae97ac26828e23dd9867473870ddc3c0768d48cfdfc105564e6eb2ebb6ddf",
+      "premiumSheet": "celebrating-sheet-03.png",
+      "sourceCellBounds": [
+        41,
+        52,
+        560,
+        559
+      ],
+      "registeredBounds": [
+        211,
+        207,
+        1760,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        59
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 13,
+      "source": "source-2048/celebrating/celebrating-13.png",
+      "runtime": "runtime-512/celebrating/celebrating-13.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "ba697f4b316359973a34122fbef3717f11e072e96380a36694dc091da5ce3421",
+      "runtimeSha256": "f0e37f1c8da9792c48c88ff2591bebe57eba6fac8971c0618e1e63ba87dda42f",
+      "premiumSheet": "celebrating-sheet-04.png",
+      "sourceCellBounds": [
+        73,
+        113,
+        602,
+        603
+      ],
+      "registeredBounds": [
+        305,
+        259,
+        1882,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        -72
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 14,
+      "source": "source-2048/celebrating/celebrating-14.png",
+      "runtime": "runtime-512/celebrating/celebrating-14.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "964fbe7a17f35f40ad54cc4086426f5e5e8724dc17efafc9859ac721856d5de4",
+      "runtimeSha256": "915dbec5e7544db2fce7b4c3b7d7272aab878f2cd2d6d143fcc600759bc20118",
+      "premiumSheet": "celebrating-sheet-04.png",
+      "sourceCellBounds": [
+        30,
+        135,
+        601,
+        602
+      ],
+      "registeredBounds": [
+        178,
+        324,
+        1882,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        -69
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 15,
+      "source": "source-2048/celebrating/celebrating-15.png",
+      "runtime": "runtime-512/celebrating/celebrating-15.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "5eda331e079bd2fb2a6a1a310bd1a141b7a63374db2ef787ea84ca4335b3d2a2",
+      "runtimeSha256": "45db1c57613f207f56185a6164a808f9ee6ba2ead9ce664e638c234163b9b647",
+      "premiumSheet": "celebrating-sheet-04.png",
+      "sourceCellBounds": [
+        87,
+        111,
+        590,
+        529
+      ],
+      "registeredBounds": [
+        348,
+        470,
+        1849,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        148
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 16,
+      "source": "source-2048/celebrating/celebrating-16.png",
+      "runtime": "runtime-512/celebrating/celebrating-16.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "4b1463fb5e17569c7813d92748705c3c60afcfef5772f54a82641630b0056541",
+      "runtimeSha256": "202950e0193f91be8e91806b6e07c7a0b10c94295d8ef23c8e4d2edc9d8d2b07",
+      "premiumSheet": "celebrating-sheet-04.png",
+      "sourceCellBounds": [
+        63,
+        113,
+        568,
+        535
+      ],
+      "registeredBounds": [
+        276,
+        458,
+        1784,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        130
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 17,
+      "source": "source-2048/celebrating/celebrating-17.png",
+      "runtime": "runtime-512/celebrating/celebrating-17.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "496278d7b17e1463e2d4716407e1fae88c09d7357559578390e3f049d340ecd8",
+      "runtimeSha256": "ebcf2a69d8cd9ba01b7dc8c4559e8733c0e7406b05f72f9fdeee290139b561be",
+      "premiumSheet": "celebrating-sheet-05.png",
+      "sourceCellBounds": [
+        62,
+        200,
+        614,
+        602
+      ],
+      "registeredBounds": [
+        276,
+        519,
+        1920,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        -69
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 18,
+      "source": "source-2048/celebrating/celebrating-18.png",
+      "runtime": "runtime-512/celebrating/celebrating-18.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "b649bc6a1af5bb86e1684df3c4d93e8cf76fac2809ddf8bf53d0ccfa88c5dc5e",
+      "runtimeSha256": "f22bbe410e82d67c18e6382755bb9d20e0d9ace3ebc0820a432050afd6276784",
+      "premiumSheet": "celebrating-sheet-05.png",
+      "sourceCellBounds": [
+        15,
+        326,
+        587,
+        607
+      ],
+      "registeredBounds": [
+        134,
+        874,
+        1840,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        -84
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 19,
+      "source": "source-2048/celebrating/celebrating-19.png",
+      "runtime": "runtime-512/celebrating/celebrating-19.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "d486b481679642313131c7638d896bdf1fd935ceeec19bf6e359181576474c9d",
+      "runtimeSha256": "3734812efafb6610782e68173bf60a1d1050f83c0c7db5d8845fd4b4992a4e32",
+      "premiumSheet": "celebrating-sheet-05.png",
+      "sourceCellBounds": [
+        48,
+        254,
+        604,
+        505
+      ],
+      "registeredBounds": [
+        232,
+        963,
+        1891,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        218
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    },
+    {
+      "state": "celebrating",
+      "frame": 20,
+      "source": "source-2048/celebrating/celebrating-20.png",
+      "runtime": "runtime-512/celebrating/celebrating-20.png",
+      "sourceSize": [
+        2048,
+        2048
+      ],
+      "runtimeSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "4dc743e4f5e98ff89789f7e0e3103b0f592a6ac63a6c019678d7718b39f89ff8",
+      "runtimeSha256": "f38e07639192380e19641b1c99b22169582f0a0e0327d2d4e088c5a1f5f3e298",
+      "premiumSheet": "celebrating-sheet-05.png",
+      "sourceCellBounds": [
+        53,
+        88,
+        582,
+        502
+      ],
+      "registeredBounds": [
+        247,
+        482,
+        1825,
+        1720
+      ],
+      "registrationOffset": [
+        96,
+        228
+      ],
+      "anchor": [
+        1024,
+        1720
+      ]
+    }
+  ],
+  "exportReminder": "Always export future variants from source-2048. Do not enlarge runtime-512 or the atlas."
+}
