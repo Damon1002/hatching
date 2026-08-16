@@ -32,7 +32,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { CubeLand3DView } from './src/components/CubeLand3DView';
+import { IsometricLandView } from './src/components/IsometricLandView';
 import { AMBIENT_QUOTES } from './src/data/quotes';
 import { FOCUS_TAGS, SPECIES_CATALOG } from './src/data/species';
 import { colors, radii, shadows, spacing, type, TagKey } from './src/theme';
@@ -253,10 +253,10 @@ function ForestHomeScreen() {
         </View>
 
         {/* ==========================================
-            3. CENTER HERO: EXACT BLENDER 3D MODEL (cube-land.glb)
+            3. CENTER HERO: 2D ISOMETRIC 16-CUBE LAND
            ========================================== */}
         <View style={styles.centerHeroWrap}>
-          <CubeLand3DView isFocusing={running} progress={progress} />
+          <IsometricLandView isFocusing={running} progress={progress} />
         </View>
 
         {/* ==========================================
