@@ -1,22 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Image,
-  PanResponder,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
   useWindowDimensions,
 } from 'react-native';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
 import Svg, {
   Defs,
   Ellipse,
@@ -42,141 +32,50 @@ export function IsometricLandView({
   initialGridSize = 25,
 }: IsometricLandViewProps) {
   const { width: windowWidth } = useWindowDimensions();
-  const sceneSize = Math.min(windowWidth - 20, 350);
+  const sceneWidth = Math.min(windowWidth - 32, 360);
 
   const [currentGrid, setCurrentGrid] = useState<16 | 25>(initialGridSize);
 
-  // 1. Animation Shared Values
-  const entryScale = useSharedValue(0.01);
-  const floatY = useSharedValue(0);
-  const dragRotateZ = useSharedValue(0);
-  const dragTranslateX = useSharedValue(0);
-  const eggPulse = useSharedValue(1);
-  const auraGlow = useSharedValue(0.85);
-
-  useEffect(() => {
-    // A. Cinematic Spring Pop-in Entrance
-    entryScale.value = withSpring(1, { damping: 11, stiffness: 140 });
-
-    // B. Idle Island Levitation Float
-    floatY.value = withRepeat(
-      withSequence(
-        withTiming(-7, { duration: 2400, easing: Easing.inOut(Easing.sin) }),
-        withTiming(5, { duration: 2400, easing: Easing.inOut(Easing.sin) })
-      ),
-      -1,
-      true
-    );
-
-    // C. Egg Life Pulse & Aura
-    eggPulse.value = withRepeat(
-      withSequence(
-        withTiming(1.05, { duration: 1600, easing: Easing.inOut(Easing.quad) }),
-        withTiming(0.96, { duration: 1600, easing: Easing.inOut(Easing.quad) })
-      ),
-      -1,
-      true
-    );
-
-    auraGlow.value = withRepeat(
-      withSequence(
-        withTiming(1.15, { duration: 2000, easing: Easing.inOut(Easing.sin) }),
-        withTiming(0.85, { duration: 2000, easing: Easing.inOut(Easing.sin) })
-      ),
-      -1,
-      true
-    );
-  }, []);
-
   const handleToggleGrid = () => {
-    // Pop animation on tier switch
-    entryScale.value = 0.88;
-    entryScale.value = withSpring(1, { damping: 12, stiffness: 160 });
     setCurrentGrid(prev => (prev === 16 ? 25 : 16));
   };
 
-  // 2. Interactive Touch Drag Tilt (Parallax response)
-  const panResponder = React.useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderMove: (_, gestureState) => {
-        dragRotateZ.value = Math.max(-12, Math.min(12, gestureState.dx * 0.15));
-        dragTranslateX.value = Math.max(-18, Math.min(18, gestureState.dx * 0.2));
-      },
-      onPanResponderRelease: () => {
-        dragRotateZ.value = withSpring(0, { damping: 12, stiffness: 180 });
-        dragTranslateX.value = withSpring(0, { damping: 12, stiffness: 180 });
-      },
-    })
-  ).current;
-
-  // 3. Animated Styles
-  const islandAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: entryScale.value },
-      { translateY: floatY.value },
-      { translateX: dragTranslateX.value },
-      { rotateZ: `${dragRotateZ.value}deg` },
-    ],
-  }));
-
-  const shadowAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scaleX: withTiming(floatY.value < 0 ? 0.94 : 1.06, { duration: 300 }) },
-      { scaleY: withTiming(floatY.value < 0 ? 0.94 : 1.06, { duration: 300 }) },
-    ],
-    opacity: withTiming(floatY.value < 0 ? 0.35 : 0.5, { duration: 300 }),
-  }));
-
-  const eggAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: eggPulse.value }],
-  }));
-
-  const auraAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: auraGlow.value }],
-  }));
-
-  const activeAsset = currentGrid === 25 ? LAND_25_ASSET : LAND_16_ASSET;
+  const is25 = currentGrid === 25;
+  const activeAsset = is25 ? LAND_25_ASSET : LAND_16_ASSET;
+  const aspectRatio = is25 ? 780 / 462 : 626 / 384;
+  const landHeight = Math.round(sceneWidth / aspectRatio);
 
   return (
-    <View
-      style={[styles.container, { width: sceneSize, height: sceneSize }]}
-      {...panResponder.panHandlers}
-    >
+    <View style={[styles.container, { width: sceneWidth, height: landHeight + 40 }]}>
       {/* Background Soft Sunlight Aura */}
-      <Animated.View style={[styles.sunlightAura, auraAnimatedStyle]} />
+      <View style={styles.sunlightAura} />
 
-      {/* Floating Island Shadow on the ground */}
-      <Animated.View style={[styles.groundShadowWrap, shadowAnimatedStyle]}>
+      {/* Ground Shadow */}
+      <View style={styles.groundShadowWrap}>
         <View
           style={[
             styles.groundShadow,
-            currentGrid === 25 && { width: 245, height: 46, borderRadius: 23 },
+            is25 ? styles.groundShadow25 : styles.groundShadow16,
           ]}
         />
-      </Animated.View>
+      </View>
 
-      {/* 2D ISOMETRIC BLENDER CUBE LAND */}
-      <Animated.View style={[styles.islandWrap, islandAnimatedStyle]}>
+      {/* 100% Fully Displayed Static 2D Isometric Land */}
+      <View style={[styles.islandWrap, { width: sceneWidth, height: landHeight }]}>
         <Image
           source={activeAsset}
-          style={[
-            styles.islandImage,
-            currentGrid === 25 ? styles.islandImage25 : styles.islandImage16,
-          ]}
+          style={styles.islandImage}
           resizeMode="contain"
         />
 
         {/* Center Hero: Glowing Dragon Egg resting on land */}
-        <Animated.View
+        <View
           style={[
             styles.eggOverlay,
-            currentGrid === 25 ? { top: 48 } : { top: 52 },
-            eggAnimatedStyle,
+            is25 ? { top: '14%' } : { top: '15%' },
           ]}
         >
-          <Svg width={68} height={82} viewBox="0 0 68 82">
+          <Svg width={62} height={76} viewBox="0 0 68 82">
             <Defs>
               <SvgRadialGradient id="eggGrad2D" cx="36%" cy="32%" r="65%">
                 <Stop offset="0%" stopColor="#FFF9E6" />
@@ -256,8 +155,8 @@ export function IsometricLandView({
               />
             </G>
           </Svg>
-        </Animated.View>
-      </Animated.View>
+        </View>
+      </View>
 
       {/* Grid Expansion Badge / Quick Switcher */}
       <TouchableOpacity
@@ -266,7 +165,7 @@ export function IsometricLandView({
         onPress={handleToggleGrid}
       >
         <Text style={styles.expansionBadgeText}>
-          {currentGrid === 25 ? '✨ 25 Cubes (5x5)' : '🌱 16 Cubes (4x4)'}
+          {is25 ? '✨ 25 Cubes (5x5)' : '🌱 16 Cubes (4x4)'}
         </Text>
       </TouchableOpacity>
     </View>
@@ -281,41 +180,38 @@ const styles = StyleSheet.create({
   },
   sunlightAura: {
     position: 'absolute',
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: 'rgba(235, 245, 195, 0.18)',
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: 'rgba(235, 245, 195, 0.16)',
   },
   groundShadowWrap: {
     position: 'absolute',
-    bottom: 8,
+    bottom: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   groundShadow: {
-    width: 220,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(15, 45, 35, 0.35)',
+    backgroundColor: 'rgba(15, 45, 35, 0.30)',
+  },
+  groundShadow16: {
+    width: 250,
+    height: 44,
+    borderRadius: 22,
+  },
+  groundShadow25: {
+    width: 290,
+    height: 50,
+    borderRadius: 25,
   },
   islandWrap: {
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    width: '100%',
-    height: '100%',
   },
   islandImage: {
-    width: 310,
-    height: 240,
-  },
-  islandImage16: {
-    width: 300,
-    height: 235,
-  },
-  islandImage25: {
-    width: 325,
-    height: 250,
+    width: '100%',
+    height: '100%',
   },
   eggOverlay: {
     position: 'absolute',
@@ -324,11 +220,11 @@ const styles = StyleSheet.create({
   },
   expansionBadge: {
     position: 'absolute',
-    bottom: -10,
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 14,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.94)',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
