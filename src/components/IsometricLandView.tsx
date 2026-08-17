@@ -25,7 +25,7 @@ import Svg, {
   Stop,
 } from 'react-native-svg';
 
-const ISLAND_16_ASSET = require('../../assets/tiles/island-16-grid.png');
+const BLENDER_2D_ASSET = require('../../assets/tiles/blender-cube-land-2d.png');
 
 interface IsometricLandViewProps {
   isFocusing?: boolean;
@@ -136,10 +136,10 @@ export function IsometricLandView({
         <View style={styles.groundShadow} />
       </Animated.View>
 
-      {/* 2D ISOMETRIC 16-CUBE LAND */}
+      {/* 2D ISOMETRIC BLENDER CUBE LAND */}
       <Animated.View style={[styles.islandWrap, islandAnimatedStyle]}>
         <Image
-          source={ISLAND_16_ASSET}
+          source={BLENDER_2D_ASSET}
           style={styles.islandImage}
           resizeMode="contain"
         />
@@ -162,8 +162,8 @@ export function IsometricLandView({
               </SvgLinearGradient>
             </Defs>
 
-            {/* Egg Shadow on Grass */}
-            <Ellipse cx={34} cy={72} rx={20} ry={6} fill="rgba(25, 55, 20, 0.45)" />
+            {/* Egg Shadow on Top Plates */}
+            <Ellipse cx={34} cy={72} rx={20} ry={6} fill="rgba(35, 45, 20, 0.45)" />
 
             {/* Egg Body */}
             <G transform="translate(34, 40)">
@@ -265,12 +265,12 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   islandImage: {
-    width: 295,
-    height: 245,
+    width: 300,
+    height: 235,
   },
   eggOverlay: {
     position: 'absolute',
-    top: 64,
+    top: 52,
     alignItems: 'center',
     justifyContent: 'center',
   },
