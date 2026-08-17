@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
   PanResponder,
   StyleSheet,
+  Text,
+  TouchableOpacity,
   View,
   useWindowDimensions,
 } from 'react-native';
@@ -25,19 +27,24 @@ import Svg, {
   Stop,
 } from 'react-native-svg';
 
-const BLENDER_2D_ASSET = require('../../assets/tiles/blender-cube-land-2d.png');
+const LAND_16_ASSET = require('../../assets/tiles/blender-cube-land-2d.png');
+const LAND_25_ASSET = require('../../assets/tiles/blender-land-25-grid.png');
 
 interface IsometricLandViewProps {
   isFocusing?: boolean;
   progress?: number;
+  initialGridSize?: 16 | 25;
 }
 
 export function IsometricLandView({
   isFocusing = false,
   progress = 0,
+  initialGridSize = 25,
 }: IsometricLandViewProps) {
   const { width: windowWidth } = useWindowDimensions();
-  const sceneSize = Math.min(windowWidth - 20, 340);
+  const sceneSize = Math.min(windowWidth - 20, 350);
+
+  const [currentGrid, setCurrentGrid] = useState<16 | 25>(initialGridSize);
 
   // 1. Animation Shared Values
   const entryScale = useSharedValue(0.01);
@@ -81,6 +88,13 @@ export function IsometricLandView({
     );
   }, []);
 
+  const handleToggleGrid = () => {
+    // Pop animation on tier switch
+    entryScale.value = 0.88;
+    entryScale.value = withSpring(1, { damping: 12, stiffness: 160 });
+    setCurrentGrid(prev => (prev === 16 ? 25 : 16));
+  };
+
   // 2. Interactive Touch Drag Tilt (Parallax response)
   const panResponder = React.useRef(
     PanResponder.create({
@@ -123,6 +137,8 @@ export function IsometricLandView({
     transform: [{ scale: auraGlow.value }],
   }));
 
+  const activeAsset = currentGrid === 25 ? LAND_25_ASSET : LAND_16_ASSET;
+
   return (
     <View
       style={[styles.container, { width: sceneSize, height: sceneSize }]}
@@ -133,19 +149,33 @@ export function IsometricLandView({
 
       {/* Floating Island Shadow on the ground */}
       <Animated.View style={[styles.groundShadowWrap, shadowAnimatedStyle]}>
-        <View style={styles.groundShadow} />
+        <View
+          style={[
+            styles.groundShadow,
+            currentGrid === 25 && { width: 245, height: 46, borderRadius: 23 },
+          ]}
+        />
       </Animated.View>
 
       {/* 2D ISOMETRIC BLENDER CUBE LAND */}
       <Animated.View style={[styles.islandWrap, islandAnimatedStyle]}>
         <Image
-          source={BLENDER_2D_ASSET}
-          style={styles.islandImage}
+          source={activeAsset}
+          style={[
+            styles.islandImage,
+            currentGrid === 25 ? styles.islandImage25 : styles.islandImage16,
+          ]}
           resizeMode="contain"
         />
 
-        {/* Center Hero: Glowing Dragon Egg resting on 16-cube land */}
-        <Animated.View style={[styles.eggOverlay, eggAnimatedStyle]}>
+        {/* Center Hero: Glowing Dragon Egg resting on land */}
+        <Animated.View
+          style={[
+            styles.eggOverlay,
+            currentGrid === 25 ? { top: 48 } : { top: 52 },
+            eggAnimatedStyle,
+          ]}
+        >
           <Svg width={68} height={82} viewBox="0 0 68 82">
             <Defs>
               <SvgRadialGradient id="eggGrad2D" cx="36%" cy="32%" r="65%">
@@ -228,6 +258,17 @@ export function IsometricLandView({
           </Svg>
         </Animated.View>
       </Animated.View>
+
+      {/* Grid Expansion Badge / Quick Switcher */}
+      <TouchableOpacity
+        style={styles.expansionBadge}
+        activeOpacity={0.8}
+        onPress={handleToggleGrid}
+      >
+        <Text style={styles.expansionBadgeText}>
+          {currentGrid === 25 ? '✨ 25 Cubes (5x5)' : '🌱 16 Cubes (4x4)'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -240,9 +281,9 @@ const styles = StyleSheet.create({
   },
   sunlightAura: {
     position: 'absolute',
-    width: 250,
-    height: 250,
-    borderRadius: 125,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
     backgroundColor: 'rgba(235, 245, 195, 0.18)',
   },
   groundShadowWrap: {
@@ -265,13 +306,38 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   islandImage: {
+    width: 310,
+    height: 240,
+  },
+  islandImage16: {
     width: 300,
     height: 235,
   },
+  islandImage25: {
+    width: 325,
+    height: 250,
+  },
   eggOverlay: {
     position: 'absolute',
-    top: 52,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  expansionBadge: {
+    position: 'absolute',
+    bottom: -10,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  expansionBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#2A5D4E',
   },
 });
