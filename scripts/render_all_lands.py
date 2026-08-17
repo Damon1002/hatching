@@ -7,14 +7,29 @@ def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
 
     glb_path = os.path.abspath('assets/models/cube-land.glb')
     output_path = os.path.abspath(os.path.join('assets/tiles', output_filename))
+    atlas_img_path = os.path.abspath('assets/tiles/top-atlas.png')
 
-    print(f"Rendering {grid_size}x{grid_size} -> {output_filename}")
+    print(f"==========================================")
+    print(f"Rendering {grid_size}x{grid_size} Land -> {output_filename}")
+    print(f"==========================================")
+
+    # 1. Import base GLB
     bpy.ops.import_scene.gltf(filepath=glb_path)
+
+    # 2. Update 'IsoLand Atlas' material texture with the 4-border dotted atlas
+    atlas_mat = bpy.data.materials.get("IsoLand Atlas")
+    if atlas_mat and atlas_mat.node_tree:
+        for node in atlas_mat.node_tree.nodes:
+            if node.type == 'TEX_IMAGE':
+                new_img = bpy.data.images.load(atlas_img_path, check_existing=False)
+                node.image = new_img
+                print(f"Updated texture on IsoLand Atlas to: {atlas_img_path}")
 
     origin = mathutils.Vector((-2.361, -3.557, -1.143))
     step = 1.700
 
     if grid_size != 4:
+        # Collect template blocks from the 16 original meshes
         templates = {}
         for obj in list(bpy.data.objects):
             if obj.type == 'MESH' and obj.name.startswith('IsoLand_'):
@@ -22,8 +37,10 @@ def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
                 gx, gy = int(parts[0]), int(parts[1])
                 templates[(gx, gy)] = obj
 
+        # Build NxN grid mapping corners, edges, and interior
         for x in range(grid_size):
             for y in range(grid_size):
+                # Map to corresponding template
                 tx = 0 if x == 0 else (3 if x == grid_size - 1 else 1)
                 ty = 0 if y == 0 else (3 if y == grid_size - 1 else 1)
 
@@ -33,8 +50,11 @@ def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
                 new_obj.location = origin + mathutils.Vector((x * step, y * step, 0))
                 bpy.context.scene.collection.objects.link(new_obj)
 
+        # Delete original templates
         for obj in templates.values():
             bpy.data.objects.remove(obj, do_unlink=True)
+
+    bpy.context.view_layer.update()
 
     # Compute bounding box
     mesh_objs = [obj for obj in bpy.data.objects if obj.type == 'MESH']
@@ -55,9 +75,9 @@ def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
     size = max_c - min_c
     max_dim = max(size.x, size.y, size.z)
 
-    print(f"Center: {center}, Size: {size}, MaxDim: {max_dim}")
+    print(f"Bounding Center: {center}, Size: {size}, MaxDim: {max_dim}")
 
-    # Orthographic Camera with 2.35x ortho_scale for generous margins around all 4 corners
+    # Orthographic Camera with generous scale for complete 4-corner framing
     cam_data = bpy.data.cameras.new("IsoCamera")
     cam_data.type = 'ORTHO'
     cam_data.ortho_scale = max_dim * 2.35
@@ -73,7 +93,7 @@ def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
     cam_dir = (center - cam_obj.location).normalized()
     cam_obj.rotation_euler = cam_dir.to_track_quat('-Z', 'Y').to_euler()
 
-    # Studio Lighting
+    # Studio Sun Light
     sun_data = bpy.data.lights.new(name="SunKey", type='SUN')
     sun_data.energy = 6.0
     sun_data.color = (1.0, 0.98, 0.92)
@@ -107,7 +127,7 @@ def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
     scene.render.filepath = output_path
 
     bpy.ops.render.render(write_still=True)
-    print(f"Completed: {output_path}")
+    print(f"Completed render: {output_path}")
 
 render_land(grid_size=4, output_filename="blender-cube-land-2d.png")
 render_land(grid_size=5, output_filename="blender-land-25-grid.png")
