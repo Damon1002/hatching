@@ -1,6 +1,7 @@
 import bpy
 import mathutils
 import os
+import sys
 
 def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -10,7 +11,7 @@ def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
     atlas_img_path = os.path.abspath('assets/tiles/top-atlas.png')
 
     print(f"==========================================")
-    print(f"Rendering {grid_size}x{grid_size} Land -> {output_filename}")
+    print(f"Rendering {grid_size}x{grid_size} ({grid_size*grid_size} Cubes) -> {output_filename}")
     print(f"==========================================")
 
     # 1. Import base GLB
@@ -23,13 +24,12 @@ def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
             if node.type == 'TEX_IMAGE':
                 new_img = bpy.data.images.load(atlas_img_path, check_existing=False)
                 node.image = new_img
-                print(f"Updated texture on IsoLand Atlas to: {atlas_img_path}")
 
     origin = mathutils.Vector((-2.361, -3.557, -1.143))
     step = 1.700
 
     if grid_size != 4:
-        # Collect template blocks from the 16 original meshes
+        # Collect template blocks from original 16 meshes
         templates = {}
         for obj in list(bpy.data.objects):
             if obj.type == 'MESH' and obj.name.startswith('IsoLand_'):
@@ -37,10 +37,9 @@ def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
                 gx, gy = int(parts[0]), int(parts[1])
                 templates[(gx, gy)] = obj
 
-        # Build NxN grid mapping corners, edges, and interior
+        # Build NxN matrix: corners, outer edges, and interior
         for x in range(grid_size):
             for y in range(grid_size):
-                # Map to corresponding template
                 tx = 0 if x == 0 else (3 if x == grid_size - 1 else 1)
                 ty = 0 if y == 0 else (3 if y == grid_size - 1 else 1)
 
@@ -50,7 +49,7 @@ def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
                 new_obj.location = origin + mathutils.Vector((x * step, y * step, 0))
                 bpy.context.scene.collection.objects.link(new_obj)
 
-        # Delete original templates
+        # Remove original templates
         for obj in templates.values():
             bpy.data.objects.remove(obj, do_unlink=True)
 
@@ -75,17 +74,17 @@ def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
     size = max_c - min_c
     max_dim = max(size.x, size.y, size.z)
 
-    print(f"Bounding Center: {center}, Size: {size}, MaxDim: {max_dim}")
+    print(f"Center: {center}, Size: {size}, MaxDim: {max_dim:.2f}")
 
-    # Orthographic Camera with generous scale for complete 4-corner framing
+    # Orthographic Camera with dynamic ortho_scale calculation
     cam_data = bpy.data.cameras.new("IsoCamera")
     cam_data.type = 'ORTHO'
-    cam_data.ortho_scale = max_dim * 2.35
+    cam_data.ortho_scale = max_dim * 2.35  # Dynamically scales to fit any NxN grid size perfectly
     cam_data.clip_start = 0.1
-    cam_data.clip_end = 200.0
+    cam_data.clip_end = 500.0
 
     cam_obj = bpy.data.objects.new("IsoCamera", cam_data)
-    dist = 40.0
+    dist = max(40.0, max_dim * 3.5)
     cam_obj.location = center + mathutils.Vector((dist, -dist, dist * 0.816))
     bpy.context.scene.collection.objects.link(cam_obj)
     bpy.context.scene.camera = cam_obj
@@ -93,7 +92,7 @@ def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
     cam_dir = (center - cam_obj.location).normalized()
     cam_obj.rotation_euler = cam_dir.to_track_quat('-Z', 'Y').to_euler()
 
-    # Studio Sun Light
+    # Studio Lighting
     sun_data = bpy.data.lights.new(name="SunKey", type='SUN')
     sun_data.energy = 6.0
     sun_data.color = (1.0, 0.98, 0.92)
@@ -117,7 +116,7 @@ def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
     # Cycles Renderer
     scene = bpy.context.scene
     scene.render.engine = 'CYCLES'
-    scene.cycles.samples = 48
+    scene.cycles.samples = 32
     scene.render.resolution_x = 1024
     scene.render.resolution_y = 1024
     scene.render.resolution_percentage = 100
@@ -127,7 +126,10 @@ def render_land(grid_size=4, output_filename="blender-cube-land-2d.png"):
     scene.render.filepath = output_path
 
     bpy.ops.render.render(write_still=True)
-    print(f"Completed render: {output_path}")
+    print(f"Successfully generated: {output_path}")
 
+# Generate all expansion tiers: 16 (4x4), 25 (5x5), 36 (6x6), 64 (8x8)
 render_land(grid_size=4, output_filename="blender-cube-land-2d.png")
 render_land(grid_size=5, output_filename="blender-land-25-grid.png")
+render_land(grid_size=6, output_filename="blender-land-36-grid.png")
+render_land(grid_size=8, output_filename="blender-land-64-grid.png")

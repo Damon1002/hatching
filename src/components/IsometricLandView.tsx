@@ -17,13 +17,21 @@ import Svg, {
   Stop,
 } from 'react-native-svg';
 
-const LAND_16_ASSET = require('../../assets/tiles/blender-cube-land-2d.png');
-const LAND_25_ASSET = require('../../assets/tiles/blender-land-25-grid.png');
+const LAND_TIERS = {
+  16: require('../../assets/tiles/blender-cube-land-2d.png'),
+  25: require('../../assets/tiles/blender-land-25-grid.png'),
+  36: require('../../assets/tiles/blender-land-36-grid.png'),
+  64: require('../../assets/tiles/blender-land-64-grid.png'),
+} as const;
+
+export type GridTier = 16 | 25 | 36 | 64;
+
+const TIER_ORDER: GridTier[] = [16, 25, 36, 64];
 
 interface IsometricLandViewProps {
   isFocusing?: boolean;
   progress?: number;
-  initialGridSize?: 16 | 25;
+  initialGridSize?: GridTier;
 }
 
 export function IsometricLandView({
@@ -34,16 +42,24 @@ export function IsometricLandView({
   const { width: windowWidth } = useWindowDimensions();
   const sceneWidth = Math.min(windowWidth - 32, 360);
 
-  const [currentGrid, setCurrentGrid] = useState<16 | 25>(initialGridSize);
+  const [currentGrid, setCurrentGrid] = useState<GridTier>(initialGridSize);
 
-  const handleToggleGrid = () => {
-    setCurrentGrid(prev => (prev === 16 ? 25 : 16));
+  const handleCycleGrid = () => {
+    setCurrentGrid(prev => {
+      const idx = TIER_ORDER.indexOf(prev);
+      return TIER_ORDER[(idx + 1) % TIER_ORDER.length];
+    });
   };
 
-  const is25 = currentGrid === 25;
-  const activeAsset = is25 ? LAND_25_ASSET : LAND_16_ASSET;
-  const aspectRatio = is25 ? 780 / 462 : 626 / 384;
-  const landHeight = Math.round(sceneWidth / aspectRatio);
+  const activeAsset = LAND_TIERS[currentGrid];
+  const landHeight = Math.round(sceneWidth * 0.60);
+
+  const tierLabels: Record<GridTier, string> = {
+    16: '🌱 16 Cubes (4x4)',
+    25: '✨ 25 Cubes (5x5)',
+    36: '🌿 36 Cubes (6x6)',
+    64: '👑 64 Cubes (8x8)',
+  };
 
   return (
     <View style={[styles.container, { width: sceneWidth, height: landHeight + 40 }]}>
@@ -52,12 +68,7 @@ export function IsometricLandView({
 
       {/* Ground Shadow */}
       <View style={styles.groundShadowWrap}>
-        <View
-          style={[
-            styles.groundShadow,
-            is25 ? styles.groundShadow25 : styles.groundShadow16,
-          ]}
-        />
+        <View style={styles.groundShadow} />
       </View>
 
       {/* 100% Fully Displayed Static 2D Isometric Land */}
@@ -69,12 +80,7 @@ export function IsometricLandView({
         />
 
         {/* Center Hero: Glowing Dragon Egg resting on land */}
-        <View
-          style={[
-            styles.eggOverlay,
-            is25 ? { top: '14%' } : { top: '15%' },
-          ]}
-        >
+        <View style={[styles.eggOverlay, { top: '14%' }]}>
           <Svg width={62} height={76} viewBox="0 0 68 82">
             <Defs>
               <SvgRadialGradient id="eggGrad2D" cx="36%" cy="32%" r="65%">
@@ -158,14 +164,14 @@ export function IsometricLandView({
         </View>
       </View>
 
-      {/* Grid Expansion Badge / Quick Switcher */}
+      {/* Grid Expansion Badge / Quick Cycle Switcher */}
       <TouchableOpacity
         style={styles.expansionBadge}
         activeOpacity={0.8}
-        onPress={handleToggleGrid}
+        onPress={handleCycleGrid}
       >
         <Text style={styles.expansionBadgeText}>
-          {is25 ? '✨ 25 Cubes (5x5)' : '🌱 16 Cubes (4x4)'}
+          {tierLabels[currentGrid]}
         </Text>
       </TouchableOpacity>
     </View>
@@ -193,16 +199,9 @@ const styles = StyleSheet.create({
   },
   groundShadow: {
     backgroundColor: 'rgba(15, 45, 35, 0.30)',
-  },
-  groundShadow16: {
-    width: 250,
-    height: 44,
-    borderRadius: 22,
-  },
-  groundShadow25: {
-    width: 290,
-    height: 50,
-    borderRadius: 25,
+    width: 280,
+    height: 48,
+    borderRadius: 24,
   },
   islandWrap: {
     alignItems: 'center',
