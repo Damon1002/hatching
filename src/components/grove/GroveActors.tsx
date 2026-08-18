@@ -263,64 +263,155 @@ export function GroveCreatureSprite({
   const spine1 = `M ${-s * 0.25} ${-s * 0.75} L ${-s * 0.42} ${-s * 0.95} L ${-s * 0.12} ${-s * 0.85} Z`;
   const spine2 = `M ${-s * 0.05} ${-s * 0.92} L ${-s * 0.18} ${-s * 1.12} L ${s * 0.08} ${-s * 1.0} Z`;
 
-  // Ruby Skeletal Animation Transforms
-  const rubyBreathe = useDerivedValue(() => {
+  // Parametric Ruby Dragon Colors from reference palette
+  const rubyMain = '#C83256';
+  const rubyDark = '#7B1736';
+  const rubyDeep = '#4E0E22';
+  const rubyLight = '#E64D6F';
+  const rubyBelly = '#FDE2C8';
+  const rubyScute = '#E09A7A';
+  const rubyHorn = '#6E1428';
+  const rubyAmberEye = '#FBB03B';
+
+  // Long Neck & Head Articulation
+  const neckWave = useDerivedValue(() => {
     const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
     const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
-    if (hopping) return [{ scale: 1 }];
-    const b = Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2 + phase);
+    const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
+    const air = hopping ? Math.sin(hopT * Math.PI) : 0;
+    // Neck stretches forward and arches during hops, gently breathes during idle
+    const stretch = air * 0.12 + (!hopping ? Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2 + phase) * 0.03 : 0);
+    const tilt = hopping ? air * 0.15 : Math.sin((time.value / GROVE_LOOP_MS) * TAU * 1.5 + phase) * 0.05;
     return [
-      { scaleY: 1 + b * 0.035 },
-      { scaleX: 1 - b * 0.018 },
+      { scaleY: 1 + stretch },
+      { scaleX: 1 - stretch * 0.4 },
+      { rotate: tilt },
     ];
   });
 
-  const rubyWingFlap = useDerivedValue(() => {
+  // Scalloped 3-Finger Wings Flapping
+  const rubyWing = useDerivedValue(() => {
     const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
     const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
-    const freq = hopping ? 12 : 3.5;
-    const amp = hopping ? 0.35 : 0.15;
-    const w = Math.sin((time.value / GROVE_LOOP_MS) * TAU * freq + phase);
+    const freq = hopping ? 12 : 4;
+    const amp = hopping ? 0.45 : 0.28;
+    const wave = Math.sin((time.value / GROVE_LOOP_MS) * TAU * freq + phase);
     return [
-      { scaleY: 1 + w * amp },
-      { rotate: w * (hopping ? 0.14 : 0.06) },
+      { scaleY: 0.75 + amp * wave },
+      { scaleX: 0.9 + 0.15 * wave },
+      { rotate: wave * 0.16 },
     ];
   });
 
-  if (isRuby && (rubyIdleImg || rubyJumpImg)) {
+  // Long Whip Tail Undulation
+  const rubyTailWag = useDerivedValue(() => {
+    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
+    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
+    const wave = Math.sin((time.value / GROVE_LOOP_MS) * TAU * (hopping ? 6 : 3) + phase);
+    return [
+      { rotate: wave * (hopping ? 0.25 : 0.18) },
+      { scaleX: 1 + wave * 0.05 },
+    ];
+  });
+
+  // Ruby Dragon Vector Geometries
+  // 1. Long Whip Tail with Dorsal Spines
+  const rubyTailPath = `M ${-s * 0.35} ${-s * 0.28} Q ${-s * 1.05} ${-s * 0.45} ${-s * 1.5} ${-s * 0.72} Q ${-s * 1.78} ${-s * 0.88} ${-s * 1.98} ${-s * 0.82}`;
+  
+  // 2. 4-Tier Spiky Horns / Head Crest
+  const rCrest1 = `M ${s * 0.12} ${-s * 1.48} Q ${-s * 0.25} ${-s * 2.05} ${-s * 0.55} ${-s * 2.2} Q ${-s * 0.15} ${-s * 1.75} ${s * 0.26} ${-s * 1.5} Z`;
+  const rCrest2 = `M ${s * 0.05} ${-s * 1.38} Q ${-s * 0.42} ${-s * 1.82} ${-s * 0.75} ${-s * 1.92} Q ${-s * 0.3} ${-s * 1.55} ${s * 0.15} ${-s * 1.38} Z`;
+  const rCrest3 = `M ${-s * 0.02} ${-s * 1.28} Q ${-s * 0.52} ${-s * 1.55} ${-s * 0.82} ${-s * 1.6} Q ${-s * 0.4} ${-s * 1.35} ${s * 0.08} ${-s * 1.25} Z`;
+  const rCrest4 = `M ${s * 0.02} ${-s * 1.15} Q ${-s * 0.42} ${-s * 1.32} ${-s * 0.68} ${-s * 1.3} Q ${-s * 0.32} ${-s * 1.15} ${s * 0.1} ${-s * 1.1} Z`;
+
+  // 3. Scalloped 3-Finger Wings
+  const rWingLeft = `M 0 ${-s * 0.55} Q ${-s * 0.75} ${-s * 1.38} ${-s * 1.15} ${-s * 1.25} Q ${-s * 1.0} ${-s * 0.88} ${-s * 0.82} ${-s * 0.72} Q ${-s * 0.65} ${-s * 0.58} ${-s * 0.5} ${-s * 0.42} Q ${-s * 0.22} ${-s * 0.5} 0 ${-s * 0.55} Z`;
+  const rWingRight = `M 0 ${-s * 0.55} Q ${s * 0.82} ${-s * 1.45} ${s * 1.22} ${-s * 1.32} Q ${s * 1.05} ${-s * 0.95} ${s * 0.9} ${-s * 0.75} Q ${s * 0.7} ${-s * 0.6} ${s * 0.52} ${-s * 0.42} Q ${s * 0.26} ${-s * 0.5} 0 ${-s * 0.55} Z`;
+
+  // 4. Long Graceful S-Curve Neck
+  const rNeck = `M ${-s * 0.12} ${-s * 0.72} Q ${s * 0.08} ${-s * 1.1} ${s * 0.2} ${-s * 1.35} L ${s * 0.4} ${-s * 1.25} Q ${s * 0.28} ${-s * 0.92} ${s * 0.22} ${-s * 0.65} Z`;
+
+  if (isRuby) {
     return (
       <Group transform={transform}>
-        {/* Dynamic Ground Shadow with breathing sync */}
+        {/* Dynamic Ground Shadow */}
         <Group transform={shadowTransform}>
-          <Oval x={-rw * 0.42} y={-rh * 0.08} width={rw * 0.84} height={rh * 0.25} color="rgba(30,12,20,0.32)" />
+          <Oval x={-s * 0.7} y={-s * 0.1} width={s * 1.4} height={s * 0.28} color="rgba(30,12,20,0.32)" />
         </Group>
 
-        {/* Articulated Skeletal Reference Sprite */}
-        {rubyJumpImg && isHoppingSV.value === 1 ? (
-          <Group transform={rubyWingFlap} origin={{ x: -rw * 0.05, y: -rh * 0.55 }}>
-            <SkiaImage
-              image={rubyJumpImg}
-              x={-rw * 0.48}
-              y={-rh * 1.05}
-              width={rw * 1.05}
-              height={rh * 1.05}
-              fit="contain"
-            />
-          </Group>
-        ) : rubyIdleImg ? (
-          <Group transform={rubyBreathe} origin={{ x: 0, y: -rh * 0.1 }}>
-            <Group transform={rubyWingFlap} origin={{ x: rw * 0.02, y: -rh * 0.52 }}>
-              <SkiaImage
-                image={rubyIdleImg}
-                x={-rw * 0.44}
-                y={-rh * 0.98}
-                width={rw}
-                height={rh}
-                fit="contain"
-              />
-            </Group>
-          </Group>
-        ) : null}
+        {/* 1. Long Whip Tail with undulating wagging */}
+        <Group transform={rubyTailWag} origin={{ x: -s * 0.35, y: -s * 0.28 }}>
+          <Path path={rubyTailPath} color={rubyMain} style="stroke" strokeWidth={Math.max(3.5, s * 0.22)} strokeCap="round" />
+          {/* Tail Spikes */}
+          <Path path={`M ${-s * 0.7} ${-s * 0.45} L ${-s * 0.82} ${-s * 0.62} L ${-s * 0.6} ${-s * 0.5} Z`} color={rubyDeep} />
+          <Path path={`M ${-s * 1.05} ${-s * 0.58} L ${-s * 1.16} ${-s * 0.74} L ${-s * 0.95} ${-s * 0.62} Z`} color={rubyDeep} />
+          <Path path={`M ${-s * 1.4} ${-s * 0.7} L ${-s * 1.5} ${-s * 0.86} L ${-s * 1.3} ${-s * 0.74} Z`} color={rubyDeep} />
+          <Path path={`M ${-s * 1.7} ${-s * 0.82} L ${-s * 1.78} ${-s * 0.95} L ${-s * 1.62} ${-s * 0.84} Z`} color={rubyDeep} />
+        </Group>
+
+        {/* 2. Back Dorsal Spines along spine */}
+        <Path path={`M ${-s * 0.26} ${-s * 0.75} L ${-s * 0.42} ${-s * 0.98} L ${-s * 0.12} ${-s * 0.85} Z`} color={rubyDark} />
+        <Path path={`M ${-s * 0.06} ${-s * 0.88} L ${-s * 0.2} ${-s * 1.1} L ${s * 0.08} ${-s * 0.96} Z`} color={rubyDark} />
+
+        {/* 3. Back Left Wing (behind body) */}
+        <Group transform={rubyWing} origin={{ x: 0, y: -s * 0.55 }}>
+          <Path path={rWingLeft} color={rubyDeep} opacity={0.88} />
+          <Path path={`M 0 ${-s * 0.55} Q ${-s * 0.6} ${-s * 1.05} ${-s * 1.15} ${-s * 1.25}`} color={rubyDark} style="stroke" strokeWidth={Math.max(1.5, s * 0.04)} strokeCap="round" />
+        </Group>
+
+        {/* 4. Main Body Torso */}
+        <Oval x={-s * 0.5} y={-s * 0.78} width={s * 1.0} height={s * 0.85} color={rubyMain} />
+
+        {/* 5. Articulated Long Graceful Neck & Head */}
+        <Group transform={neckWave} origin={{ x: 0, y: -s * 0.7 }}>
+          {/* S-Curve Neck Mesh */}
+          <Path path={rNeck} color={rubyMain} />
+          
+          {/* Segmented Peach Underbelly Scutes */}
+          <Oval x={s * 0.05} y={-s * 0.68} width={s * 0.42} height={s * 0.65} color={rubyBelly} />
+          <Path path={`M ${s * 0.08} ${-s * 0.52} Q ${s * 0.24} ${-s * 0.5} ${s * 0.4} ${-s * 0.54}`} color={rubyScute} style="stroke" strokeWidth={Math.max(1, s * 0.02)} />
+          <Path path={`M ${s * 0.06} ${-s * 0.38} Q ${s * 0.24} ${-s * 0.36} ${s * 0.42} ${-s * 0.4}`} color={rubyScute} style="stroke" strokeWidth={Math.max(1, s * 0.02)} />
+          <Path path={`M ${s * 0.08} ${-s * 0.24} Q ${s * 0.22} ${-s * 0.22} ${s * 0.38} ${-s * 0.26}`} color={rubyScute} style="stroke" strokeWidth={Math.max(1, s * 0.02)} />
+
+          {/* 4-Tier Spiky Head Crest Horns */}
+          <Path path={rCrest4} color={rubyHorn} />
+          <Path path={rCrest3} color={rubyHorn} />
+          <Path path={rCrest2} color={rubyHorn} />
+          <Path path={rCrest1} color={rubyHorn} />
+
+          {/* Dragon Head Core */}
+          <Oval x={-s * 0.15} y={-s * 1.42} width={s * 0.72} height={s * 0.58} color={rubyMain} />
+          
+          {/* Snout & Smile */}
+          <Oval x={s * 0.2} y={-s * 1.25} width={s * 0.46} height={s * 0.34} color={rubyLight} />
+          <Path path={`M ${s * 0.18} ${-s * 1.1} Q ${s * 0.35} ${-s * 1.08} ${s * 0.52} ${-s * 1.15}`} color={rubyDark} style="stroke" strokeWidth={Math.max(1, s * 0.02)} strokeCap="round" />
+          <Circle cx={s * 0.48} cy={-s * 1.22} r={s * 0.035} color={rubyDeep} />
+
+          {/* Big Warm Amber Eyes from reference */}
+          <Oval x={s * 0.08} y={-s * 1.38} width={s * 0.26} height={s * 0.32} color={rubyDeep} />
+          <Oval x={s * 0.1} y={-s * 1.36} width={s * 0.22} height={s * 0.28} color={rubyAmberEye} />
+          <Oval x={s * 0.12} y={-s * 1.36} width={s * 0.12} height={s * 0.22} color="#1A0A14" />
+          {/* Anime Eye Highlights */}
+          <Circle cx={s * 0.14} cy={-s * 1.42} r={s * 0.065} color="#FFFFFF" />
+          <Circle cx={s * 0.24} cy={-s * 1.28} r={s * 0.025} color="#FFE699" />
+        </Group>
+
+        {/* 6. Hero Front Scalloped Bat Wing */}
+        <Group transform={rubyWing} origin={{ x: 0, y: -s * 0.55 }}>
+          <Path path={rWingRight} color={rubyMain} opacity={0.95} />
+          {/* Wing Struts */}
+          <Path path={`M 0 ${-s * 0.55} Q ${s * 0.65} ${-s * 1.1} ${s * 1.22} ${-s * 1.32}`} color={rubyDark} style="stroke" strokeWidth={Math.max(1.8, s * 0.04)} strokeCap="round" />
+          <Path path={`M 0 ${-s * 0.55} Q ${s * 0.55} ${-s * 0.85} ${s * 0.9} ${-s * 0.75}`} color={rubyDark} style="stroke" strokeWidth={Math.max(1.2, s * 0.03)} strokeCap="round" />
+          <Path path={`M 0 ${-s * 0.55} Q ${s * 0.38} ${-s * 0.62} ${s * 0.52} ${-s * 0.42}`} color={rubyDark} style="stroke" strokeWidth={Math.max(1, s * 0.025)} strokeCap="round" />
+        </Group>
+
+        {/* 7. Hind & Front Paws with Claws */}
+        <Oval x={-s * 0.42} y={-s * 0.18} width={s * 0.34} height={s * 0.22} color={rubyDark} />
+        <Oval x={s * 0.12} y={-s * 0.18} width={s * 0.3} height={s * 0.22} color={rubyDark} />
+        <Circle cx={-s * 0.42} cy={-s * 0.08} r={s * 0.025} color="#1A0A14" />
+        <Circle cx={-s * 0.34} cy={-s * 0.06} r={s * 0.025} color="#1A0A14" />
+        <Circle cx={s * 0.18} cy={-s * 0.08} r={s * 0.025} color="#1A0A14" />
+        <Circle cx={s * 0.26} cy={-s * 0.06} r={s * 0.025} color="#1A0A14" />
       </Group>
     );
   }
