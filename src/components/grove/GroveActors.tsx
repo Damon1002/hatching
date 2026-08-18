@@ -263,33 +263,63 @@ export function GroveCreatureSprite({
   const spine1 = `M ${-s * 0.25} ${-s * 0.75} L ${-s * 0.42} ${-s * 0.95} L ${-s * 0.12} ${-s * 0.85} Z`;
   const spine2 = `M ${-s * 0.05} ${-s * 0.92} L ${-s * 0.18} ${-s * 1.12} L ${s * 0.08} ${-s * 1.0} Z`;
 
+  // Ruby Skeletal Animation Transforms
+  const rubyBreathe = useDerivedValue(() => {
+    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
+    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
+    if (hopping) return [{ scale: 1 }];
+    const b = Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2 + phase);
+    return [
+      { scaleY: 1 + b * 0.035 },
+      { scaleX: 1 - b * 0.018 },
+    ];
+  });
+
+  const rubyWingFlap = useDerivedValue(() => {
+    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
+    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
+    const freq = hopping ? 12 : 3.5;
+    const amp = hopping ? 0.35 : 0.15;
+    const w = Math.sin((time.value / GROVE_LOOP_MS) * TAU * freq + phase);
+    return [
+      { scaleY: 1 + w * amp },
+      { rotate: w * (hopping ? 0.14 : 0.06) },
+    ];
+  });
+
   if (isRuby && (rubyIdleImg || rubyJumpImg)) {
     return (
       <Group transform={transform}>
-        {/* Dynamic Ground Shadow */}
+        {/* Dynamic Ground Shadow with breathing sync */}
         <Group transform={shadowTransform}>
           <Oval x={-rw * 0.42} y={-rh * 0.08} width={rw * 0.84} height={rh * 0.25} color="rgba(30,12,20,0.32)" />
         </Group>
 
-        {/* Render High-Definition Reference Sprite with Idle / Jump Switching */}
+        {/* Articulated Skeletal Reference Sprite */}
         {rubyJumpImg && isHoppingSV.value === 1 ? (
-          <SkiaImage
-            image={rubyJumpImg}
-            x={-rw * 0.48}
-            y={-rh * 1.05}
-            width={rw * 1.05}
-            height={rh * 1.05}
-            fit="contain"
-          />
+          <Group transform={rubyWingFlap} origin={{ x: -rw * 0.05, y: -rh * 0.55 }}>
+            <SkiaImage
+              image={rubyJumpImg}
+              x={-rw * 0.48}
+              y={-rh * 1.05}
+              width={rw * 1.05}
+              height={rh * 1.05}
+              fit="contain"
+            />
+          </Group>
         ) : rubyIdleImg ? (
-          <SkiaImage
-            image={rubyIdleImg}
-            x={-rw * 0.44}
-            y={-rh * 0.98}
-            width={rw}
-            height={rh}
-            fit="contain"
-          />
+          <Group transform={rubyBreathe} origin={{ x: 0, y: -rh * 0.1 }}>
+            <Group transform={rubyWingFlap} origin={{ x: rw * 0.02, y: -rh * 0.52 }}>
+              <SkiaImage
+                image={rubyIdleImg}
+                x={-rw * 0.44}
+                y={-rh * 0.98}
+                width={rw}
+                height={rh}
+                fit="contain"
+              />
+            </Group>
+          </Group>
         ) : null}
       </Group>
     );
