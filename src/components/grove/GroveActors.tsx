@@ -95,9 +95,10 @@ export function GroveTuftSprite({
 const EGG_SOURCE = require('../../../assets/eggs/dragon-egg-red.png');
 const EGG_ASPECT = 979 / 708;
 
-const RUBY_IDLE = require('../../../assets/dragon/ruby/idle.png');
-const RUBY_JUMP = require('../../../assets/dragon/ruby/jump.png');
-const RUBY_HAPPY = require('../../../assets/dragon/ruby/happy.png');
+const RUBY_SIT = require('../../../assets/dragon/ruby/postures/p6_relaxed_sit.png');
+const RUBY_HOP = require('../../../assets/dragon/ruby/postures/p5_happy_hop.png');
+const RUBY_CHEER = require('../../../assets/dragon/ruby/postures/p10_excited_cheer.png');
+const RUBY_WINK = require('../../../assets/dragon/ruby/postures/p7_cute_wink.png');
 
 export function GroveEgg({
   x,
@@ -170,9 +171,10 @@ export function GroveCreatureSprite({
   time: SharedValue<number>;
   speciesId?: string;
 }) {
-  const rubyIdleImg = useImage(RUBY_IDLE);
-  const rubyJumpImg = useImage(RUBY_JUMP);
-  const rubyHappyImg = useImage(RUBY_HAPPY);
+  const rubySitImg = useImage(RUBY_SIT);
+  const rubyHopImg = useImage(RUBY_HOP);
+  const rubyCheerImg = useImage(RUBY_CHEER);
+  const rubyWinkImg = useImage(RUBY_WINK);
 
   const tw = camera.tw;
   const ox = camera.ox;
@@ -249,9 +251,55 @@ export function GroveCreatureSprite({
     { rotate: Math.sin((time.value / GROVE_LOOP_MS) * TAU * 3 + phase) * 0.18 },
   ]);
 
-  // Ruby Sprite Sizing
-  const rw = tw * 0.96;
-  const rh = rw * (115 / 130);
+  // Ruby Posture Sprite Sizing
+  const rw = tw * 0.98;
+  const rh = rw * (205 / 204);
+
+  // Ruby Harmonic Breathing & Wing Flutter
+  const rubyBreathe = useDerivedValue(() => {
+    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
+    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
+    if (hopping) return [{ scale: 1 }];
+    const b = Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase);
+    return [
+      { scaleY: 1 + b * 0.03 },
+      { scaleX: 1 - b * 0.015 },
+    ];
+  });
+
+  if (isRuby && (rubySitImg || rubyHopImg)) {
+    return (
+      <Group transform={transform}>
+        {/* Dynamic Ground Shadow */}
+        <Group transform={shadowTransform}>
+          <Oval x={-rw * 0.42} y={-rh * 0.08} width={rw * 0.84} height={rh * 0.25} color="rgba(30,12,20,0.32)" />
+        </Group>
+
+        {/* 12-Posture Reference Sprite with In-Flight Hopping & Idle Transitions */}
+        {rubyHopImg && isHoppingSV.value === 1 ? (
+          <SkiaImage
+            image={rubyHopImg}
+            x={-rw * 0.48}
+            y={-rh * 1.02}
+            width={rw * 1.04}
+            height={rh * 1.04}
+            fit="contain"
+          />
+        ) : rubySitImg ? (
+          <Group transform={rubyBreathe} origin={{ x: 0, y: -rh * 0.15 }}>
+            <SkiaImage
+              image={rubySitImg}
+              x={-rw * 0.44}
+              y={-rh * 0.98}
+              width={rw}
+              height={rh}
+              fit="contain"
+            />
+          </Group>
+        ) : null}
+      </Group>
+    );
+  }
 
   // Sky Drake Paths
   const skyTailPath = `M ${-s * 0.35} ${-s * 0.25} Q ${-s * 0.95} ${-s * 0.4} ${-s * 1.15} ${-s * 0.75}`;
