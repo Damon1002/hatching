@@ -207,9 +207,6 @@ function RubyDragonCreature({
   camera: IsoCamera;
   time: SharedValue<number>;
 }) {
-  const rubySitImg = useImage(RUBY_SIT);
-  const rubyHopImg = useImage(RUBY_HOP);
-
   const tw = camera.tw;
   const ox = camera.ox;
   const oy = camera.oy;
@@ -218,7 +215,21 @@ function RubyDragonCreature({
   const destX = creature.destX;
   const destY = creature.destY;
   const phase = creature.phase;
+  const s = tw * 0.38;
 
+  // Exact Color Palette from Reference Deconstruction Sheet
+  const cWine = '#5B0F2A';     // Deep shadow & dorsal spine accents
+  const cCrimson = '#A4184A';  // Darker muscle tone & wing bone
+  const cRuby = '#D4275D';     // Main ruby body & neck
+  const cHighlight = '#F7687D';// Soft upper specular highlight
+  const cScuteLine = '#FFB89A';// Warm peach scute divider line
+  const cBelly = '#FFE9CF';    // Cream underbelly plate
+  const cWhite = '#FFFFFF';    // Specular eye highlight
+  const cAmberTop = '#FFD24D'; // Golden amber iris top
+  const cAmberBot = '#F89AC0'; // Amber iris gradient bottom
+  const cCharcoal = '#0E0A0F'; // Pupil, claws, nostril
+
+  // 1. DragonRoot Transform (Isometric motion, leap arc, facing, aerodynamic tilt)
   const transform = useDerivedValue(() => {
     const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
     let f = 0;
@@ -242,9 +253,9 @@ function RubyDragonCreature({
     const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
     const air = hopping ? Math.sin(hopT * Math.PI) : 0;
     const px = Math.round(ox + (cx - cy) * tw * 0.5);
-    const py = Math.round(oy + (cx + cy) * tw * 0.25 - z * tw) - air * tw * 0.32;
-    const tilt = hopping ? (facing === 1 ? -0.12 : 0.12) * Math.sin(hopT * Math.PI) : 0;
-    const breathe = !hopping ? 1 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2) * 0.02 : 1;
+    const py = Math.round(oy + (cx + cy) * tw * 0.25 - z * tw) - air * tw * 0.34;
+    const tilt = hopping ? (facing === 1 ? -0.14 : 0.14) * Math.sin(hopT * Math.PI) : 0;
+    const breathe = !hopping ? 1 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase) * 0.018 : 1;
     return [
       { translateX: px },
       { translateY: py },
@@ -254,62 +265,309 @@ function RubyDragonCreature({
     ];
   });
 
+  // Dynamic Ground Shadow
   const shadowTransform = useDerivedValue(() => {
     const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
     const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
     const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
     const air = hopping ? Math.sin(hopT * Math.PI) : 0;
-    return [{ translateX: air * tw * 0.14 }, { scale: 1 - air * 0.25 }];
+    return [{ translateX: air * tw * 0.14 }, { scale: 1 - air * 0.28 }];
   });
 
-  const isHoppingSV = useDerivedValue(() => {
-    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
-    return u < 0.08 || (u >= 0.7 && u < 0.78) ? 1 : 0;
-  });
-
-  const rw = tw * 0.98;
-  const rh = rw * (205 / 204);
-
-  const rubyBreathe = useDerivedValue(() => {
+  // Torso Breathing Expansion
+  const bodyBreathe = useDerivedValue(() => {
     const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
     const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
     if (hopping) return [{ scale: 1 }];
     const b = Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase);
     return [
-      { scaleY: 1 + b * 0.03 },
-      { scaleX: 1 - b * 0.015 },
+      { scaleY: 1 + b * 0.025 },
+      { scaleX: 1 - b * 0.012 },
     ];
   });
 
+  // 2. Parametric 4-Joint Neck FK Chain
+  const neck0Rot = useDerivedValue(() => {
+    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
+    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
+    const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
+    const air = hopping ? Math.sin(hopT * Math.PI) : 0;
+    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase;
+    return [{ rotate: air * 0.1 + Math.sin(t) * 0.035 }];
+  });
+
+  const neck1Rot = useDerivedValue(() => {
+    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
+    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
+    const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
+    const air = hopping ? Math.sin(hopT * Math.PI) : 0;
+    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase - 0.25;
+    return [{ rotate: air * 0.12 + Math.sin(t) * 0.045 }];
+  });
+
+  const neck2Rot = useDerivedValue(() => {
+    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
+    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
+    const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
+    const air = hopping ? Math.sin(hopT * Math.PI) : 0;
+    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase - 0.5;
+    return [{ rotate: air * 0.14 + Math.sin(t) * 0.05 }];
+  });
+
+  const neck3Rot = useDerivedValue(() => {
+    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
+    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
+    const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
+    const air = hopping ? Math.sin(hopT * Math.PI) : 0;
+    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase - 0.75;
+    return [{ rotate: air * 0.1 + Math.sin(t) * 0.04 }];
+  });
+
+  // Head Counterbalance Bob
+  const headRot = useDerivedValue(() => {
+    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
+    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
+    const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
+    const air = hopping ? Math.sin(hopT * Math.PI) : 0;
+    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase - 1.0;
+    return [{ rotate: -air * 0.15 + Math.sin(t) * 0.035 }];
+  });
+
+  // 3. Parametric 5-Joint Tail Traveling Wave Chain
+  const tail0Rot = useDerivedValue(() => {
+    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.8 + phase;
+    return [{ rotate: Math.sin(t) * 0.1 }];
+  });
+  const tail1Rot = useDerivedValue(() => {
+    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.8 + phase - 0.35;
+    return [{ rotate: Math.sin(t) * 0.14 }];
+  });
+  const tail2Rot = useDerivedValue(() => {
+    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.8 + phase - 0.7;
+    return [{ rotate: Math.sin(t) * 0.18 }];
+  });
+  const tail3Rot = useDerivedValue(() => {
+    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.8 + phase - 1.05;
+    return [{ rotate: Math.sin(t) * 0.22 }];
+  });
+  const tail4Rot = useDerivedValue(() => {
+    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.8 + phase - 1.4;
+    return [{ rotate: Math.sin(t) * 0.26 }];
+  });
+
+  // 4. 2-Bone Flapping Wings (FK Upper arm + Forearm drag)
+  const wingUpperL = useDerivedValue(() => {
+    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
+    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
+    const freq = hopping ? 12 : 3.6;
+    const amp = hopping ? 0.45 : 0.24;
+    const w = Math.sin((time.value / GROVE_LOOP_MS) * TAU * freq + phase);
+    return [
+      { rotate: -0.18 + w * amp },
+      { scaleY: 0.82 + 0.25 * w },
+    ];
+  });
+  const wingForearmL = useDerivedValue(() => {
+    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
+    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
+    const freq = hopping ? 12 : 3.6;
+    const amp = hopping ? 0.32 : 0.16;
+    const w = Math.sin((time.value / GROVE_LOOP_MS) * TAU * freq + phase - 0.45);
+    return [{ rotate: 0.12 + w * amp }];
+  });
+
+  const wingUpperR = useDerivedValue(() => {
+    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
+    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
+    const freq = hopping ? 12 : 3.6;
+    const amp = hopping ? 0.48 : 0.26;
+    const w = Math.sin((time.value / GROVE_LOOP_MS) * TAU * freq + phase);
+    return [
+      { rotate: -0.15 + w * amp },
+      { scaleY: 0.85 + 0.28 * w },
+    ];
+  });
+  const wingForearmR = useDerivedValue(() => {
+    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
+    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
+    const freq = hopping ? 12 : 3.6;
+    const amp = hopping ? 0.36 : 0.18;
+    const w = Math.sin((time.value / GROVE_LOOP_MS) * TAU * freq + phase - 0.45);
+    return [{ rotate: 0.1 + w * amp }];
+  });
+
+  // 5. Eye Blink Worklet (blinks every 3.5s)
+  const eyeBlink = useDerivedValue(() => {
+    const cycle = (time.value + phase * 600) % 3600;
+    if (cycle < 150) {
+      const p = Math.sin((cycle / 150) * Math.PI);
+      return [{ scaleY: Math.max(0.08, 1 - p * 0.95) }];
+    }
+    return [{ scaleY: 1 }];
+  });
+
+  // Parametric Wing Geometries
+  const wingArmPath = `M 0 0 Q ${s * 0.42} ${-s * 0.48} ${s * 0.75} ${-s * 0.65}`;
+  const wingForearmPath = `M ${s * 0.75} ${-s * 0.65} Q ${s * 0.95} ${-s * 0.55} ${s * 1.15} ${-s * 0.35}`;
+  const wingMembraneHero = `M 0 0 Q ${s * 0.42} ${-s * 0.48} ${s * 0.75} ${-s * 0.65} Q ${s * 0.95} ${-s * 0.55} ${s * 1.15} ${-s * 0.35} Q ${s * 0.92} ${-s * 0.15} ${s * 0.78} 0 Q ${s * 0.58} ${s * 0.08} ${s * 0.42} ${s * 0.12} Q ${s * 0.2} ${s * 0.08} 0 0 Z`;
+
+  // Modular Head Crest Spikes (Horns)
+  const horn1 = `M ${s * 0.08} ${-s * 0.18} Q ${-s * 0.28} ${-s * 0.65} ${-s * 0.58} ${-s * 0.75} Q ${-s * 0.2} ${-s * 0.45} ${s * 0.22} ${-s * 0.18} Z`;
+  const horn2 = `M ${s * 0.02} ${-s * 0.1} Q ${-s * 0.42} ${-s * 0.48} ${-s * 0.75} ${-s * 0.55} Q ${-s * 0.32} ${-s * 0.3} ${s * 0.12} ${-s * 0.08} Z`;
+  const horn3 = `M ${-s * 0.04} 0 Q ${-s * 0.48} ${-s * 0.28} ${-s * 0.8} ${-s * 0.32} Q ${-s * 0.38} ${-s * 0.12} ${s * 0.05} ${s * 0.02} Z`;
+  const horn4 = `M 0 ${s * 0.1} Q ${-s * 0.4} ${s * 0.1} ${-s * 0.68} ${s * 0.06} Q ${-s * 0.3} ${s * 0.22} ${s * 0.08} ${s * 0.14} Z`;
+
   return (
     <Group transform={transform}>
-      {/* Dynamic Ground Shadow */}
+      {/* 1. Dynamic Ground Shadow */}
       <Group transform={shadowTransform}>
-        <Oval x={-rw * 0.42} y={-rh * 0.08} width={rw * 0.84} height={rh * 0.25} color="rgba(30,12,20,0.32)" />
+        <Oval x={-s * 0.7} y={-s * 0.1} width={s * 1.4} height={s * 0.32} color="rgba(35,10,22,0.32)" />
       </Group>
 
-      {/* 12-Posture Reference Sprite with In-Flight Hopping & Idle Transitions */}
-      {rubyHopImg && isHoppingSV.value === 1 ? (
-        <SkiaImage
-          image={rubyHopImg}
-          x={-rw * 0.48}
-          y={-rh * 1.02}
-          width={rw * 1.04}
-          height={rh * 1.04}
-          fit="contain"
-        />
-      ) : rubySitImg ? (
-        <Group transform={rubyBreathe} origin={{ x: 0, y: -rh * 0.15 }}>
-          <SkiaImage
-            image={rubySitImg}
-            x={-rw * 0.44}
-            y={-rh * 0.98}
-            width={rw}
-            height={rh}
-            fit="contain"
-          />
+      {/* 2. Left Wing (Back Wing behind body) */}
+      <Group transform={wingUpperL} origin={{ x: -s * 0.08, y: -s * 0.55 }}>
+        <Path path={wingMembraneHero} color={cCrimson} opacity={0.88} />
+        <Path path={wingArmPath} color={cWine} style="stroke" strokeWidth={Math.max(2, s * 0.04)} strokeCap="round" />
+        <Group transform={wingForearmL} origin={{ x: s * 0.75, y: -s * 0.65 }}>
+          <Path path={wingForearmPath} color={cWine} style="stroke" strokeWidth={Math.max(1.8, s * 0.035)} strokeCap="round" />
         </Group>
-      ) : null}
+      </Group>
+
+      {/* 3. Parametric 5-Segment Tail Traveling Wave Chain */}
+      <Group transform={tail0Rot} origin={{ x: -s * 0.35, y: -s * 0.25 }}>
+        {/* Tail Segment 0 (Base) */}
+        <Oval x={-s * 0.45} y={-s * 0.35} width={s * 0.32} height={s * 0.28} color={cRuby} />
+        <Path path={`M ${-s * 0.38} ${-s * 0.35} L ${-s * 0.48} ${-s * 0.52} L ${-s * 0.3} ${-s * 0.38} Z`} color={cWine} />
+
+        <Group transform={tail1Rot} origin={{ x: -s * 0.42, y: -s * 0.25 }}>
+          {/* Tail Segment 1 */}
+          <Oval x={-s * 0.68} y={-s * 0.34} width={s * 0.3} height={s * 0.24} color={cRuby} />
+          <Path path={`M ${-s * 0.6} ${-s * 0.34} L ${-s * 0.72} ${-s * 0.5} L ${-s * 0.52} ${-s * 0.36} Z`} color={cWine} />
+
+          <Group transform={tail2Rot} origin={{ x: -s * 0.65, y: -s * 0.25 }}>
+            {/* Tail Segment 2 */}
+            <Oval x={-s * 0.9} y={-s * 0.32} width={s * 0.28} height={s * 0.22} color={cRuby} />
+            <Path path={`M ${-s * 0.82} ${-s * 0.32} L ${-s * 0.94} ${-s * 0.48} L ${-s * 0.74} ${-s * 0.34} Z`} color={cWine} />
+
+            <Group transform={tail3Rot} origin={{ x: -s * 0.88, y: -s * 0.25 }}>
+              {/* Tail Segment 3 */}
+              <Oval x={-s * 1.1} y={-s * 0.3} width={s * 0.25} height={s * 0.2} color={cRuby} />
+              <Path path={`M ${-s * 1.02} ${-s * 0.3} L ${-s * 1.14} ${-s * 0.44} L ${-s * 0.96} ${-s * 0.32} Z`} color={cWine} />
+
+              <Group transform={tail4Rot} origin={{ x: -s * 1.08, y: -s * 0.25 }}>
+                {/* Tail Segment 4 + Tapered Whip Tip */}
+                <Path path={`M ${-s * 1.08} ${-s * 0.25} Q ${-s * 1.35} ${-s * 0.32} ${-s * 1.58} ${-s * 0.48} Q ${-s * 1.3} ${-s * 0.2} ${-s * 1.08} ${-s * 0.18} Z`} color={cRuby} />
+                <Path path={`M ${-s * 1.25} ${-s * 0.3} L ${-s * 1.38} ${-s * 0.42} L ${-s * 1.18} ${-s * 0.28} Z`} color={cWine} />
+              </Group>
+            </Group>
+          </Group>
+        </Group>
+      </Group>
+
+      {/* 4. Hind Left Leg (Large Muscular Thigh & Claws) */}
+      <Oval x={-s * 0.48} y={-s * 0.42} width={s * 0.52} height={s * 0.46} color={cCrimson} />
+      <Oval x={-s * 0.46} y={-s * 0.16} width={s * 0.34} height={s * 0.2} color={cWine} />
+      <Circle cx={-s * 0.46} cy={-s * 0.06} r={s * 0.026} color={cCharcoal} />
+      <Circle cx={-s * 0.38} cy={-s * 0.04} r={s * 0.026} color={cCharcoal} />
+      <Circle cx={-s * 0.3} cy={-s * 0.04} r={s * 0.026} color={cCharcoal} />
+
+      {/* 5. Main Torso Body */}
+      <Group transform={bodyBreathe} origin={{ x: 0, y: -s * 0.35 }}>
+        {/* Rounded Ruby Torso */}
+        <Oval x={-s * 0.5} y={-s * 0.72} width={s * 1.0} height={s * 0.82} color={cRuby} />
+        {/* Torso Top Highlight */}
+        <Oval x={-s * 0.36} y={-s * 0.68} width={s * 0.65} height={s * 0.48} color={cHighlight} opacity={0.6} />
+
+        {/* Chest & Belly Cream Underbelly Shield */}
+        <Path path={`M ${s * 0.08} ${-s * 0.65} Q ${s * 0.38} ${-s * 0.55} ${s * 0.38} ${-s * 0.2} Q ${s * 0.22} ${-s * 0.1} ${s * 0.04} ${-s * 0.16} Q ${-s * 0.02} ${-s * 0.42} ${s * 0.08} ${-s * 0.65} Z`} color={cBelly} />
+        {/* Chest Scute Divider Lines */}
+        <Path path={`M ${s * 0.08} ${-s * 0.52} Q ${s * 0.24} ${-s * 0.48} ${s * 0.37} ${-s * 0.54}`} color={cScuteLine} style="stroke" strokeWidth={Math.max(1.2, s * 0.025)} strokeCap="round" />
+        <Path path={`M ${s * 0.05} ${-s * 0.38} Q ${s * 0.22} ${-s * 0.34} ${s * 0.36} ${-s * 0.4}`} color={cScuteLine} style="stroke" strokeWidth={Math.max(1.2, s * 0.025)} strokeCap="round" />
+        <Path path={`M ${s * 0.05} ${-s * 0.24} Q ${s * 0.18} ${-s * 0.2} ${s * 0.3} ${-s * 0.26}`} color={cScuteLine} style="stroke" strokeWidth={Math.max(1.2, s * 0.025)} strokeCap="round" />
+      </Group>
+
+      {/* 6. Parametric 4-Joint Neck FK Chain & Head Hierarchy */}
+      {/* Neck Segment 0 (Lower Neck) */}
+      <Group transform={neck0Rot} origin={{ x: s * 0.12, y: -s * 0.58 }}>
+        <Path path={`M ${-s * 0.02} ${-s * 0.58} L ${s * 0.24} ${-s * 0.58} L ${s * 0.26} ${-s * 0.78} L ${0} ${-s * 0.78} Z`} color={cRuby} />
+        {/* Ventral Scute Plate */}
+        <Path path={`M ${s * 0.1} ${-s * 0.58} L ${s * 0.24} ${-s * 0.58} L ${s * 0.26} ${-s * 0.78} L ${s * 0.12} ${-s * 0.78} Z`} color={cBelly} />
+        <Path path={`M ${s * 0.11} ${-s * 0.68} Q ${s * 0.2} ${-s * 0.66} ${s * 0.25} ${-s * 0.69}`} color={cScuteLine} style="stroke" strokeWidth={Math.max(1, s * 0.02)} strokeCap="round" />
+
+        {/* Neck Segment 1 (Mid-Lower Neck) */}
+        <Group transform={neck1Rot} origin={{ x: s * 0.13, y: -s * 0.78 }}>
+          <Path path={`M 0 ${-s * 0.78} L ${s * 0.26} ${-s * 0.78} L ${s * 0.28} ${-s * 0.98} L ${s * 0.04} ${-s * 0.98} Z`} color={cRuby} />
+          <Path path={`M ${s * 0.12} ${-s * 0.78} L ${s * 0.26} ${-s * 0.78} L ${s * 0.28} ${-s * 0.98} L ${s * 0.15} ${-s * 0.98} Z`} color={cBelly} />
+          <Path path={`M ${s * 0.14} ${-s * 0.88} Q ${s * 0.22} ${-s * 0.86} ${s * 0.27} ${-s * 0.89}`} color={cScuteLine} style="stroke" strokeWidth={Math.max(1, s * 0.02)} strokeCap="round" />
+
+          {/* Neck Segment 2 (Mid-Upper Neck) */}
+          <Group transform={neck2Rot} origin={{ x: s * 0.16, y: -s * 0.98 }}>
+            <Path path={`M ${s * 0.04} ${-s * 0.98} L ${s * 0.28} ${-s * 0.98} L ${s * 0.32} ${-s * 1.18} L ${s * 0.08} ${-s * 1.18} Z`} color={cRuby} />
+            <Path path={`M ${s * 0.15} ${-s * 0.98} L ${s * 0.28} ${-s * 0.98} L ${s * 0.32} ${-s * 1.18} L ${s * 0.18} ${-s * 1.18} Z`} color={cBelly} />
+            <Path path={`M ${s * 0.17} ${-s * 1.08} Q ${s * 0.25} ${-s * 1.06} ${s * 0.3} ${-s * 1.09}`} color={cScuteLine} style="stroke" strokeWidth={Math.max(1, s * 0.02)} strokeCap="round" />
+
+            {/* Neck Segment 3 (Upper Neck / Throat) */}
+            <Group transform={neck3Rot} origin={{ x: s * 0.2, y: -s * 1.18 }}>
+              <Path path={`M ${s * 0.08} ${-s * 1.18} L ${s * 0.32} ${-s * 1.18} L ${s * 0.35} ${-s * 1.34} L ${s * 0.12} ${-s * 1.34} Z`} color={cRuby} />
+              <Path path={`M ${s * 0.18} ${-s * 1.18} L ${s * 0.32} ${-s * 1.18} L ${s * 0.35} ${-s * 1.34} L ${s * 0.22} ${-s * 1.34} Z`} color={cBelly} />
+
+              {/* 7. Head Hierarchy (Parented to Top of Neck with its own Pivot) */}
+              <Group transform={headRot} origin={{ x: s * 0.22, y: -s * 1.34 }}>
+                {/* Head Crest / Horn Spikes (Parented directly to skull) */}
+                <Path path={horn4} color={cWine} />
+                <Path path={horn3} color={cWine} />
+                <Path path={horn2} color={cWine} />
+                <Path path={horn1} color={cWine} />
+
+                {/* Main Skull Core */}
+                <Oval x={-s * 0.12} y={-s * 1.62} width={s * 0.72} height={s * 0.58} color={cRuby} />
+                {/* Skull Top Highlight */}
+                <Oval x={-s * 0.02} y={-s * 1.58} width={s * 0.48} height={s * 0.35} color={cHighlight} opacity={0.7} />
+
+                {/* Snout & Cheeks */}
+                <Oval x={s * 0.24} y={-s * 1.45} width={s * 0.46} height={s * 0.35} color={cHighlight} />
+                {/* Cute Smiling Mouth Line */}
+                <Path path={`M ${s * 0.22} ${-s * 1.28} Q ${s * 0.4} ${-s * 1.25} ${s * 0.56} ${-s * 1.32}`} color={cWine} style="stroke" strokeWidth={Math.max(1.2, s * 0.025)} strokeCap="round" />
+                {/* Nostril */}
+                <Circle cx={s * 0.52} cy={-s * 1.4} r={s * 0.035} color={cCharcoal} />
+
+                {/* Modular Golden Amber Anime Eye with Specular Highlights & Blinking */}
+                <Group transform={eyeBlink} origin={{ x: s * 0.24, y: -s * 1.46 }}>
+                  {/* Eye Socket Contour */}
+                  <Oval x={s * 0.12} y={-s * 1.58} width={s * 0.28} height={s * 0.34} color={cWine} />
+                  {/* Amber Iris Top & Bottom */}
+                  <Oval x={s * 0.14} y={-s * 1.56} width={s * 0.24} height={s * 0.3} color={cAmberTop} />
+                  <Oval x={s * 0.16} y={-s * 1.48} width={s * 0.2} height={s * 0.18} color={cAmberBot} opacity={0.65} />
+                  {/* Charcoal Pupil */}
+                  <Oval x={s * 0.16} y={-s * 1.55} width={s * 0.14} height={s * 0.24} color={cCharcoal} />
+                  {/* Specular Sparkles */}
+                  <Circle cx={s * 0.18} cy={-s * 1.58} r={s * 0.065} color={cWhite} />
+                  <Circle cx={s * 0.28} cy={-s * 1.45} r={s * 0.028} color={cAmberTop} />
+                </Group>
+              </Group>
+            </Group>
+          </Group>
+        </Group>
+      </Group>
+
+      {/* 8. Hero Front Right Wing */}
+      <Group transform={wingUpperR} origin={{ x: 0, y: -s * 0.55 }}>
+        <Path path={wingMembraneHero} color={cRuby} opacity={0.96} />
+        {/* Wing Struts */}
+        <Path path={wingArmPath} color={cWine} style="stroke" strokeWidth={Math.max(2.2, s * 0.045)} strokeCap="round" />
+        <Path path={`M 0 0 Q ${s * 0.45} ${-s * 0.25} ${s * 0.78} 0`} color={cWine} style="stroke" strokeWidth={Math.max(1.4, s * 0.03)} strokeCap="round" />
+        <Path path={`M 0 0 Q ${s * 0.28} ${-s * 0.08} ${s * 0.42} ${s * 0.12}`} color={cWine} style="stroke" strokeWidth={Math.max(1.2, s * 0.025)} strokeCap="round" />
+        <Group transform={wingForearmR} origin={{ x: s * 0.75, y: -s * 0.65 }}>
+          <Path path={wingForearmPath} color={cWine} style="stroke" strokeWidth={Math.max(1.8, s * 0.035)} strokeCap="round" />
+        </Group>
+      </Group>
+
+      {/* 9. Front Right Paw & Claws */}
+      <Oval x={s * 0.1} y={-s * 0.22} width={s * 0.24} height={s * 0.3} color={cRuby} />
+      <Oval x={s * 0.15} y={-s * 0.15} width={s * 0.28} height={s * 0.18} color={cWine} />
+      <Circle cx={s * 0.18} cy={-s * 0.06} r={s * 0.024} color={cCharcoal} />
+      <Circle cx={s * 0.26} cy={-s * 0.04} r={s * 0.024} color={cCharcoal} />
+      <Circle cx={s * 0.34} cy={-s * 0.04} r={s * 0.024} color={cCharcoal} />
     </Group>
   );
 }
