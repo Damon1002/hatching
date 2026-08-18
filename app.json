@@ -25,7 +25,14 @@
     },
     "plugins": [
       "expo-status-bar",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "enableBackgroundPlayback": false
+        }
+      ]
     ]
   }
 }

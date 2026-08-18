@@ -18,7 +18,6 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Circle, Defs, G, LinearGradient as SvgLinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -32,11 +31,14 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { useGroveSong } from './src/audio/useGroveSong';
 import { IsometricLandView } from './src/components/IsometricLandView';
 import { AMBIENT_QUOTES } from './src/data/quotes';
 import { FOCUS_TAGS, SPECIES_CATALOG } from './src/data/species';
 import { colors, radii, shadows, spacing, type, TagKey } from './src/theme';
 import { DailyGroveItem, DragonSpecies, FocusMode, SessionRecord, TagInfo } from './src/types';
+
+const GROVE_SEED = 20260818;
 
 const SESSION_SECONDS_PER_MINUTE = __DEV__ ? 1 : 60;
 const DURATION_PRESETS = [10, 15, 20, 25, 30, 45, 60, 90, 120];
@@ -56,6 +58,7 @@ function ForestHomeScreen() {
   const [mode, setMode] = useState<'timer' | 'stopwatch'>('timer');
   const [coins, setCoins] = useState(306);
   const [todayFocusMinutes, setTodayFocusMinutes] = useState(10);
+  const [sessionsCompleted, setSessionsCompleted] = useState(0);
   const [running, setRunning] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(10 * SESSION_SECONDS_PER_MINUTE);
   const [quoteIndex, setQuoteIndex] = useState(0);
@@ -74,6 +77,8 @@ function ForestHomeScreen() {
     [selectedTag]
   );
 
+  useGroveSong(GROVE_SEED, soundEnabled);
+
   // Synchronize timer duration changes
   const setDuration = (mins: number) => {
     if (running) return;
@@ -90,6 +95,7 @@ function ForestHomeScreen() {
       // Completed focus session
       setRunning(false);
       setTodayFocusMinutes((prev) => prev + durationMinutes);
+      setSessionsCompleted((prev) => prev + 1);
       setCoins((prev) => prev + Math.floor(durationMinutes * 1.5));
       setToast(`✨ 专注成功！获得 ${Math.floor(durationMinutes * 1.5)} 灵晶，飞龙蛋已吸收心流能量！`);
       setRemainingSeconds(durationMinutes * SESSION_SECONDS_PER_MINUTE);
@@ -256,7 +262,14 @@ function ForestHomeScreen() {
             3. CENTER HERO: 2D ISOMETRIC 16-CUBE LAND
            ========================================== */}
         <View style={styles.centerHeroWrap}>
-          <IsometricLandView isFocusing={running} progress={progress} />
+          <IsometricLandView
+            seed={GROVE_SEED}
+            isFocusing={running}
+            progress={progress}
+            focusMinutes={todayFocusMinutes}
+            sessionsCompleted={sessionsCompleted}
+            tag={selectedTag}
+          />
         </View>
 
         {/* ==========================================
