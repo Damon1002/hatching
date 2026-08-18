@@ -32,6 +32,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useGroveSong } from './src/audio/useGroveSong';
+import { HatchingBottomSheet } from './src/components/HatchingBottomSheet';
 import { IsometricLandView } from './src/components/IsometricLandView';
 import { AMBIENT_QUOTES } from './src/data/quotes';
 import { FOCUS_TAGS, SPECIES_CATALOG } from './src/data/species';
@@ -64,6 +65,8 @@ function ForestHomeScreen() {
   const [quoteIndex, setQuoteIndex] = useState(0);
 
   // Modals & Drawers
+  const [showHatchModal, setShowHatchModal] = useState(false);
+  const [selectedSpeciesId, setSelectedSpeciesId] = useState<string>('baby_sky_drake');
   const [showTagModal, setShowTagModal] = useState(false);
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [showGiveUpModal, setShowGiveUpModal] = useState(false);
@@ -261,7 +264,14 @@ function ForestHomeScreen() {
         {/* ==========================================
             3. CENTER HERO: 2D ISOMETRIC 16-CUBE LAND
            ========================================== */}
-        <View style={styles.centerHeroWrap}>
+        <PressableScale
+          disabled={running}
+          onPress={() => {
+            Haptics.selectionAsync();
+            setShowHatchModal(true);
+          }}
+          style={styles.centerHeroWrap}
+        >
           <IsometricLandView
             seed={GROVE_SEED}
             isFocusing={running}
@@ -270,7 +280,7 @@ function ForestHomeScreen() {
             sessionsCompleted={sessionsCompleted}
             tag={selectedTag}
           />
-        </View>
+        </PressableScale>
 
         {/* ==========================================
             4. TAG SELECTOR PILL (e.g. 🔴 Work)
@@ -462,6 +472,33 @@ function ForestHomeScreen() {
           </BlurView>
         </View>
       </Modal>
+
+      {/* ==========================================
+          BREEDING & HATCHING SETTINGS BOTTOM SHEET
+         ========================================== */}
+      <HatchingBottomSheet
+        visible={showHatchModal}
+        onClose={() => setShowHatchModal(false)}
+        selectedSpeciesId={selectedSpeciesId}
+        onSelectSpecies={(species) => {
+          setSelectedSpeciesId(species.id);
+        }}
+        selectedDuration={durationMinutes}
+        onSelectDuration={(mins) => {
+          setDurationMinutes(mins);
+          setRemainingSeconds(mins * SESSION_SECONDS_PER_MINUTE);
+        }}
+        selectedTag={selectedTag}
+        onSelectTag={(tag) => setSelectedTag(tag)}
+        onConfirmHatch={(species, mins, tag) => {
+          setSelectedSpeciesId(species.id);
+          setDurationMinutes(mins);
+          setRemainingSeconds(mins * SESSION_SECONDS_PER_MINUTE);
+          setSelectedTag(tag);
+          setRunning(true);
+          setToast(`🌱 开始培育「${species.name}」！专注 ${mins} 分钟`);
+        }}
+      />
 
       {/* ==========================================
           TOAST FEEDBACK

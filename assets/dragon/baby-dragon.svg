@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <radialGradient id="shadowGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(15,35,22,0.38)" />
+      <stop offset="80%" stop-color="rgba(15,35,22,0.18)" />
+      <stop offset="100%" stop-color="rgba(15,35,22,0)" />
+    </radialGradient>
+  </defs>
+
+  <!-- Ground Shadow -->
+  <ellipse cx="512" cy="711.5200000000001" rx="247" ry="68.39999999999999" fill="url(#shadowGrad)" />
+
+  <!-- Dragon Tail -->
+  <path d="M 379 601.32 Q 151 544.32 75.00000000000006 411.32000000000005" fill="none" stroke="#8bd3e4" stroke-width="60.800000000000004" stroke-linecap="round" />
+  <path d="M 75.00000000000006 411.32000000000005 L -1 354.32000000000005 L 56 278.32 L 113 373.32000000000005 Z" fill="#6498a4" />
+
+  <!-- Back Spines -->
+  <path d="M 417 411.32000000000005 L 352.4 335.32000000000005 L 466.4 373.32000000000005 Z" fill="#6498a4" />
+  <path d="M 493 346.72 L 443.6 270.72 L 542.4 316.32000000000005 Z" fill="#6498a4" />
+
+  <!-- Dragon Wings (Behind Body) -->
+  <path d="M 512 487.32000000000005 Q 208 221.32000000000005 75.00000000000006 297.32000000000005 Q 189 449.32000000000005 284 563.32 Q 398 525.32 512 487.32000000000005 Z" fill="#6498a4" opacity="0.92" />
+  <path d="M 512 487.32000000000005 Q 816 221.32000000000005 949 297.32000000000005 Q 835 449.32000000000005 740 563.32 Q 626 525.32 512 487.32000000000005 Z" fill="#a8deeb" opacity="0.92" />
+
+  <!-- Dragon Body -->
+  <ellipse cx="512" cy="561.4200000000001" rx="190" ry="161.5" fill="#8bd3e4" />
+
+  <!-- Soft Belly Plate -->
+  <ellipse cx="569" cy="572.82" rx="114" ry="123.5" fill="#FFF5DD" />
+
+  <!-- Horns -->
+  <path d="M 455 259.3200000000001 Q 379 107.32000000000005 314.4 80.72000000000003 Q 428.4 183.32000000000005 504.4 270.72 Z" fill="#F5C252" stroke="#D89E28" stroke-width="5.7" />
+  <path d="M 531 259.3200000000001 Q 607 107.32000000000005 671.6 80.72000000000003 Q 569 183.32000000000005 580.4 270.72 Z" fill="#F5C252" stroke="#D89E28" stroke-width="5.7" />
+
+  <!-- Dragon Head -->
+  <ellipse cx="534.8" cy="339.12000000000006" rx="167.2" ry="136.79999999999998" fill="#8bd3e4" />
+
+  <!-- Dragon Snout / Cheek -->
+  <ellipse cx="627.9" cy="377.12000000000006" rx="85.5" ry="68.39999999999999" fill="#a8deeb" />
+
+  <!-- Cute Nostril -->
+  <circle cx="656.4" cy="361.9200000000001" r="13.3" fill="#6498a4" />
+
+  <!-- Eyes (Anime Sparkle) -->
+  <ellipse cx="512" cy="304.92" rx="45.6" ry="57" fill="#2A101E" />
+  <circle cx="493" cy="270.72" r="24.7" fill="#FFFFFF" />
+  <circle cx="527.2" cy="323.9200000000001" r="9.5" fill="#FFFFFF" />
+
+  <ellipse cx="626" cy="304.92" rx="45.6" ry="57" fill="#2A101E" />
+  <circle cx="607" cy="270.72" r="24.7" fill="#FFFFFF" />
+  <circle cx="641.2" cy="323.9200000000001" r="9.5" fill="#FFFFFF" />
+
+  <!-- Claws / Feet -->
+  <ellipse cx="420.8" cy="673.5200000000001" rx="60.800000000000004" ry="38" fill="#6498a4" />
+  <ellipse cx="618.4" cy="673.5200000000001" rx="60.800000000000004" ry="38" fill="#6498a4" />
+</svg>

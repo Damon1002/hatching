@@ -29,6 +29,10 @@ export interface DragonSpecies {
   requiredMinutes: number;
   color: string;
   unlocked: boolean;
+  isVip?: boolean;
+  category?: 'dragon' | 'plant' | 'special';
+  badge?: string;
+  image?: any;
 }
 
 export interface DailyGroveItem {

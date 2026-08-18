@@ -257,16 +257,16 @@ export function GroveCreatureSprite({
       <Path path={spine1} color={darkColor} />
       <Path path={spine2} color={darkColor} />
 
-      {/* Dragon Body */}
-      <Oval x={-s * 0.5} y={-s * 0.78} width={s * 1.0} height={s * 0.85} color={mainColor} />
-      {/* Soft Belly Plate */}
-      <Oval x={-s * 0.15} y={-s * 0.65} width={s * 0.6} height={s * 0.65} color={bellyColor} />
-
       {/* Dragon Wings */}
       <Group transform={wing} origin={{ x: 0, y: -s * 0.55 }}>
         <Path path={wingLeft} color={darkColor} opacity={0.92} />
         <Path path={wingRight} color={lightColor} opacity={0.92} />
       </Group>
+
+      {/* Dragon Body */}
+      <Oval x={-s * 0.5} y={-s * 0.78} width={s * 1.0} height={s * 0.85} color={mainColor} />
+      {/* Soft Belly Plate */}
+      <Oval x={-s * 0.15} y={-s * 0.65} width={s * 0.6} height={s * 0.65} color={bellyColor} />
 
       {/* Dragon Horns */}
       <Path path={hornLeft} color={hornColor} />
