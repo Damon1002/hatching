@@ -59,14 +59,25 @@
   <!-- Graceful Neck -->
   <path d="M 474.52 461.79999999999995 Q 518.72 325.8 566.3199999999999 234 L 634.3199999999999 267.99999999999994 Q 600.3199999999999 393.79999999999995 576.52 495.79999999999995 Z" fill="url(#rubyBodyGrad)" />
 
-  <!-- Segmented Cream Underbelly & Chest -->
-  <!-- Scute Plates -->
-  <ellipse cx="559.52" cy="587.5999999999999" rx="95.2" ry="118.99999999999999" fill="#FDE2C8" />
-  <!-- Scute Segmentation Ribs -->
-  <path d="M 511.91999999999996 540 Q 566.3199999999999 546.8 620.72 533.1999999999999" fill="none" stroke="#E09A7A" stroke-width="5.44" />
-  <path d="M 505.12 580.8 Q 566.3199999999999 587.5999999999999 627.52 574" fill="none" stroke="#E09A7A" stroke-width="5.44" />
-  <path d="M 505.12 621.5999999999999 Q 566.3199999999999 628.4 627.52 614.8" fill="none" stroke="#E09A7A" stroke-width="5.44" />
-  <path d="M 511.91999999999996 662.4 Q 559.52 669.1999999999999 610.52 655.5999999999999" fill="none" stroke="#E09A7A" stroke-width="5.44" />
+  <!-- Continuous Segmented Cream/Peach Underbelly & Ventral Scutes -->
+  <!-- Base Ventral Band from under chin to abdomen -->
+  <path d="M 566.3199999999999 301.99999999999994 Q 539.12 393.79999999999995 518.72 478.79999999999995 Q 484.71999999999997 563.8 498.32 665.8 Q 545.92 676 593.52 631.8 Q 634.3199999999999 553.5999999999999 620.72 478.79999999999995 Q 610.52 393.79999999999995 634.3199999999999 315.59999999999997 Z" fill="#FDE2C8" />
+  <!-- Center Highlight Strip -->
+  <path d="M 559.52 325.8 Q 545.92 393.79999999999995 532.3199999999999 478.79999999999995 Q 518.72 563.8 525.52 648.8 Q 559.52 648.8 579.92 563.8 Q 593.52 478.79999999999995 586.72 393.79999999999995 Q 586.72 335.99999999999994 600.3199999999999 325.8 Z" fill="#FFF3E8" opacity="0.85" />
+  
+  <!-- Individual Curved Scute Segmentation Lines -->
+  <!-- Throat Scutes -->
+  <path d="M 573.12 322.4 Q 600.3199999999999 329.2 620.72 315.59999999999997" fill="none" stroke="#E09A7A" stroke-width="5.44" stroke-linecap="round" />
+  <path d="M 552.72 363.19999999999993 Q 583.3199999999999 369.99999999999994 613.92 356.3999999999999" fill="none" stroke="#E09A7A" stroke-width="5.44" stroke-linecap="round" />
+  <path d="M 539.12 403.99999999999994 Q 573.12 410.79999999999995 607.12 397.2" fill="none" stroke="#E09A7A" stroke-width="5.44" stroke-linecap="round" />
+  <!-- Neck Scutes -->
+  <path d="M 525.52 448.19999999999993 Q 566.3199999999999 458.4 607.12 441.3999999999999" fill="none" stroke="#E09A7A" stroke-width="5.44" stroke-linecap="round" />
+  <!-- Chest Scutes -->
+  <path d="M 511.91999999999996 495.79999999999995 Q 559.52 509.4 613.92 488.99999999999994" fill="none" stroke="#E09A7A" stroke-width="6.8" stroke-linecap="round" />
+  <path d="M 498.32 543.4 Q 552.72 560.4 613.92 536.5999999999999" fill="none" stroke="#E09A7A" stroke-width="6.8" stroke-linecap="round" />
+  <!-- Abdominal Scutes -->
+  <path d="M 488.12 591 Q 545.92 608 603.72 584.1999999999999" fill="none" stroke="#E09A7A" stroke-width="6.8" stroke-linecap="round" />
+  <path d="M 498.32 635.1999999999999 Q 539.12 648.8 586.72 628.4" fill="none" stroke="#E09A7A" stroke-width="6.8" stroke-linecap="round" />
 
   <!-- Front Leg / Paw -->
   <ellipse cx="579.92" cy="642" rx="54.4" ry="81.6" fill="url(#rubyBodyGrad)" />

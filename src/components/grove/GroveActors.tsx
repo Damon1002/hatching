@@ -269,7 +269,8 @@ export function GroveCreatureSprite({
   const rubyDeep = '#4E0E22';
   const rubyLight = '#E64D6F';
   const rubyBelly = '#FDE2C8';
-  const rubyScute = '#E09A7A';
+  const rubyBellyHighlight = '#FFF3E8';
+  const rubyScute = '#D47A6A';
   const rubyHorn = '#6E1428';
   const rubyAmberEye = '#FBB03B';
 
@@ -328,8 +329,11 @@ export function GroveCreatureSprite({
   const rWingLeft = `M 0 ${-s * 0.55} Q ${-s * 0.75} ${-s * 1.38} ${-s * 1.15} ${-s * 1.25} Q ${-s * 1.0} ${-s * 0.88} ${-s * 0.82} ${-s * 0.72} Q ${-s * 0.65} ${-s * 0.58} ${-s * 0.5} ${-s * 0.42} Q ${-s * 0.22} ${-s * 0.5} 0 ${-s * 0.55} Z`;
   const rWingRight = `M 0 ${-s * 0.55} Q ${s * 0.82} ${-s * 1.45} ${s * 1.22} ${-s * 1.32} Q ${s * 1.05} ${-s * 0.95} ${s * 0.9} ${-s * 0.75} Q ${s * 0.7} ${-s * 0.6} ${s * 0.52} ${-s * 0.42} Q ${s * 0.26} ${-s * 0.5} 0 ${-s * 0.55} Z`;
 
-  // 4. Long Graceful S-Curve Neck
+  // 4. Long Graceful S-Curve Neck Back Contour
   const rNeck = `M ${-s * 0.12} ${-s * 0.72} Q ${s * 0.08} ${-s * 1.1} ${s * 0.2} ${-s * 1.35} L ${s * 0.4} ${-s * 1.25} Q ${s * 0.28} ${-s * 0.92} ${s * 0.22} ${-s * 0.65} Z`;
+
+  // 5. Continuous Peach/Cream Ventral Plate (from chin down throat, neck, and chest)
+  const rVentralPlates = `M ${s * 0.22} ${-s * 1.22} Q ${s * 0.14} ${-s * 0.95} ${s * 0.08} ${-s * 0.7} Q ${-s * 0.02} ${-s * 0.45} ${s * 0.02} ${-s * 0.15} Q ${s * 0.16} ${-s * 0.12} ${s * 0.3} ${-s * 0.25} Q ${s * 0.42} ${-s * 0.48} ${s * 0.38} ${-s * 0.7} Q ${s * 0.35} ${-s * 0.95} ${s * 0.42} ${-s * 1.18} Z`;
 
   if (isRuby) {
     return (
@@ -342,6 +346,8 @@ export function GroveCreatureSprite({
         {/* 1. Long Whip Tail with undulating wagging */}
         <Group transform={rubyTailWag} origin={{ x: -s * 0.35, y: -s * 0.28 }}>
           <Path path={rubyTailPath} color={rubyMain} style="stroke" strokeWidth={Math.max(3.5, s * 0.22)} strokeCap="round" />
+          {/* Tail Underside Peach Strip */}
+          <Path path={`M ${-s * 0.35} ${-s * 0.2} Q ${-s * 0.8} ${-s * 0.32} ${-s * 1.2} ${-s * 0.52}`} color={rubyBelly} style="stroke" strokeWidth={Math.max(1.5, s * 0.08)} strokeCap="round" />
           {/* Tail Spikes */}
           <Path path={`M ${-s * 0.7} ${-s * 0.45} L ${-s * 0.82} ${-s * 0.62} L ${-s * 0.6} ${-s * 0.5} Z`} color={rubyDeep} />
           <Path path={`M ${-s * 1.05} ${-s * 0.58} L ${-s * 1.16} ${-s * 0.74} L ${-s * 0.95} ${-s * 0.62} Z`} color={rubyDeep} />
@@ -362,16 +368,29 @@ export function GroveCreatureSprite({
         {/* 4. Main Body Torso */}
         <Oval x={-s * 0.5} y={-s * 0.78} width={s * 1.0} height={s * 0.85} color={rubyMain} />
 
-        {/* 5. Articulated Long Graceful Neck & Head */}
+        {/* 5. Articulated Long Graceful Neck & Head with Continuous Ventral Scutes */}
         <Group transform={neckWave} origin={{ x: 0, y: -s * 0.7 }}>
           {/* S-Curve Neck Mesh */}
           <Path path={rNeck} color={rubyMain} />
           
-          {/* Segmented Peach Underbelly Scutes */}
-          <Oval x={s * 0.05} y={-s * 0.68} width={s * 0.42} height={s * 0.65} color={rubyBelly} />
-          <Path path={`M ${s * 0.08} ${-s * 0.52} Q ${s * 0.24} ${-s * 0.5} ${s * 0.4} ${-s * 0.54}`} color={rubyScute} style="stroke" strokeWidth={Math.max(1, s * 0.02)} />
-          <Path path={`M ${s * 0.06} ${-s * 0.38} Q ${s * 0.24} ${-s * 0.36} ${s * 0.42} ${-s * 0.4}`} color={rubyScute} style="stroke" strokeWidth={Math.max(1, s * 0.02)} />
-          <Path path={`M ${s * 0.08} ${-s * 0.24} Q ${s * 0.22} ${-s * 0.22} ${s * 0.38} ${-s * 0.26}`} color={rubyScute} style="stroke" strokeWidth={Math.max(1, s * 0.02)} />
+          {/* Continuous Peach/Cream Ventral Scute Base Band */}
+          <Path path={rVentralPlates} color={rubyBelly} />
+          {/* Soft Highlight center core */}
+          <Path path={`M ${s * 0.2} ${-s * 1.15} Q ${s * 0.16} ${-s * 0.95} ${s * 0.12} ${-s * 0.7} Q ${s * 0.08} ${-s * 0.45} ${s * 0.1} ${-s * 0.2} Q ${s * 0.2} ${-s * 0.2} ${s * 0.26} ${-s * 0.45} Q ${s * 0.3} ${-s * 0.7} ${s * 0.28} ${-s * 0.95} Q ${s * 0.28} ${-s * 1.12} ${s * 0.32} ${-s * 1.15} Z`} color={rubyBellyHighlight} opacity={0.85} />
+
+          {/* Individual Ventral Scute Plate Division Lines (Smiling concave curves matching reference) */}
+          {/* Throat Scutes */}
+          <Path path={`M ${s * 0.24} ${-s * 1.16} Q ${s * 0.32} ${-s * 1.14} ${s * 0.38} ${-s * 1.18}`} color={rubyScute} style="stroke" strokeWidth={Math.max(1, s * 0.02)} strokeCap="round" />
+          <Path path={`M ${s * 0.18} ${-s * 1.04} Q ${s * 0.27} ${-s * 1.02} ${s * 0.36} ${-s * 1.06}`} color={rubyScute} style="stroke" strokeWidth={Math.max(1, s * 0.02)} strokeCap="round" />
+          <Path path={`M ${s * 0.14} ${-s * 0.92} Q ${s * 0.24} ${-s * 0.9} ${s * 0.34} ${-s * 0.94}`} color={rubyScute} style="stroke" strokeWidth={Math.max(1, s * 0.02)} strokeCap="round" />
+          {/* Lower Neck Scutes */}
+          <Path path={`M ${s * 0.1} ${-s * 0.79} Q ${s * 0.22} ${-s * 0.76} ${s * 0.34} ${-s * 0.81}`} color={rubyScute} style="stroke" strokeWidth={Math.max(1, s * 0.02)} strokeCap="round" />
+          {/* Chest Scutes */}
+          <Path path={`M ${s * 0.06} ${-s * 0.65} Q ${s * 0.2} ${-s * 0.61} ${s * 0.36} ${-s * 0.67}`} color={rubyScute} style="stroke" strokeWidth={Math.max(1.2, s * 0.022)} strokeCap="round" />
+          <Path path={`M ${s * 0.02} ${-s * 0.51} Q ${s * 0.18} ${-s * 0.46} ${s * 0.36} ${-s * 0.53}`} color={rubyScute} style="stroke" strokeWidth={Math.max(1.2, s * 0.022)} strokeCap="round" />
+          {/* Abdominal / Tummy Scutes */}
+          <Path path={`M ${-s * 0.01} ${-s * 0.37} Q ${s * 0.16} ${-s * 0.32} ${s * 0.33} ${-s * 0.39}`} color={rubyScute} style="stroke" strokeWidth={Math.max(1.2, s * 0.022)} strokeCap="round" />
+          <Path path={`M ${s * 0.02} ${-s * 0.24} Q ${s * 0.14} ${-s * 0.2} ${s * 0.28} ${-s * 0.26}`} color={rubyScute} style="stroke" strokeWidth={Math.max(1.2, s * 0.022)} strokeCap="round" />
 
           {/* 4-Tier Spiky Head Crest Horns */}
           <Path path={rCrest4} color={rubyHorn} />

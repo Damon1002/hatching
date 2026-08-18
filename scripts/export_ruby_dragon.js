@@ -113,14 +113,25 @@ function buildRubyDragonSvg(width = 1024, height = 1024) {
   <!-- Graceful Neck -->
   <path d="${neckBack}" fill="url(#rubyBodyGrad)" />
 
-  <!-- Segmented Cream Underbelly & Chest -->
-  <!-- Scute Plates -->
-  <ellipse cx="${cx + s * 0.2}" cy="${cy - s * 0.38}" rx="${s * 0.28}" ry="${s * 0.35}" fill="${peachBelly}" />
-  <!-- Scute Segmentation Ribs -->
-  <path d="M ${cx + s * 0.06} ${cy - s * 0.52} Q ${cx + s * 0.22} ${cy - s * 0.5} ${cx + s * 0.38} ${cy - s * 0.54}" fill="none" stroke="${peachLine}" stroke-width="${s * 0.016}" />
-  <path d="M ${cx + s * 0.04} ${cy - s * 0.4} Q ${cx + s * 0.22} ${cy - s * 0.38} ${cx + s * 0.4} ${cy - s * 0.42}" fill="none" stroke="${peachLine}" stroke-width="${s * 0.016}" />
-  <path d="M ${cx + s * 0.04} ${cy - s * 0.28} Q ${cx + s * 0.22} ${cy - s * 0.26} ${cx + s * 0.4} ${cy - s * 0.3}" fill="none" stroke="${peachLine}" stroke-width="${s * 0.016}" />
-  <path d="M ${cx + s * 0.06} ${cy - s * 0.16} Q ${cx + s * 0.2} ${cy - s * 0.14} ${cx + s * 0.35} ${cy - s * 0.18}" fill="none" stroke="${peachLine}" stroke-width="${s * 0.016}" />
+  <!-- Continuous Segmented Cream/Peach Underbelly & Ventral Scutes -->
+  <!-- Base Ventral Band from under chin to abdomen -->
+  <path d="M ${cx + s * 0.22} ${cy - s * 1.22} Q ${cx + s * 0.14} ${cy - s * 0.95} ${cx + s * 0.08} ${cy - s * 0.7} Q ${cx - s * 0.02} ${cy - s * 0.45} ${cx + s * 0.02} ${cy - s * 0.15} Q ${cx + s * 0.16} ${cy - s * 0.12} ${cx + s * 0.3} ${cy - s * 0.25} Q ${cx + s * 0.42} ${cy - s * 0.48} ${cx + s * 0.38} ${cy - s * 0.7} Q ${cx + s * 0.35} ${cy - s * 0.95} ${cx + s * 0.42} ${cy - s * 1.18} Z" fill="${peachBelly}" />
+  <!-- Center Highlight Strip -->
+  <path d="M ${cx + s * 0.2} ${cy - s * 1.15} Q ${cx + s * 0.16} ${cy - s * 0.95} ${cx + s * 0.12} ${cy - s * 0.7} Q ${cx + s * 0.08} ${cy - s * 0.45} ${cx + s * 0.1} ${cy - s * 0.2} Q ${cx + s * 0.2} ${cy - s * 0.2} ${cx + s * 0.26} ${cy - s * 0.45} Q ${cx + s * 0.3} ${cy - s * 0.7} ${cx + s * 0.28} ${cy - s * 0.95} Q ${cx + s * 0.28} ${cy - s * 1.12} ${cx + s * 0.32} ${cy - s * 1.15} Z" fill="#FFF3E8" opacity="0.85" />
+  
+  <!-- Individual Curved Scute Segmentation Lines -->
+  <!-- Throat Scutes -->
+  <path d="M ${cx + s * 0.24} ${cy - s * 1.16} Q ${cx + s * 0.32} ${cy - s * 1.14} ${cx + s * 0.38} ${cy - s * 1.18}" fill="none" stroke="${peachLine}" stroke-width="${s * 0.016}" stroke-linecap="round" />
+  <path d="M ${cx + s * 0.18} ${cy - s * 1.04} Q ${cx + s * 0.27} ${cy - s * 1.02} ${cx + s * 0.36} ${cy - s * 1.06}" fill="none" stroke="${peachLine}" stroke-width="${s * 0.016}" stroke-linecap="round" />
+  <path d="M ${cx + s * 0.14} ${cy - s * 0.92} Q ${cx + s * 0.24} ${cy - s * 0.9} ${cx + s * 0.34} ${cy - s * 0.94}" fill="none" stroke="${peachLine}" stroke-width="${s * 0.016}" stroke-linecap="round" />
+  <!-- Neck Scutes -->
+  <path d="M ${cx + s * 0.1} ${cy - s * 0.79} Q ${cx + s * 0.22} ${cy - s * 0.76} ${cx + s * 0.34} ${cy - s * 0.81}" fill="none" stroke="${peachLine}" stroke-width="${s * 0.016}" stroke-linecap="round" />
+  <!-- Chest Scutes -->
+  <path d="M ${cx + s * 0.06} ${cy - s * 0.65} Q ${cx + s * 0.2} ${cy - s * 0.61} ${cx + s * 0.36} ${cy - s * 0.67}" fill="none" stroke="${peachLine}" stroke-width="${s * 0.02}" stroke-linecap="round" />
+  <path d="M ${cx + s * 0.02} ${cy - s * 0.51} Q ${cx + s * 0.18} ${cy - s * 0.46} ${cx + s * 0.36} ${cy - s * 0.53}" fill="none" stroke="${peachLine}" stroke-width="${s * 0.02}" stroke-linecap="round" />
+  <!-- Abdominal Scutes -->
+  <path d="M ${cx - s * 0.01} ${cy - s * 0.37} Q ${cx + s * 0.16} ${cy - s * 0.32} ${cx + s * 0.33} ${cy - s * 0.39}" fill="none" stroke="${peachLine}" stroke-width="${s * 0.02}" stroke-linecap="round" />
+  <path d="M ${cx + s * 0.02} ${cy - s * 0.24} Q ${cx + s * 0.14} ${cy - s * 0.2} ${cx + s * 0.28} ${cy - s * 0.26}" fill="none" stroke="${peachLine}" stroke-width="${s * 0.02}" stroke-linecap="round" />
 
   <!-- Front Leg / Paw -->
   <ellipse cx="${cx + s * 0.26}" cy="${cy - s * 0.22}" rx="${s * 0.16}" ry="${s * 0.24}" fill="url(#rubyBodyGrad)" />
