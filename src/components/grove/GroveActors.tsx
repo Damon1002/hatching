@@ -194,6 +194,28 @@ export function GroveCreatureSprite({
   );
 }
 
+// Modular Rig Sprite Parts from reference deconstruction sheet
+const IMG_TORSO = require('../../../assets/dragon/ruby/rig_parts/torso.png');
+const IMG_NECK0 = require('../../../assets/dragon/ruby/rig_parts/neck_0.png');
+const IMG_NECK1 = require('../../../assets/dragon/ruby/rig_parts/neck_1.png');
+const IMG_NECK2 = require('../../../assets/dragon/ruby/rig_parts/neck_2.png');
+const IMG_NECK3 = require('../../../assets/dragon/ruby/rig_parts/neck_3.png');
+const IMG_HEAD_IDLE = require('../../../assets/dragon/ruby/rig_parts/head_idle.png');
+const IMG_HEAD_CHEER = require('../../../assets/dragon/ruby/rig_parts/head_cheer.png');
+const IMG_HEAD_WINK = require('../../../assets/dragon/ruby/rig_parts/head_wink.png');
+const IMG_TAIL0 = require('../../../assets/dragon/ruby/rig_parts/tail_0.png');
+const IMG_TAIL1 = require('../../../assets/dragon/ruby/rig_parts/tail_1.png');
+const IMG_TAIL2 = require('../../../assets/dragon/ruby/rig_parts/tail_2.png');
+const IMG_TAIL3 = require('../../../assets/dragon/ruby/rig_parts/tail_3.png');
+const IMG_TAIL4 = require('../../../assets/dragon/ruby/rig_parts/tail_4.png');
+const IMG_WING_L_BONE = require('../../../assets/dragon/ruby/rig_parts/wing_left_bone.png');
+const IMG_WING_L_MEM = require('../../../assets/dragon/ruby/rig_parts/wing_left_membrane.png');
+const IMG_WING_R_BONE = require('../../../assets/dragon/ruby/rig_parts/wing_right_bone.png');
+const IMG_WING_R_MEM = require('../../../assets/dragon/ruby/rig_parts/wing_right_membrane.png');
+const IMG_THIGH = require('../../../assets/dragon/ruby/rig_parts/back_thigh.png');
+const IMG_PAW_BACK = require('../../../assets/dragon/ruby/rig_parts/paw_back.png');
+const IMG_PAW_FRONT = require('../../../assets/dragon/ruby/rig_parts/paw_front.png');
+
 function RubyDragonCreature({
   creature,
   homeZ,
@@ -207,6 +229,28 @@ function RubyDragonCreature({
   camera: IsoCamera;
   time: SharedValue<number>;
 }) {
+  // Load modular image pieces
+  const imgTorso = useImage(IMG_TORSO);
+  const imgNeck0 = useImage(IMG_NECK0);
+  const imgNeck1 = useImage(IMG_NECK1);
+  const imgNeck2 = useImage(IMG_NECK2);
+  const imgNeck3 = useImage(IMG_NECK3);
+  const imgHeadIdle = useImage(IMG_HEAD_IDLE);
+  const imgHeadCheer = useImage(IMG_HEAD_CHEER);
+  const imgHeadWink = useImage(IMG_HEAD_WINK);
+  const imgTail0 = useImage(IMG_TAIL0);
+  const imgTail1 = useImage(IMG_TAIL1);
+  const imgTail2 = useImage(IMG_TAIL2);
+  const imgTail3 = useImage(IMG_TAIL3);
+  const imgTail4 = useImage(IMG_TAIL4);
+  const imgWingLBone = useImage(IMG_WING_L_BONE);
+  const imgWingLMem = useImage(IMG_WING_L_MEM);
+  const imgWingRBone = useImage(IMG_WING_R_BONE);
+  const imgWingRMem = useImage(IMG_WING_R_MEM);
+  const imgThigh = useImage(IMG_THIGH);
+  const imgPawBack = useImage(IMG_PAW_BACK);
+  const imgPawFront = useImage(IMG_PAW_FRONT);
+
   const tw = camera.tw;
   const ox = camera.ox;
   const oy = camera.oy;
@@ -215,19 +259,7 @@ function RubyDragonCreature({
   const destX = creature.destX;
   const destY = creature.destY;
   const phase = creature.phase;
-  const s = tw * 0.38;
-
-  // Exact Color Palette from Reference Deconstruction Sheet
-  const cWine = '#5B0F2A';     // Deep shadow & dorsal spine accents
-  const cCrimson = '#A4184A';  // Darker muscle tone & wing bone
-  const cRuby = '#D4275D';     // Main ruby body & neck
-  const cHighlight = '#F7687D';// Soft upper specular highlight
-  const cScuteLine = '#FFB89A';// Warm peach scute divider line
-  const cBelly = '#FFE9CF';    // Cream underbelly plate
-  const cWhite = '#FFFFFF';    // Specular eye highlight
-  const cAmberTop = '#FFD24D'; // Golden amber iris top
-  const cAmberBot = '#F89AC0'; // Amber iris gradient bottom
-  const cCharcoal = '#0E0A0F'; // Pupil, claws, nostril
+  const s = tw * 0.42;
 
   // 1. DragonRoot Transform (Isometric motion, leap arc, facing, aerodynamic tilt)
   const transform = useDerivedValue(() => {
@@ -367,15 +399,6 @@ function RubyDragonCreature({
       { scaleY: 0.82 + 0.25 * w },
     ];
   });
-  const wingForearmL = useDerivedValue(() => {
-    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
-    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
-    const freq = hopping ? 12 : 3.6;
-    const amp = hopping ? 0.32 : 0.16;
-    const w = Math.sin((time.value / GROVE_LOOP_MS) * TAU * freq + phase - 0.45);
-    return [{ rotate: 0.12 + w * amp }];
-  });
-
   const wingUpperR = useDerivedValue(() => {
     const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
     const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
@@ -387,35 +410,11 @@ function RubyDragonCreature({
       { scaleY: 0.85 + 0.28 * w },
     ];
   });
-  const wingForearmR = useDerivedValue(() => {
+
+  const isHoppingSV = useDerivedValue(() => {
     const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
-    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
-    const freq = hopping ? 12 : 3.6;
-    const amp = hopping ? 0.36 : 0.18;
-    const w = Math.sin((time.value / GROVE_LOOP_MS) * TAU * freq + phase - 0.45);
-    return [{ rotate: 0.1 + w * amp }];
+    return u < 0.08 || (u >= 0.7 && u < 0.78) ? 1 : 0;
   });
-
-  // 5. Eye Blink Worklet (blinks every 3.5s)
-  const eyeBlink = useDerivedValue(() => {
-    const cycle = (time.value + phase * 600) % 3600;
-    if (cycle < 150) {
-      const p = Math.sin((cycle / 150) * Math.PI);
-      return [{ scaleY: Math.max(0.08, 1 - p * 0.95) }];
-    }
-    return [{ scaleY: 1 }];
-  });
-
-  // Parametric Wing Geometries
-  const wingArmPath = `M 0 0 Q ${s * 0.42} ${-s * 0.48} ${s * 0.75} ${-s * 0.65}`;
-  const wingForearmPath = `M ${s * 0.75} ${-s * 0.65} Q ${s * 0.95} ${-s * 0.55} ${s * 1.15} ${-s * 0.35}`;
-  const wingMembraneHero = `M 0 0 Q ${s * 0.42} ${-s * 0.48} ${s * 0.75} ${-s * 0.65} Q ${s * 0.95} ${-s * 0.55} ${s * 1.15} ${-s * 0.35} Q ${s * 0.92} ${-s * 0.15} ${s * 0.78} 0 Q ${s * 0.58} ${s * 0.08} ${s * 0.42} ${s * 0.12} Q ${s * 0.2} ${s * 0.08} 0 0 Z`;
-
-  // Modular Head Crest Spikes (Horns)
-  const horn1 = `M ${s * 0.08} ${-s * 0.18} Q ${-s * 0.28} ${-s * 0.65} ${-s * 0.58} ${-s * 0.75} Q ${-s * 0.2} ${-s * 0.45} ${s * 0.22} ${-s * 0.18} Z`;
-  const horn2 = `M ${s * 0.02} ${-s * 0.1} Q ${-s * 0.42} ${-s * 0.48} ${-s * 0.75} ${-s * 0.55} Q ${-s * 0.32} ${-s * 0.3} ${s * 0.12} ${-s * 0.08} Z`;
-  const horn3 = `M ${-s * 0.04} 0 Q ${-s * 0.48} ${-s * 0.28} ${-s * 0.8} ${-s * 0.32} Q ${-s * 0.38} ${-s * 0.12} ${s * 0.05} ${s * 0.02} Z`;
-  const horn4 = `M 0 ${s * 0.1} Q ${-s * 0.4} ${s * 0.1} ${-s * 0.68} ${s * 0.06} Q ${-s * 0.3} ${s * 0.22} ${s * 0.08} ${s * 0.14} Z`;
 
   return (
     <Group transform={transform}>
@@ -425,39 +424,86 @@ function RubyDragonCreature({
       </Group>
 
       {/* 2. Left Wing (Back Wing behind body) */}
-      <Group transform={wingUpperL} origin={{ x: -s * 0.08, y: -s * 0.55 }}>
-        <Path path={wingMembraneHero} color={cCrimson} opacity={0.88} />
-        <Path path={wingArmPath} color={cWine} style="stroke" strokeWidth={Math.max(2, s * 0.04)} strokeCap="round" />
-        <Group transform={wingForearmL} origin={{ x: s * 0.75, y: -s * 0.65 }}>
-          <Path path={wingForearmPath} color={cWine} style="stroke" strokeWidth={Math.max(1.8, s * 0.035)} strokeCap="round" />
+      {imgWingLMem && (
+        <Group transform={wingUpperL} origin={{ x: -s * 0.08, y: -s * 0.55 }}>
+          <SkiaImage
+            image={imgWingLMem}
+            x={-s * 0.72}
+            y={-s * 0.65}
+            width={s * 1.15}
+            height={s * 0.82}
+            fit="contain"
+            opacity={0.88}
+          />
+          {imgWingLBone && (
+            <SkiaImage
+              image={imgWingLBone}
+              x={-s * 0.58}
+              y={-s * 0.75}
+              width={s * 0.95}
+              height={s * 0.68}
+              fit="contain"
+            />
+          )}
         </Group>
-      </Group>
+      )}
 
-      {/* 3. Parametric 5-Segment Tail Traveling Wave Chain */}
+      {/* 3. Parametric 5-Segment Tail FK Chain with Reference Sprites */}
       <Group transform={tail0Rot} origin={{ x: -s * 0.35, y: -s * 0.25 }}>
-        {/* Tail Segment 0 (Base) */}
-        <Oval x={-s * 0.45} y={-s * 0.35} width={s * 0.32} height={s * 0.28} color={cRuby} />
-        <Path path={`M ${-s * 0.38} ${-s * 0.35} L ${-s * 0.48} ${-s * 0.52} L ${-s * 0.3} ${-s * 0.38} Z`} color={cWine} />
-
-        <Group transform={tail1Rot} origin={{ x: -s * 0.42, y: -s * 0.25 }}>
-          {/* Tail Segment 1 */}
-          <Oval x={-s * 0.68} y={-s * 0.34} width={s * 0.3} height={s * 0.24} color={cRuby} />
-          <Path path={`M ${-s * 0.6} ${-s * 0.34} L ${-s * 0.72} ${-s * 0.5} L ${-s * 0.52} ${-s * 0.36} Z`} color={cWine} />
-
+        {imgTail0 && (
+          <SkiaImage
+            image={imgTail0}
+            x={-s * 0.65}
+            y={-s * 0.48}
+            width={s * 0.78}
+            height={s * 0.58}
+            fit="contain"
+          />
+        )}
+        <Group transform={tail1Rot} origin={{ x: -s * 0.45, y: -s * 0.25 }}>
+          {imgTail1 && (
+            <SkiaImage
+              image={imgTail1}
+              x={-s * 0.36}
+              y={-s * 0.42}
+              width={s * 0.38}
+              height={s * 0.48}
+              fit="contain"
+            />
+          )}
           <Group transform={tail2Rot} origin={{ x: -s * 0.65, y: -s * 0.25 }}>
-            {/* Tail Segment 2 */}
-            <Oval x={-s * 0.9} y={-s * 0.32} width={s * 0.28} height={s * 0.22} color={cRuby} />
-            <Path path={`M ${-s * 0.82} ${-s * 0.32} L ${-s * 0.94} ${-s * 0.48} L ${-s * 0.74} ${-s * 0.34} Z`} color={cWine} />
-
-            <Group transform={tail3Rot} origin={{ x: -s * 0.88, y: -s * 0.25 }}>
-              {/* Tail Segment 3 */}
-              <Oval x={-s * 1.1} y={-s * 0.3} width={s * 0.25} height={s * 0.2} color={cRuby} />
-              <Path path={`M ${-s * 1.02} ${-s * 0.3} L ${-s * 1.14} ${-s * 0.44} L ${-s * 0.96} ${-s * 0.32} Z`} color={cWine} />
-
-              <Group transform={tail4Rot} origin={{ x: -s * 1.08, y: -s * 0.25 }}>
-                {/* Tail Segment 4 + Tapered Whip Tip */}
-                <Path path={`M ${-s * 1.08} ${-s * 0.25} Q ${-s * 1.35} ${-s * 0.32} ${-s * 1.58} ${-s * 0.48} Q ${-s * 1.3} ${-s * 0.2} ${-s * 1.08} ${-s * 0.18} Z`} color={cRuby} />
-                <Path path={`M ${-s * 1.25} ${-s * 0.3} L ${-s * 1.38} ${-s * 0.42} L ${-s * 1.18} ${-s * 0.28} Z`} color={cWine} />
+            {imgTail2 && (
+              <SkiaImage
+                image={imgTail2}
+                x={-s * 0.32}
+                y={-s * 0.35}
+                width={s * 0.34}
+                height={s * 0.38}
+                fit="contain"
+              />
+            )}
+            <Group transform={tail3Rot} origin={{ x: -s * 0.85, y: -s * 0.25 }}>
+              {imgTail3 && (
+                <SkiaImage
+                  image={imgTail3}
+                  x={-s * 0.3}
+                  y={-s * 0.28}
+                  width={s * 0.32}
+                  height={s * 0.3}
+                  fit="contain"
+                />
+              )}
+              <Group transform={tail4Rot} origin={{ x: -s * 1.05, y: -s * 0.25 }}>
+                {imgTail4 && (
+                  <SkiaImage
+                    image={imgTail4}
+                    x={-s * 0.52}
+                    y={-s * 0.25}
+                    width={s * 0.55}
+                    height={s * 0.25}
+                    fit="contain"
+                  />
+                )}
               </Group>
             </Group>
           </Group>
@@ -465,85 +511,107 @@ function RubyDragonCreature({
       </Group>
 
       {/* 4. Hind Left Leg (Large Muscular Thigh & Claws) */}
-      <Oval x={-s * 0.48} y={-s * 0.42} width={s * 0.52} height={s * 0.46} color={cCrimson} />
-      <Oval x={-s * 0.46} y={-s * 0.16} width={s * 0.34} height={s * 0.2} color={cWine} />
-      <Circle cx={-s * 0.46} cy={-s * 0.06} r={s * 0.026} color={cCharcoal} />
-      <Circle cx={-s * 0.38} cy={-s * 0.04} r={s * 0.026} color={cCharcoal} />
-      <Circle cx={-s * 0.3} cy={-s * 0.04} r={s * 0.026} color={cCharcoal} />
+      {imgThigh && (
+        <SkiaImage
+          image={imgThigh}
+          x={-s * 0.48}
+          y={-s * 0.45}
+          width={s * 0.55}
+          height={s * 0.78}
+          fit="contain"
+        />
+      )}
+      {imgPawBack && (
+        <SkiaImage
+          image={imgPawBack}
+          x={-s * 0.45}
+          y={-s * 0.15}
+          width={s * 0.38}
+          height={s * 0.32}
+          fit="contain"
+        />
+      )}
 
-      {/* 5. Main Torso Body */}
+      {/* 5. Main Torso Body from Reference */}
       <Group transform={bodyBreathe} origin={{ x: 0, y: -s * 0.35 }}>
-        {/* Rounded Ruby Torso */}
-        <Oval x={-s * 0.5} y={-s * 0.72} width={s * 1.0} height={s * 0.82} color={cRuby} />
-        {/* Torso Top Highlight */}
-        <Oval x={-s * 0.36} y={-s * 0.68} width={s * 0.65} height={s * 0.48} color={cHighlight} opacity={0.6} />
-
-        {/* Chest & Belly Cream Underbelly Shield */}
-        <Path path={`M ${s * 0.08} ${-s * 0.65} Q ${s * 0.38} ${-s * 0.55} ${s * 0.38} ${-s * 0.2} Q ${s * 0.22} ${-s * 0.1} ${s * 0.04} ${-s * 0.16} Q ${-s * 0.02} ${-s * 0.42} ${s * 0.08} ${-s * 0.65} Z`} color={cBelly} />
-        {/* Chest Scute Divider Lines */}
-        <Path path={`M ${s * 0.08} ${-s * 0.52} Q ${s * 0.24} ${-s * 0.48} ${s * 0.37} ${-s * 0.54}`} color={cScuteLine} style="stroke" strokeWidth={Math.max(1.2, s * 0.025)} strokeCap="round" />
-        <Path path={`M ${s * 0.05} ${-s * 0.38} Q ${s * 0.22} ${-s * 0.34} ${s * 0.36} ${-s * 0.4}`} color={cScuteLine} style="stroke" strokeWidth={Math.max(1.2, s * 0.025)} strokeCap="round" />
-        <Path path={`M ${s * 0.05} ${-s * 0.24} Q ${s * 0.18} ${-s * 0.2} ${s * 0.3} ${-s * 0.26}`} color={cScuteLine} style="stroke" strokeWidth={Math.max(1.2, s * 0.025)} strokeCap="round" />
+        {imgTorso && (
+          <SkiaImage
+            image={imgTorso}
+            x={-s * 0.52}
+            y={-s * 0.75}
+            width={s * 0.98}
+            height={s * 1.08}
+            fit="contain"
+          />
+        )}
       </Group>
 
-      {/* 6. Parametric 4-Joint Neck FK Chain & Head Hierarchy */}
-      {/* Neck Segment 0 (Lower Neck) */}
+      {/* 6. Parametric 4-Joint Neck FK Chain & Head with Reference Sprites */}
       <Group transform={neck0Rot} origin={{ x: s * 0.12, y: -s * 0.58 }}>
-        <Path path={`M ${-s * 0.02} ${-s * 0.58} L ${s * 0.24} ${-s * 0.58} L ${s * 0.26} ${-s * 0.78} L ${0} ${-s * 0.78} Z`} color={cRuby} />
-        {/* Ventral Scute Plate */}
-        <Path path={`M ${s * 0.1} ${-s * 0.58} L ${s * 0.24} ${-s * 0.58} L ${s * 0.26} ${-s * 0.78} L ${s * 0.12} ${-s * 0.78} Z`} color={cBelly} />
-        <Path path={`M ${s * 0.11} ${-s * 0.68} Q ${s * 0.2} ${-s * 0.66} ${s * 0.25} ${-s * 0.69}`} color={cScuteLine} style="stroke" strokeWidth={Math.max(1, s * 0.02)} strokeCap="round" />
-
-        {/* Neck Segment 1 (Mid-Lower Neck) */}
+        {imgNeck0 && (
+          <SkiaImage
+            image={imgNeck0}
+            x={-s * 0.05}
+            y={-s * 0.75}
+            width={s * 0.42}
+            height={s * 0.72}
+            fit="contain"
+          />
+        )}
         <Group transform={neck1Rot} origin={{ x: s * 0.13, y: -s * 0.78 }}>
-          <Path path={`M 0 ${-s * 0.78} L ${s * 0.26} ${-s * 0.78} L ${s * 0.28} ${-s * 0.98} L ${s * 0.04} ${-s * 0.98} Z`} color={cRuby} />
-          <Path path={`M ${s * 0.12} ${-s * 0.78} L ${s * 0.26} ${-s * 0.78} L ${s * 0.28} ${-s * 0.98} L ${s * 0.15} ${-s * 0.98} Z`} color={cBelly} />
-          <Path path={`M ${s * 0.14} ${-s * 0.88} Q ${s * 0.22} ${-s * 0.86} ${s * 0.27} ${-s * 0.89}`} color={cScuteLine} style="stroke" strokeWidth={Math.max(1, s * 0.02)} strokeCap="round" />
-
-          {/* Neck Segment 2 (Mid-Upper Neck) */}
+          {imgNeck1 && (
+            <SkiaImage
+              image={imgNeck1}
+              x={-s * 0.03}
+              y={-s * 0.75}
+              width={s * 0.42}
+              height={s * 0.72}
+              fit="contain"
+            />
+          )}
           <Group transform={neck2Rot} origin={{ x: s * 0.16, y: -s * 0.98 }}>
-            <Path path={`M ${s * 0.04} ${-s * 0.98} L ${s * 0.28} ${-s * 0.98} L ${s * 0.32} ${-s * 1.18} L ${s * 0.08} ${-s * 1.18} Z`} color={cRuby} />
-            <Path path={`M ${s * 0.15} ${-s * 0.98} L ${s * 0.28} ${-s * 0.98} L ${s * 0.32} ${-s * 1.18} L ${s * 0.18} ${-s * 1.18} Z`} color={cBelly} />
-            <Path path={`M ${s * 0.17} ${-s * 1.08} Q ${s * 0.25} ${-s * 1.06} ${s * 0.3} ${-s * 1.09}`} color={cScuteLine} style="stroke" strokeWidth={Math.max(1, s * 0.02)} strokeCap="round" />
-
-            {/* Neck Segment 3 (Upper Neck / Throat) */}
+            {imgNeck2 && (
+              <SkiaImage
+                image={imgNeck2}
+                x={-s * 0.02}
+                y={-s * 0.82}
+                width={s * 0.4}
+                height={s * 0.82}
+                fit="contain"
+              />
+            )}
             <Group transform={neck3Rot} origin={{ x: s * 0.2, y: -s * 1.18 }}>
-              <Path path={`M ${s * 0.08} ${-s * 1.18} L ${s * 0.32} ${-s * 1.18} L ${s * 0.35} ${-s * 1.34} L ${s * 0.12} ${-s * 1.34} Z`} color={cRuby} />
-              <Path path={`M ${s * 0.18} ${-s * 1.18} L ${s * 0.32} ${-s * 1.18} L ${s * 0.35} ${-s * 1.34} L ${s * 0.22} ${-s * 1.34} Z`} color={cBelly} />
-
+              {imgNeck3 && (
+                <SkiaImage
+                  image={imgNeck3}
+                  x={-s * 0.02}
+                  y={-s * 0.8}
+                  width={s * 0.38}
+                  height={s * 0.8}
+                  fit="contain"
+                />
+              )}
               {/* 7. Head Hierarchy (Parented to Top of Neck with its own Pivot) */}
               <Group transform={headRot} origin={{ x: s * 0.22, y: -s * 1.34 }}>
-                {/* Head Crest / Horn Spikes (Parented directly to skull) */}
-                <Path path={horn4} color={cWine} />
-                <Path path={horn3} color={cWine} />
-                <Path path={horn2} color={cWine} />
-                <Path path={horn1} color={cWine} />
-
-                {/* Main Skull Core */}
-                <Oval x={-s * 0.12} y={-s * 1.62} width={s * 0.72} height={s * 0.58} color={cRuby} />
-                {/* Skull Top Highlight */}
-                <Oval x={-s * 0.02} y={-s * 1.58} width={s * 0.48} height={s * 0.35} color={cHighlight} opacity={0.7} />
-
-                {/* Snout & Cheeks */}
-                <Oval x={s * 0.24} y={-s * 1.45} width={s * 0.46} height={s * 0.35} color={cHighlight} />
-                {/* Cute Smiling Mouth Line */}
-                <Path path={`M ${s * 0.22} ${-s * 1.28} Q ${s * 0.4} ${-s * 1.25} ${s * 0.56} ${-s * 1.32}`} color={cWine} style="stroke" strokeWidth={Math.max(1.2, s * 0.025)} strokeCap="round" />
-                {/* Nostril */}
-                <Circle cx={s * 0.52} cy={-s * 1.4} r={s * 0.035} color={cCharcoal} />
-
-                {/* Modular Golden Amber Anime Eye with Specular Highlights & Blinking */}
-                <Group transform={eyeBlink} origin={{ x: s * 0.24, y: -s * 1.46 }}>
-                  {/* Eye Socket Contour */}
-                  <Oval x={s * 0.12} y={-s * 1.58} width={s * 0.28} height={s * 0.34} color={cWine} />
-                  {/* Amber Iris Top & Bottom */}
-                  <Oval x={s * 0.14} y={-s * 1.56} width={s * 0.24} height={s * 0.3} color={cAmberTop} />
-                  <Oval x={s * 0.16} y={-s * 1.48} width={s * 0.2} height={s * 0.18} color={cAmberBot} opacity={0.65} />
-                  {/* Charcoal Pupil */}
-                  <Oval x={s * 0.16} y={-s * 1.55} width={s * 0.14} height={s * 0.24} color={cCharcoal} />
-                  {/* Specular Sparkles */}
-                  <Circle cx={s * 0.18} cy={-s * 1.58} r={s * 0.065} color={cWhite} />
-                  <Circle cx={s * 0.28} cy={-s * 1.45} r={s * 0.028} color={cAmberTop} />
-                </Group>
+                {isHoppingSV.value === 1 && imgHeadCheer ? (
+                  <SkiaImage
+                    image={imgHeadCheer}
+                    x={-s * 0.15}
+                    y={-s * 1.62}
+                    width={s * 0.98}
+                    height={s * 0.76}
+                    fit="contain"
+                  />
+                ) : imgHeadIdle ? (
+                  <SkiaImage
+                    image={imgHeadIdle}
+                    x={-s * 0.15}
+                    y={-s * 1.62}
+                    width={s * 0.98}
+                    height={s * 0.75}
+                    fit="contain"
+                  />
+                ) : null}
               </Group>
             </Group>
           </Group>
@@ -551,23 +619,41 @@ function RubyDragonCreature({
       </Group>
 
       {/* 8. Hero Front Right Wing */}
-      <Group transform={wingUpperR} origin={{ x: 0, y: -s * 0.55 }}>
-        <Path path={wingMembraneHero} color={cRuby} opacity={0.96} />
-        {/* Wing Struts */}
-        <Path path={wingArmPath} color={cWine} style="stroke" strokeWidth={Math.max(2.2, s * 0.045)} strokeCap="round" />
-        <Path path={`M 0 0 Q ${s * 0.45} ${-s * 0.25} ${s * 0.78} 0`} color={cWine} style="stroke" strokeWidth={Math.max(1.4, s * 0.03)} strokeCap="round" />
-        <Path path={`M 0 0 Q ${s * 0.28} ${-s * 0.08} ${s * 0.42} ${s * 0.12}`} color={cWine} style="stroke" strokeWidth={Math.max(1.2, s * 0.025)} strokeCap="round" />
-        <Group transform={wingForearmR} origin={{ x: s * 0.75, y: -s * 0.65 }}>
-          <Path path={wingForearmPath} color={cWine} style="stroke" strokeWidth={Math.max(1.8, s * 0.035)} strokeCap="round" />
+      {imgWingRMem && (
+        <Group transform={wingUpperR} origin={{ x: 0, y: -s * 0.55 }}>
+          <SkiaImage
+            image={imgWingRMem}
+            x={-s * 0.15}
+            y={-s * 0.65}
+            width={s * 1.18}
+            height={s * 0.86}
+            fit="contain"
+            opacity={0.96}
+          />
+          {imgWingRBone && (
+            <SkiaImage
+              image={imgWingRBone}
+              x={-s * 0.15}
+              y={-s * 0.75}
+              width={s * 0.98}
+              height={s * 0.68}
+              fit="contain"
+            />
+          )}
         </Group>
-      </Group>
+      )}
 
-      {/* 9. Front Right Paw & Claws */}
-      <Oval x={s * 0.1} y={-s * 0.22} width={s * 0.24} height={s * 0.3} color={cRuby} />
-      <Oval x={s * 0.15} y={-s * 0.15} width={s * 0.28} height={s * 0.18} color={cWine} />
-      <Circle cx={s * 0.18} cy={-s * 0.06} r={s * 0.024} color={cCharcoal} />
-      <Circle cx={s * 0.26} cy={-s * 0.04} r={s * 0.024} color={cCharcoal} />
-      <Circle cx={s * 0.34} cy={-s * 0.04} r={s * 0.024} color={cCharcoal} />
+      {/* 9. Front Right Paw */}
+      {imgPawFront && (
+        <SkiaImage
+          image={imgPawFront}
+          x={s * 0.12}
+          y={-s * 0.16}
+          width={s * 0.32}
+          height={s * 0.38}
+          fit="contain"
+        />
+      )}
     </Group>
   );
 }
