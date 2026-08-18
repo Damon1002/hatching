@@ -95,17 +95,21 @@ export function IsometricLandView({
     world.tufts.forEach((tuft, index) => {
       list.push({ key: `u-${tuft.x}-${tuft.y}`, depth: tuft.x + tuft.y + 0.35, layer: 1, kind: 'tuft', index });
     });
-    list.push({ key: 'ember', depth: world.egg.x + world.egg.y + 0.48, layer: 2, kind: 'ember' });
-    list.push({ key: 'egg', depth: world.egg.x + world.egg.y + 0.5, layer: 3, kind: 'egg' });
-    list.push({
-      key: 'creature',
-      depth: world.creature.homeX + world.creature.homeY + 0.55,
-      layer: 4,
-      kind: 'creature',
-    });
+    const isEgg = speciesId === 'dragon_egg';
+    if (isEgg) {
+      list.push({ key: 'ember', depth: world.egg.x + world.egg.y + 0.48, layer: 2, kind: 'ember' });
+      list.push({ key: 'egg', depth: world.egg.x + world.egg.y + 0.5, layer: 3, kind: 'egg' });
+    } else {
+      list.push({
+        key: 'creature',
+        depth: world.creature.homeX + world.creature.homeY + 0.55,
+        layer: 4,
+        kind: 'creature',
+      });
+    }
     list.sort((a, b) => a.depth - b.depth || a.layer - b.layer);
     return list;
-  }, [tiles, world]);
+  }, [speciesId, tiles, world]);
 
   const waterTiles = tiles.filter((tile) => tile.kind === 'water');
   const eggTile = world.tiles[world.egg.y][world.egg.x];

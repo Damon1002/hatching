@@ -44,7 +44,7 @@ export function HatchingBottomSheet({
 }: HatchingBottomSheetProps) {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<'planting' | 'favorites'>('planting');
-  const [favorites, setFavorites] = useState<Set<string>>(new Set(['baby_sky_drake', 'emberwing']));
+  const [favorites, setFavorites] = useState<Set<string>>(new Set(['dragon_egg', 'emberwing', 'baby_sky_drake']));
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'dragon' | 'plant'>('all');
 
   const selectedSpecies = useMemo(

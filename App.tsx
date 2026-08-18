@@ -66,7 +66,7 @@ function ForestHomeScreen() {
 
   // Modals & Drawers
   const [showHatchModal, setShowHatchModal] = useState(false);
-  const [selectedSpeciesId, setSelectedSpeciesId] = useState<string>('baby_sky_drake');
+  const [selectedSpeciesId, setSelectedSpeciesId] = useState<string>('emberwing');
   const [showTagModal, setShowTagModal] = useState(false);
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [showGiveUpModal, setShowGiveUpModal] = useState(false);
