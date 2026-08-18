@@ -24,6 +24,7 @@ export interface IsometricLandViewProps {
   focusMinutes?: number;
   sessionsCompleted?: number;
   tag?: TagKey;
+  speciesId?: string;
 }
 
 type DrawItem =
@@ -41,6 +42,7 @@ export function IsometricLandView({
   focusMinutes = 10,
   sessionsCompleted = 0,
   tag = 'work',
+  speciesId = 'baby_sky_drake',
 }: IsometricLandViewProps) {
   const { width: windowWidth } = useWindowDimensions();
   const sceneWidth = Math.min(windowWidth - 24, 380);
@@ -235,6 +237,7 @@ export function IsometricLandView({
               destZ={creatureDest.height}
               camera={camera}
               time={time}
+              speciesId={speciesId}
             />
           );
         })}

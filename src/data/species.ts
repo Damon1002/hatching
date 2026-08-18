@@ -36,7 +36,7 @@ export const SPECIES_CATALOG: DragonSpecies[] = [
     unlocked: true,
     isVip: true,
     category: 'dragon',
-    image: require('../../assets/eggs/dragon-egg-red.png'),
+    image: require('../../assets/dragon/ruby-dragon.png'),
   },
   {
     id: 'jade_sprout',

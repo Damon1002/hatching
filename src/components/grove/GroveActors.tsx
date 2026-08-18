@@ -157,12 +157,14 @@ export function GroveCreatureSprite({
   destZ,
   camera,
   time,
+  speciesId = 'baby_sky_drake',
 }: {
   creature: GroveCreature;
   homeZ: number;
   destZ: number;
   camera: IsoCamera;
   time: SharedValue<number>;
+  speciesId?: string;
 }) {
   const tw = camera.tw;
   const ox = camera.ox;
@@ -172,12 +174,18 @@ export function GroveCreatureSprite({
   const destX = creature.destX;
   const destY = creature.destY;
   const phase = creature.phase;
-  const s = tw * 0.32;
-  const mainColor = creature.color;
-  const darkColor = shade(mainColor, -0.28);
-  const lightColor = shade(mainColor, 0.25);
-  const bellyColor = '#FFF5DD';
-  const hornColor = '#F5C252';
+  const isRuby = speciesId === 'emberwing';
+  const s = tw * (isRuby ? 0.34 : 0.32);
+
+  // Colors
+  const mainColor = isRuby ? '#C83256' : creature.color;
+  const darkColor = isRuby ? '#7B1736' : shade(mainColor, -0.28);
+  const deepColor = isRuby ? '#4E0E22' : shade(mainColor, -0.45);
+  const lightColor = isRuby ? '#E64D6F' : shade(mainColor, 0.25);
+  const bellyColor = isRuby ? '#FDE2C8' : '#FFF5DD';
+  const scuteLine = isRuby ? '#E09A7A' : '#E8DCB8';
+  const hornColor = isRuby ? '#6E1428' : '#F5C252';
+  const eyeColor = isRuby ? '#FBB03B' : '#FFFFFF';
 
   const transform = useDerivedValue(() => {
     const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
@@ -221,56 +229,92 @@ export function GroveCreatureSprite({
   ]);
 
   const tailWag = useDerivedValue(() => [
-    { rotate: Math.sin((time.value / GROVE_LOOP_MS) * TAU * 3 + phase) * 0.18 },
+    { rotate: Math.sin((time.value / GROVE_LOOP_MS) * TAU * 3 + phase) * (isRuby ? 0.14 : 0.18) },
   ]);
 
-  // Tail path & spade
-  const tailPath = `M ${-s * 0.35} ${-s * 0.25} Q ${-s * 0.95} ${-s * 0.4} ${-s * 1.15} ${-s * 0.75}`;
-  const tailSpade = `M ${-s * 1.15} ${-s * 0.75} L ${-s * 1.35} ${-s * 0.9} L ${-s * 1.2} ${-s * 1.1} L ${-s * 1.05} ${-s * 0.85} Z`;
+  // Ruby Dragon Paths
+  const rubyTail = `M ${-s * 0.35} ${-s * 0.28} Q ${-s * 1.05} ${-s * 0.42} ${-s * 1.5} ${-s * 0.7} Q ${-s * 1.78} ${-s * 0.85} ${-s * 1.95} ${-s * 0.8}`;
+  const rubyCrest1 = `M ${s * 0.12} ${-s * 1.45} Q ${-s * 0.25} ${-s * 2.0} ${-s * 0.52} ${-s * 2.15} Q ${-s * 0.15} ${-s * 1.72} ${s * 0.26} ${-s * 1.48} Z`;
+  const rubyCrest2 = `M ${s * 0.05} ${-s * 1.36} Q ${-s * 0.42} ${-s * 1.78} ${-s * 0.72} ${-s * 1.88} Q ${-s * 0.3} ${-s * 1.52} ${s * 0.15} ${-s * 1.36} Z`;
+  const rubyCrest3 = `M ${-s * 0.02} ${-s * 1.25} Q ${-s * 0.52} ${-s * 1.52} ${-s * 0.82} ${-s * 1.55} Q ${-s * 0.4} ${-s * 1.32} ${s * 0.08} ${-s * 1.22} Z`;
+  const rubyCrest4 = `M ${s * 0.02} ${-s * 1.12} Q ${-s * 0.42} ${-s * 1.3} ${-s * 0.68} ${-s * 1.28} Q ${-s * 0.32} ${-s * 1.12} ${s * 0.1} ${-s * 1.08} Z`;
 
-  // Horns
-  const hornLeft = `M ${-s * 0.15} ${-s * 1.15} Q ${-s * 0.35} ${-s * 1.55} ${-s * 0.52} ${-s * 1.62} Q ${-s * 0.22} ${-s * 1.35} ${-s * 0.02} ${-s * 1.12} Z`;
-  const hornRight = `M ${s * 0.05} ${-s * 1.15} Q ${s * 0.25} ${-s * 1.55} ${s * 0.42} ${-s * 1.62} Q ${s * 0.15} ${-s * 1.35} ${s * 0.18} ${-s * 1.12} Z`;
+  // Scalloped 3-finger Ruby Wings
+  const rubyWingLeft = `M 0 ${-s * 0.55} Q ${-s * 0.75} ${-s * 1.38} ${-s * 1.1} ${-s * 1.2} Q ${-s * 0.98} ${-s * 0.85} ${-s * 0.8} ${-s * 0.7} Q ${-s * 0.65} ${-s * 0.55} ${-s * 0.5} ${-s * 0.42} Q ${-s * 0.22} ${-s * 0.5} 0 ${-s * 0.55} Z`;
+  const rubyWingRight = `M 0 ${-s * 0.55} Q ${s * 0.8} ${-s * 1.42} ${s * 1.2} ${-s * 1.3} Q ${s * 1.02} ${-s * 0.95} ${s * 0.88} ${-s * 0.75} Q ${s * 0.68} ${-s * 0.6} ${s * 0.52} ${-s * 0.42} Q ${s * 0.26} ${-s * 0.5} 0 ${-s * 0.55} Z`;
 
-  // Back spines
+  // Sky Drake Paths
+  const skyTailPath = `M ${-s * 0.35} ${-s * 0.25} Q ${-s * 0.95} ${-s * 0.4} ${-s * 1.15} ${-s * 0.75}`;
+  const skyTailSpade = `M ${-s * 1.15} ${-s * 0.75} L ${-s * 1.35} ${-s * 0.9} L ${-s * 1.2} ${-s * 1.1} L ${-s * 1.05} ${-s * 0.85} Z`;
+  const skyHornLeft = `M ${-s * 0.15} ${-s * 1.15} Q ${-s * 0.35} ${-s * 1.55} ${-s * 0.52} ${-s * 1.62} Q ${-s * 0.22} ${-s * 1.35} ${-s * 0.02} ${-s * 1.12} Z`;
+  const skyHornRight = `M ${s * 0.05} ${-s * 1.15} Q ${s * 0.25} ${-s * 1.55} ${s * 0.42} ${-s * 1.62} Q ${s * 0.15} ${-s * 1.35} ${s * 0.18} ${-s * 1.12} Z`;
+  const skyWingLeft = `M 0 ${-s * 0.55} Q ${-s * 0.8} ${-s * 1.25} ${-s * 1.15} ${-s * 1.05} Q ${-s * 0.85} ${-s * 0.65} ${-s * 0.6} ${-s * 0.35} Q ${-s * 0.3} ${-s * 0.45} 0 ${-s * 0.55} Z`;
+  const skyWingRight = `M 0 ${-s * 0.55} Q ${s * 0.8} ${-s * 1.25} ${s * 1.15} ${-s * 1.05} Q ${s * 0.85} ${-s * 0.65} ${s * 0.6} ${-s * 0.35} Q ${s * 0.3} ${-s * 0.45} 0 ${-s * 0.55} Z`;
+
+  // Dorsal Spines
   const spine1 = `M ${-s * 0.25} ${-s * 0.75} L ${-s * 0.42} ${-s * 0.95} L ${-s * 0.12} ${-s * 0.85} Z`;
   const spine2 = `M ${-s * 0.05} ${-s * 0.92} L ${-s * 0.18} ${-s * 1.12} L ${s * 0.08} ${-s * 1.0} Z`;
-
-  // Wings (Dragon Bat-Wing shape)
-  const wingLeft = `M 0 ${-s * 0.55} Q ${-s * 0.8} ${-s * 1.25} ${-s * 1.15} ${-s * 1.05} Q ${-s * 0.85} ${-s * 0.65} ${-s * 0.6} ${-s * 0.35} Q ${-s * 0.3} ${-s * 0.45} 0 ${-s * 0.55} Z`;
-  const wingRight = `M 0 ${-s * 0.55} Q ${s * 0.8} ${-s * 1.25} ${s * 1.15} ${-s * 1.05} Q ${s * 0.85} ${-s * 0.65} ${s * 0.6} ${-s * 0.35} Q ${s * 0.3} ${-s * 0.45} 0 ${-s * 0.55} Z`;
 
   return (
     <Group transform={transform}>
       {/* Ground Shadow */}
       <Group transform={shadowTransform}>
-        <Oval x={-s * 0.55} y={-s * 0.1} width={s * 1.1} height={s * 0.28} color="rgba(15,35,22,0.28)" />
+        <Oval x={-s * (isRuby ? 0.75 : 0.55)} y={-s * 0.1} width={s * (isRuby ? 1.5 : 1.1)} height={s * 0.28} color="rgba(15,35,22,0.28)" />
       </Group>
 
       {/* Dragon Tail */}
       <Group transform={tailWag} origin={{ x: -s * 0.35, y: -s * 0.25 }}>
-        <Path path={tailPath} color={mainColor} style="stroke" strokeWidth={Math.max(2.5, s * 0.16)} strokeCap="round" />
-        <Path path={tailSpade} color={darkColor} />
+        {isRuby ? (
+          <>
+            <Path path={rubyTail} color={mainColor} style="stroke" strokeWidth={Math.max(3.5, s * 0.2)} strokeCap="round" />
+            <Path path={`M ${-s * 0.75} ${-s * 0.45} L ${-s * 0.86} ${-s * 0.6} L ${-s * 0.65} ${-s * 0.5} Z`} color={deepColor} />
+            <Path path={`M ${-s * 1.1} ${-s * 0.58} L ${-s * 1.2} ${-s * 0.72} L ${-s * 1.0} ${-s * 0.62} Z`} color={deepColor} />
+            <Path path={`M ${-s * 1.45} ${-s * 0.7} L ${-s * 1.55} ${-s * 0.85} L ${-s * 1.36} ${-s * 0.74} Z`} color={deepColor} />
+          </>
+        ) : (
+          <>
+            <Path path={skyTailPath} color={mainColor} style="stroke" strokeWidth={Math.max(2.5, s * 0.16)} strokeCap="round" />
+            <Path path={skyTailSpade} color={darkColor} />
+          </>
+        )}
       </Group>
 
-      {/* Dragon Back Spines */}
-      <Path path={spine1} color={darkColor} />
-      <Path path={spine2} color={darkColor} />
+      {/* Back Spines */}
+      <Path path={spine1} color={isRuby ? deepColor : darkColor} />
+      <Path path={spine2} color={isRuby ? deepColor : darkColor} />
 
       {/* Dragon Wings */}
       <Group transform={wing} origin={{ x: 0, y: -s * 0.55 }}>
-        <Path path={wingLeft} color={darkColor} opacity={0.92} />
-        <Path path={wingRight} color={lightColor} opacity={0.92} />
+        <Path path={isRuby ? rubyWingLeft : skyWingLeft} color={darkColor} opacity={0.92} />
+        <Path path={isRuby ? rubyWingRight : skyWingRight} color={lightColor} opacity={0.92} />
       </Group>
 
       {/* Dragon Body */}
       <Oval x={-s * 0.5} y={-s * 0.78} width={s * 1.0} height={s * 0.85} color={mainColor} />
       {/* Soft Belly Plate */}
       <Oval x={-s * 0.15} y={-s * 0.65} width={s * 0.6} height={s * 0.65} color={bellyColor} />
+      {isRuby && (
+        <>
+          <Path path={`M ${-s * 0.05} ${-s * 0.52} Q ${s * 0.15} ${-s * 0.5} ${s * 0.35} ${-s * 0.54}`} color={scuteLine} style="stroke" strokeWidth={Math.max(1, s * 0.02)} />
+          <Path path={`M ${-s * 0.07} ${-s * 0.4} Q ${s * 0.15} ${-s * 0.38} ${s * 0.37} ${-s * 0.42}`} color={scuteLine} style="stroke" strokeWidth={Math.max(1, s * 0.02)} />
+          <Path path={`M ${-s * 0.07} ${-s * 0.28} Q ${s * 0.15} ${-s * 0.26} ${s * 0.37} ${-s * 0.3}`} color={scuteLine} style="stroke" strokeWidth={Math.max(1, s * 0.02)} />
+        </>
+      )}
 
-      {/* Dragon Horns */}
-      <Path path={hornLeft} color={hornColor} />
-      <Path path={hornRight} color={hornColor} />
+      {/* Dragon Horns / Head Crest */}
+      {isRuby ? (
+        <>
+          <Path path={rubyCrest4} color={deepColor} />
+          <Path path={rubyCrest3} color={deepColor} />
+          <Path path={rubyCrest2} color={deepColor} />
+          <Path path={rubyCrest1} color={hornColor} />
+        </>
+      ) : (
+        <>
+          <Path path={skyHornLeft} color={hornColor} />
+          <Path path={skyHornRight} color={hornColor} />
+        </>
+      )}
 
       {/* Dragon Head */}
       <Oval x={-s * 0.38} y={-s * 1.3} width={s * 0.88} height={s * 0.72} color={mainColor} />
@@ -279,11 +323,17 @@ export function GroveCreatureSprite({
       {/* Cute Nostril */}
       <Circle cx={s * 0.38} cy={-s * 0.88} r={s * 0.035} color={darkColor} />
 
-      {/* Dragon Eyes (Anime Sparkle) */}
+      {/* Dragon Eyes */}
       <Oval x={-s * 0.12} y={-s * 1.18} width={s * 0.24} height={s * 0.3} color="#2A101E" />
-      <Circle cx={-s * 0.05} cy={-s * 1.12} r={s * 0.065} color="#FFFFFF" />
+      <Circle cx={-s * 0.05} cy={-s * 1.12} r={s * 0.065} color={eyeColor} />
       <Oval x={s * 0.18} y={-s * 1.18} width={s * 0.24} height={s * 0.3} color="#2A101E" />
-      <Circle cx={s * 0.25} cy={-s * 1.12} r={s * 0.065} color="#FFFFFF" />
+      <Circle cx={s * 0.25} cy={-s * 1.12} r={s * 0.065} color={eyeColor} />
+      {isRuby && (
+        <>
+          <Circle cx={s * 0.25} cy={-s * 1.12} r={s * 0.032} color="#1A0A14" />
+          <Circle cx={s * 0.28} cy={-s * 1.16} r={s * 0.018} color="#FFFFFF" />
+        </>
+      )}
 
       {/* Dragon Claws / Feet */}
       <Oval x={-s * 0.4} y={-s * 0.16} width={s * 0.32} height={s * 0.2} color={darkColor} />

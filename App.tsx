@@ -279,6 +279,7 @@ function ForestHomeScreen() {
             focusMinutes={todayFocusMinutes}
             sessionsCompleted={sessionsCompleted}
             tag={selectedTag}
+            speciesId={selectedSpeciesId}
           />
         </PressableScale>
 
