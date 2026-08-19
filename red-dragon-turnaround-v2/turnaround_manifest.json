@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 2,
+  "kind": "turnaround",
+  "character": "red_dragon",
+  "sourceImage": "source.png",
+  "sourceViewId": "three_quarter",
+  "facing": "right",
+  "pose": "seated with both feet grounded and wings raised",
+  "referenceCanvas": {
+    "width": 1423,
+    "height": 1222
+  },
+  "groundY": 1189,
+  "requiredViewIds": [
+    "front",
+    "three_quarter",
+    "side",
+    "three_quarter_back",
+    "back"
+  ],
+  "requiredLayerNames": [
+    "back_wing",
+    "tail",
+    "neck_and_torso",
+    "front_wing",
+    "legs",
+    "head"
+  ],
+  "identityFreeze": {
+    "palette": [
+      "ruby-pink body",
+      "cream belly plates",
+      "burgundy wing ribs and dorsal spines"
+    ],
+    "markings": [
+      "gold-and-black eyes",
+      "cream segmented belly",
+      "single dorsal spine row",
+      "three dark claws per visible front-facing paw"
+    ],
+    "proportions": [
+      "large baby head",
+      "long upright neck",
+      "rounded seated body",
+      "long curled tail",
+      "paired bat wings"
+    ],
+    "pose": [
+      "seated",
+      "both feet on shared ground line",
+      "wings raised",
+      "tail curves around the body"
+    ],
+    "style": [
+      "clean rounded cartoon illustration",
+      "dark burgundy outlines",
+      "soft pink gradients"
+    ]
+  },
+  "asymmetryMap": [],
+  "perspectiveConvention": "view ids are camera yaw; front/back layer names refer to visual depth",
+  "generationMode": "image-to-image yaw masters chained from the reference; source-pixel layer extraction with reconstructed concealed regions",
+  "views": [
+    {
+      "id": "front",
+      "yawDegrees": 0,
+      "folder": "views/front",
+      "viewImage": "source.png",
+      "derivedFrom": "accepted adjacent yaw and original reference",
+      "reconstructed": true,
+      "qaStatus": "accepted"
+    },
+    {
+      "id": "three_quarter",
+      "yawDegrees": 45,
+      "folder": "views/three_quarter",
+      "viewImage": "source.png",
+      "derivedFrom": "normalized accepted three-quarter master",
+      "reconstructed": false,
+      "qaStatus": "accepted"
+    },
+    {
+      "id": "side",
+      "yawDegrees": 90,
+      "folder": "views/side",
+      "viewImage": "source.png",
+      "derivedFrom": "accepted adjacent yaw and original reference",
+      "reconstructed": true,
+      "qaStatus": "accepted"
+    },
+    {
+      "id": "three_quarter_back",
+      "yawDegrees": 135,
+      "folder": "views/three_quarter_back",
+      "viewImage": "source.png",
+      "derivedFrom": "accepted adjacent yaw and original reference",
+      "reconstructed": true,
+      "qaStatus": "accepted"
+    },
+    {
+      "id": "back",
+      "yawDegrees": 180,
+      "folder": "views/back",
+      "viewImage": "source.png",
+      "derivedFrom": "accepted adjacent yaw and original reference",
+      "reconstructed": true,
+      "qaStatus": "accepted"
+    }
+  ]
+}

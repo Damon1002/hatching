@@ -13,9 +13,10 @@ import {
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { FOCUS_TAGS, SPECIES_CATALOG } from '../data/species';
+import { FOCUS_TAGS, LAND_CATALOG, SPECIES_CATALOG } from '../data/species';
 import { colors, radii, shadows, spacing, type, TagKey } from '../theme';
-import { DragonSpecies, TagInfo } from '../types';
+import { DragonSpecies, LandStyleKey, TagInfo } from '../types';
+import { SunnyMeadowThumbnail, TerracedGroveThumbnail } from './grove/LandThumbnails';
 
 export interface HatchingBottomSheetProps {
   visible: boolean;
@@ -27,6 +28,8 @@ export interface HatchingBottomSheetProps {
   selectedTag: TagKey;
   onSelectTag: (tag: TagKey) => void;
   onConfirmHatch: (species: DragonSpecies, duration: number, tag: TagKey) => void;
+  selectedLandStyle?: LandStyleKey;
+  onSelectLandStyle?: (style: LandStyleKey) => void;
 }
 
 const DURATION_LIST = [10, 15, 20, 25, 30, 35, 45, 60, 90, 120, 180];
@@ -41,9 +44,11 @@ export function HatchingBottomSheet({
   selectedTag,
   onSelectTag,
   onConfirmHatch,
+  selectedLandStyle = 'sunny_meadow',
+  onSelectLandStyle,
 }: HatchingBottomSheetProps) {
   const insets = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = useState<'planting' | 'favorites'>('planting');
+  const [activeTab, setActiveTab] = useState<'planting' | 'land'>('planting');
   const [favorites, setFavorites] = useState<Set<string>>(new Set(['dragon_egg', 'emberwing', 'baby_sky_drake']));
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'dragon' | 'plant'>('all');
 
@@ -52,17 +57,14 @@ export function HatchingBottomSheet({
     [selectedSpeciesId]
   );
 
+  // Dragons & Plants for the planting grid
   const displayedSpecies = useMemo(() => {
     let list = SPECIES_CATALOG;
-    if (activeTab === 'favorites') {
-      list = list.filter((s) => favorites.has(s.id));
-      if (list.length === 0) list = SPECIES_CATALOG;
-    }
     if (categoryFilter !== 'all') {
       list = list.filter((s) => s.category === categoryFilter);
     }
     return list;
-  }, [activeTab, categoryFilter, favorites]);
+  }, [categoryFilter]);
 
   const toggleFavorite = (id: string) => {
     Haptics.selectionAsync();
@@ -91,7 +93,7 @@ export function HatchingBottomSheet({
           {/* Top Handle Bar */}
           <View style={styles.handleBar} />
 
-          {/* Top Segmented Tab Switcher */}
+          {/* Top Segmented Tab Switcher (Planting Settings | Land) */}
           <View style={styles.tabBarWrap}>
             <View style={styles.tabPillContainer}>
               <TouchableOpacity
@@ -103,7 +105,7 @@ export function HatchingBottomSheet({
                 style={[styles.tabButton, activeTab === 'planting' && styles.tabButtonActive]}
               >
                 <Text style={[styles.tabButtonText, activeTab === 'planting' && styles.tabButtonTextActive]}>
-                  Planting Settings
+                  🌱 Planting Settings
                 </Text>
               </TouchableOpacity>
 
@@ -111,177 +113,235 @@ export function HatchingBottomSheet({
                 activeOpacity={0.8}
                 onPress={() => {
                   Haptics.selectionAsync();
-                  setActiveTab('favorites');
+                  setActiveTab('land');
                 }}
-                style={[styles.tabButton, activeTab === 'favorites' && styles.tabButtonActive]}
+                style={[styles.tabButton, activeTab === 'land' && styles.tabButtonActive]}
               >
-                <Text style={[styles.tabButtonText, activeTab === 'favorites' && styles.tabButtonTextActive]}>
-                  My Favorite
+                <Text style={[styles.tabButtonText, activeTab === 'land' && styles.tabButtonTextActive]}>
+                  🏝️ Land
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-            {/* Category / Filter Header */}
-            <View style={styles.sectionHeaderRow}>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => {
-                  Haptics.selectionAsync();
-                  setCategoryFilter((prev) => (prev === 'all' ? 'dragon' : prev === 'dragon' ? 'plant' : 'all'));
-                }}
-                style={styles.dropdownHeaderBtn}
-              >
-                <Text style={styles.dropdownHeaderText}>
-                  {categoryFilter === 'dragon'
-                    ? 'Dragons (Recently unlocked)'
-                    : categoryFilter === 'plant'
-                      ? 'Trees & Flora'
-                      : 'Dragons & Trees (Recently unlocked)'}
-                </Text>
-                <Text style={styles.dropdownChevron}>⌄</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Species Grid (5 Columns) */}
-            <View style={styles.speciesGrid}>
-              {displayedSpecies.map((species) => {
-                const isSelected = species.id === selectedSpecies.id;
-                return (
+            {activeTab === 'planting' ? (
+              <>
+                {/* Category / Filter Header */}
+                <View style={styles.sectionHeaderRow}>
                   <TouchableOpacity
-                    key={species.id}
-                    activeOpacity={0.75}
+                    activeOpacity={0.7}
                     onPress={() => {
                       Haptics.selectionAsync();
-                      onSelectSpecies(species);
+                      setCategoryFilter((prev) =>
+                        prev === 'all' ? 'dragon' : prev === 'dragon' ? 'plant' : 'all'
+                      );
                     }}
-                    style={[styles.speciesCell, isSelected && styles.speciesCellSelected]}
+                    style={styles.dropdownHeaderBtn}
                   >
-                    {/* VIP Crown Badge */}
-                    {species.isVip && (
-                      <View style={styles.crownBadge}>
-                        <Text style={styles.crownIcon}>👑</Text>
-                      </View>
-                    )}
-
-                    {/* Species Avatar */}
-                    {species.image ? (
-                      <Image source={species.image} style={styles.speciesImage} resizeMode="contain" />
-                    ) : (
-                      <View style={[styles.speciesEmojiCircle, { backgroundColor: species.color + '25' }]}>
-                        <Text style={styles.speciesEmoji}>{species.icon}</Text>
-                      </View>
-                    )}
+                    <Text style={styles.dropdownHeaderText}>
+                      {categoryFilter === 'dragon'
+                        ? 'Dragons (Recently unlocked)'
+                        : categoryFilter === 'plant'
+                          ? 'Trees & Flora'
+                          : 'Dragons & Trees (Recently unlocked)'}
+                    </Text>
+                    <Text style={styles.dropdownChevron}>⌄</Text>
                   </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            {/* Focused Time Section */}
-            <View style={styles.timeSection}>
-              <Text style={styles.sectionTitle}>Focused Time</Text>
-
-              {/* Sprout & Dot Tick Ruler */}
-              <View style={styles.rulerContainer}>
-                <View style={styles.rulerSproutWrap}>
-                  <Text style={styles.rulerSprout}>🌱</Text>
                 </View>
-                <View style={styles.rulerDotsRow}>
-                  {Array.from({ length: 28 }).map((_, i) => (
-                    <View
-                      key={i}
-                      style={[
-                        styles.rulerDot,
-                        i % 4 === 0 && styles.rulerDotMajor,
-                        i === 14 && styles.rulerDotCenter,
-                      ]}
-                    />
-                  ))}
-                </View>
-              </View>
 
-              {/* Time Preset Horizontal Carousel */}
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.timePresetsRow}
-              >
-                {DURATION_LIST.map((mins) => {
-                  const isSelected = mins === selectedDuration;
-                  return (
+                {/* Species Grid (5 Columns - Dragons and Plants) */}
+                <View style={styles.speciesGrid}>
+                  {displayedSpecies.map((species) => {
+                    const isSelected = species.id === selectedSpecies.id;
+                    return (
+                      <TouchableOpacity
+                        key={species.id}
+                        activeOpacity={0.75}
+                        onPress={() => {
+                          Haptics.selectionAsync();
+                          onSelectSpecies(species);
+                        }}
+                        style={[styles.speciesCell, isSelected && styles.speciesCellSelected]}
+                      >
+                        {/* VIP Crown Badge */}
+                        {species.isVip && (
+                          <View style={styles.crownBadge}>
+                            <Text style={styles.crownIcon}>👑</Text>
+                          </View>
+                        )}
+
+                        {/* Species Avatar */}
+                        {species.image ? (
+                          <Image source={species.image} style={styles.speciesImage} resizeMode="contain" />
+                        ) : (
+                          <View style={[styles.speciesEmojiCircle, { backgroundColor: species.color + '25' }]}>
+                            <Text style={styles.speciesEmoji}>{species.icon}</Text>
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                {/* Focused Time Section */}
+                <View style={styles.timeSection}>
+                  <Text style={styles.sectionTitle}>Focused Time</Text>
+
+                  {/* Sprout & Dot Tick Ruler */}
+                  <View style={styles.rulerContainer}>
+                    <View style={styles.rulerSproutWrap}>
+                      <Text style={styles.rulerSprout}>🌱</Text>
+                    </View>
+                    <View style={styles.rulerDotsRow}>
+                      {Array.from({ length: 28 }).map((_, i) => (
+                        <View
+                          key={i}
+                          style={[
+                            styles.rulerDot,
+                            i % 4 === 0 && styles.rulerDotMajor,
+                            i === 14 && styles.rulerDotCenter,
+                          ]}
+                        />
+                      ))}
+                    </View>
+                  </View>
+
+                  {/* Time Preset Horizontal Carousel */}
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.timePresetsRow}
+                  >
+                    {DURATION_LIST.map((mins) => {
+                      const isSelected = mins === selectedDuration;
+                      return (
+                        <TouchableOpacity
+                          key={mins}
+                          activeOpacity={0.7}
+                          onPress={() => {
+                            Haptics.selectionAsync();
+                            onSelectDuration(mins);
+                          }}
+                          style={[styles.timePresetBtn, isSelected && styles.timePresetBtnSelected]}
+                        >
+                          <Text style={[styles.timePresetText, isSelected && styles.timePresetTextSelected]}>
+                            {mins}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+
+                {/* Tags Section */}
+                <View style={styles.tagsSection}>
+                  <Text style={styles.sectionTitle}>Tags</Text>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.tagsScrollRow}
+                  >
+                    {/* Add Tag Button */}
                     <TouchableOpacity
-                      key={mins}
+                      activeOpacity={0.7}
+                      onPress={() => Haptics.selectionAsync()}
+                      style={styles.addTagBtn}
+                    >
+                      <Text style={styles.addTagBtnText}>+</Text>
+                    </TouchableOpacity>
+
+                    {/* Default Unset Tag */}
+                    <TouchableOpacity
                       activeOpacity={0.7}
                       onPress={() => {
                         Haptics.selectionAsync();
-                        onSelectDuration(mins);
+                        onSelectTag('work');
                       }}
-                      style={[styles.timePresetBtn, isSelected && styles.timePresetBtnSelected]}
+                      style={[styles.tagPill, selectedTag === 'work' && styles.tagPillSelected]}
                     >
-                      <Text style={[styles.timePresetText, isSelected && styles.timePresetTextSelected]}>
-                        {mins}
+                      <View style={[styles.tagDot, { backgroundColor: colors.tags.work }]} />
+                      <Text style={[styles.tagPillText, selectedTag === 'work' && styles.tagPillTextSelected]}>
+                        None
                       </Text>
                     </TouchableOpacity>
-                  );
-                })}
-              </ScrollView>
-            </View>
 
-            {/* Tags Section */}
-            <View style={styles.tagsSection}>
-              <Text style={styles.sectionTitle}>Tags</Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.tagsScrollRow}
-              >
-                {/* Add Tag Button */}
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => Haptics.selectionAsync()}
-                  style={styles.addTagBtn}
-                >
-                  <Text style={styles.addTagBtnText}>+</Text>
-                </TouchableOpacity>
-
-                {/* Default Unset Tag */}
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => {
-                    Haptics.selectionAsync();
-                    onSelectTag('rest');
-                  }}
-                  style={[styles.tagPill, selectedTag === 'rest' && styles.tagPillSelected]}
-                >
-                  <View style={[styles.tagDot, { backgroundColor: '#A0B2AC' }]} />
-                  <Text style={[styles.tagPillText, selectedTag === 'rest' && styles.tagPillTextSelected]}>
-                    Unset
+                    {/* Tag Options List */}
+                    {FOCUS_TAGS.map((tag) => {
+                      const isSelected = tag.key === selectedTag;
+                      return (
+                        <TouchableOpacity
+                          key={tag.key}
+                          activeOpacity={0.7}
+                          onPress={() => {
+                            Haptics.selectionAsync();
+                            onSelectTag(tag.key);
+                          }}
+                          style={[styles.tagPill, isSelected && styles.tagPillSelected]}
+                        >
+                          <View style={[styles.tagDot, { backgroundColor: colors.tags[tag.key] }]} />
+                          <Text style={[styles.tagPillText, isSelected && styles.tagPillTextSelected]}>
+                            {tag.label}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+              </>
+            ) : (
+              /* ========================================================
+                 LAND TAB: Biome / Floating Island Selection Cards
+                 ======================================================== */
+              <View style={styles.landTabContent}>
+                <View style={styles.landHeaderWrap}>
+                  <Text style={styles.landHeaderTitle}>Choose Floating Island</Text>
+                  <Text style={styles.landHeaderSubtitle}>
+                    Select the environment stage where your dragon will hatch and grow
                   </Text>
-                </TouchableOpacity>
+                </View>
 
-                {/* Tag Pills */}
-                {FOCUS_TAGS.map((tag) => {
-                  const isSelected = tag.key === selectedTag;
+                {LAND_CATALOG.map((land) => {
+                  const isSelected = selectedLandStyle === land.id;
                   return (
                     <TouchableOpacity
-                      key={tag.key}
-                      activeOpacity={0.7}
+                      key={land.id}
+                      activeOpacity={0.82}
                       onPress={() => {
                         Haptics.selectionAsync();
-                        onSelectTag(tag.key);
+                        onSelectLandStyle?.(land.id);
                       }}
-                      style={[styles.tagPill, isSelected && styles.tagPillSelected]}
+                      style={[styles.landCard, isSelected && styles.landCardSelected]}
                     >
-                      <View style={[styles.tagDot, { backgroundColor: colors.tags[tag.key] }]} />
-                      <Text style={[styles.tagPillText, isSelected && styles.tagPillTextSelected]}>
-                        {tag.label}
-                      </Text>
+                      {/* Left: 3D Isometric Miniature Island Thumbnail */}
+                      <View style={[styles.landThumbnailWrap, isSelected && styles.landThumbnailWrapSelected]}>
+                        {land.id === 'sunny_meadow' ? (
+                          <SunnyMeadowThumbnail size={54} />
+                        ) : (
+                          <TerracedGroveThumbnail size={54} />
+                        )}
+                      </View>
+
+                      {/* Middle: Details */}
+                      <View style={styles.landInfoCol}>
+                        <View style={styles.landNameRow}>
+                          <Text style={styles.landNameText}>{land.name}</Text>
+                          {isSelected && (
+                            <View style={styles.landActiveBadge}>
+                              <Text style={styles.landActiveBadgeText}>✓ Active</Text>
+                            </View>
+                          )}
+                        </View>
+                        <Text style={styles.landSubtitleText}>{land.subtitle}</Text>
+                        <Text style={styles.landDescText} numberOfLines={2}>
+                          {land.description}
+                        </Text>
+                      </View>
                     </TouchableOpacity>
                   );
                 })}
-              </ScrollView>
-            </View>
+              </View>
+            )}
           </ScrollView>
 
           {/* Floating Bottom Action Bar */}
@@ -308,7 +368,7 @@ export function HatchingBottomSheet({
               <View style={styles.summaryMetaCol}>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryHourglass}>⌛</Text>
-                  <Text style={styles.summaryTimeText}>{selectedDuration}</Text>
+                  <Text style={styles.summaryTimeText}>{selectedDuration} mins</Text>
                 </View>
                 <View style={styles.summaryRow}>
                   <View style={[styles.summaryTagDot, { backgroundColor: colors.tags[selectedTag] }]} />
@@ -350,63 +410,61 @@ const styles = StyleSheet.create({
   },
   handleBar: {
     width: 38,
-    height: 4.5,
-    borderRadius: 2.5,
-    backgroundColor: '#C5D3CE',
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#D1DBD7',
     alignSelf: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
-
-  // Segmented Tab Switcher
   tabBarWrap: {
     paddingHorizontal: 20,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   tabPillContainer: {
     flexDirection: 'row',
-    backgroundColor: '#529683',
-    borderRadius: 14,
+    backgroundColor: '#E4ECE9',
+    borderRadius: 16,
     padding: 3,
-    height: 42,
   },
   tabButton: {
     flex: 1,
-    justifyContent: 'center',
+    paddingVertical: 9,
     alignItems: 'center',
-    borderRadius: 12,
+    justifyContent: 'center',
+    borderRadius: 13,
   },
   tabButtonActive: {
     backgroundColor: '#FFFFFF',
     ...Platform.select({
-      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 3 },
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
       default: { elevation: 2 },
     }),
   },
   tabButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: '#65877E',
   },
   tabButtonTextActive: {
     color: '#274C40',
     fontWeight: '700',
   },
-
   scrollContent: {
     paddingBottom: 24,
   },
-
-  // Dropdown Title
   sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
     paddingHorizontal: 20,
-    marginVertical: 8,
+    marginBottom: 12,
   },
   dropdownHeaderBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
   },
   dropdownHeaderText: {
     fontSize: 15,
@@ -414,17 +472,16 @@ const styles = StyleSheet.create({
     color: '#274C40',
   },
   dropdownChevron: {
-    fontSize: 16,
-    color: '#274C40',
-    fontWeight: '700',
+    fontSize: 14,
+    color: '#4B7367',
+    marginTop: -2,
   },
-
-  // Species Grid
   speciesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: 16,
-    gap: 10,
+    gap: 8,
+    justifyContent: 'flex-start',
   },
   speciesCell: {
     width: '18%',
@@ -614,6 +671,96 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
+  // Land Tab Cards
+  landTabContent: {
+    paddingHorizontal: 20,
+    paddingTop: 6,
+    gap: 14,
+  },
+  landHeaderWrap: {
+    marginBottom: 4,
+  },
+  landHeaderTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#274C40',
+    marginBottom: 3,
+  },
+  landHeaderSubtitle: {
+    fontSize: 13,
+    color: '#65877E',
+    lineHeight: 18,
+  },
+  landCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 16,
+    alignItems: 'center',
+    gap: 14,
+    borderWidth: 1.5,
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6 },
+      default: { elevation: 2 },
+    }),
+  },
+  landCardSelected: {
+    borderColor: '#52C59F',
+    backgroundColor: '#FAFCFB',
+    ...Platform.select({
+      ios: { shadowColor: '#2B6E57', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.16, shadowRadius: 8 },
+      default: { elevation: 4 },
+    }),
+  },
+  landThumbnailWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 18,
+    backgroundColor: '#F0F5F2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  landThumbnailWrapSelected: {
+    backgroundColor: '#E8F5F0',
+  },
+  landInfoCol: {
+    flex: 1,
+  },
+  landNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 3,
+  },
+  landNameText: {
+    fontSize: 15.5,
+    fontWeight: '700',
+    color: '#274C40',
+  },
+  landActiveBadge: {
+    backgroundColor: '#52C59F',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  landActiveBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  landSubtitleText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#5EA679',
+    marginBottom: 4,
+  },
+  landDescText: {
+    fontSize: 12,
+    color: '#6F8C83',
+    lineHeight: 16,
+  },
+
   // Floating Bottom Action Bar
   bottomBar: {
     backgroundColor: '#FFFFFF',
@@ -640,42 +787,36 @@ const styles = StyleSheet.create({
   summaryWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-    paddingHorizontal: 14,
     gap: 10,
   },
   summaryAvatarCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: '#D1ECD4',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#A4D9AB',
-    overflow: 'hidden',
-  },
-  summaryAvatarImage: {
     width: 42,
     height: 42,
+    borderRadius: 21,
+    backgroundColor: '#F0F5F3',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  summaryAvatarImage: {
+    width: 32,
+    height: 32,
   },
   summaryAvatarEmoji: {
-    fontSize: 26,
+    fontSize: 24,
   },
   summaryMetaCol: {
-    justifyContent: 'center',
-    gap: 3,
+    gap: 2,
   },
   summaryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
   },
   summaryHourglass: {
-    fontSize: 13,
+    fontSize: 12,
   },
   summaryTimeText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
     color: '#274C40',
   },
@@ -685,26 +826,23 @@ const styles = StyleSheet.create({
     borderRadius: 3.5,
   },
   summaryTagText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
-    color: '#557970',
+    color: '#5D8075',
   },
   plantBtn: {
     backgroundColor: '#52C59F',
-    paddingHorizontal: 30,
-    paddingVertical: 13,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 28,
+    paddingVertical: 12,
+    borderRadius: 20,
     ...Platform.select({
-      ios: { shadowColor: '#2B6E57', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.35, shadowRadius: 6 },
-      default: { elevation: 4 },
+      ios: { shadowColor: '#2B6E57', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.25, shadowRadius: 6 },
+      default: { elevation: 3 },
     }),
   },
   plantBtnText: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
     color: '#FFFFFF',
-    letterSpacing: 0.3,
   },
 });

@@ -32,12 +32,13 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useGroveSong } from './src/audio/useGroveSong';
+import { DragonSizeSlider, DRAGON_SIZE_DEFAULT } from './src/components/DragonSizeSlider';
 import { HatchingBottomSheet } from './src/components/HatchingBottomSheet';
 import { IsometricLandView } from './src/components/IsometricLandView';
 import { AMBIENT_QUOTES } from './src/data/quotes';
 import { FOCUS_TAGS, SPECIES_CATALOG } from './src/data/species';
 import { colors, radii, shadows, spacing, type, TagKey } from './src/theme';
-import { DailyGroveItem, DragonSpecies, FocusMode, SessionRecord, TagInfo } from './src/types';
+import { DailyGroveItem, DragonSpecies, FocusMode, LandStyleKey, SessionRecord, TagInfo } from './src/types';
 
 const GROVE_SEED = 20260818;
 
@@ -67,6 +68,8 @@ function ForestHomeScreen() {
   // Modals & Drawers
   const [showHatchModal, setShowHatchModal] = useState(false);
   const [selectedSpeciesId, setSelectedSpeciesId] = useState<string>('emberwing');
+  const [selectedLandStyle, setSelectedLandStyle] = useState<LandStyleKey>('sunny_meadow');
+  const [dragonSize, setDragonSize] = useState(DRAGON_SIZE_DEFAULT);
   const [showTagModal, setShowTagModal] = useState(false);
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [showGiveUpModal, setShowGiveUpModal] = useState(false);
@@ -236,20 +239,6 @@ function ForestHomeScreen() {
           </PressableScale>
         </View>
 
-        {/* Floating Sound / Species Quick Button (Below Top Right) */}
-        <View style={styles.subActionRow}>
-          <PressableScale
-            onPress={() => {
-              Haptics.selectionAsync();
-              setSoundEnabled(!soundEnabled);
-              setToast(soundEnabled ? '🔇 环境白噪音已关闭' : '🌧️ 已开启雨夜与微风白噪音');
-            }}
-            style={[styles.floatingCircleBtn, soundEnabled && styles.floatingCircleBtnActive]}
-          >
-            <Text style={styles.floatingCircleBtnText}>{soundEnabled ? '🌧️' : '🌱'}</Text>
-          </PressableScale>
-        </View>
-
         {/* ==========================================
             2. DAILY FOCUS GREETING / RUNNING QUOTE
            ========================================== */}
@@ -280,8 +269,14 @@ function ForestHomeScreen() {
             sessionsCompleted={sessionsCompleted}
             tag={selectedTag}
             speciesId={selectedSpeciesId}
+            dragonSize={dragonSize}
+            landStyle={selectedLandStyle}
           />
         </PressableScale>
+
+        {selectedSpeciesId === 'emberwing' ? (
+          <DragonSizeSlider value={dragonSize} onChange={setDragonSize} />
+        ) : null}
 
         {/* ==========================================
             4. TAG SELECTOR PILL (e.g. 🔴 Work)
@@ -498,6 +493,11 @@ function ForestHomeScreen() {
           setSelectedTag(tag);
           setRunning(true);
           setToast(`🌱 开始培育「${species.name}」！专注 ${mins} 分钟`);
+        }}
+        selectedLandStyle={selectedLandStyle}
+        onSelectLandStyle={(landId) => {
+          setSelectedLandStyle(landId);
+          setToast(`🏝️ 已切换浮岛环境为「${landId === 'sunny_meadow' ? '阳光原野' : '灵洲浮岛'}」！`);
         }}
       />
 

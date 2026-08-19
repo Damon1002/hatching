@@ -30,7 +30,7 @@ export interface DragonSpecies {
   color: string;
   unlocked: boolean;
   isVip?: boolean;
-  category?: 'dragon' | 'plant' | 'special';
+  category?: 'dragon' | 'plant' | 'land' | 'special';
   badge?: string;
   image?: any;
 }
@@ -42,4 +42,18 @@ export interface DailyGroveItem {
   tag: TagKey;
   speciesName: string;
   speciesEmoji: string;
+}
+
+export type LandStyleKey = 'sunny_meadow' | 'terraced_grove';
+
+export interface LandBiome {
+  id: LandStyleKey;
+  name: string;
+  subtitle: string;
+  element: string;
+  description: string;
+  icon: string;
+  color: string;
+  unlocked: boolean;
+  isVip?: boolean;
 }

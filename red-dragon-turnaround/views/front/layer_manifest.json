@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "character": "red_dragon",
+  "sourceImage": "view.png",
+  "perspectiveConvention": "front view; symmetrical limbs and wings",
+  "referenceCanvas": {
+    "width": 1359,
+    "height": 1158
+  },
+  "generationMode": "built-in image editing with deterministic layer extraction",
+  "layers": [
+    {
+      "file": "layer_back_wing.png",
+      "name": "back_wing",
+      "parent": "neck_and_torso",
+      "attachment": "back_shoulder",
+      "zIndex": 10,
+      "originPx": {
+        "x": 0,
+        "y": 328
+      },
+      "pivotNormalized": {
+        "x": 0.15,
+        "y": 0.25
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "wing shoulder joint"
+    },
+    {
+      "file": "layer_front_wing.png",
+      "name": "front_wing",
+      "parent": "neck_and_torso",
+      "attachment": "front_shoulder",
+      "zIndex": 15,
+      "originPx": {
+        "x": 809,
+        "y": 328
+      },
+      "pivotNormalized": {
+        "x": 0.85,
+        "y": 0.25
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "wing shoulder joint"
+    },
+    {
+      "file": "layer_tail.png",
+      "name": "tail",
+      "parent": "neck_and_torso",
+      "attachment": "tail_root",
+      "zIndex": 20,
+      "originPx": {
+        "x": 176,
+        "y": 629
+      },
+      "pivotNormalized": {
+        "x": 0.5,
+        "y": 0.9
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "pelvis root"
+    },
+    {
+      "file": "layer_neck_and_torso.png",
+      "name": "neck_and_torso",
+      "parent": null,
+      "attachment": "body_root",
+      "zIndex": 30,
+      "originPx": {
+        "x": 448,
+        "y": 378
+      },
+      "pivotNormalized": {
+        "x": 0.5,
+        "y": 0.65
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "torso and chest beneath paws and neck"
+    },
+    {
+      "file": "layer_legs.png",
+      "name": "legs",
+      "parent": "neck_and_torso",
+      "attachment": "hip_center",
+      "zIndex": 50,
+      "originPx": {
+        "x": 328,
+        "y": 808
+      },
+      "pivotNormalized": {
+        "x": 0.5,
+        "y": 0.2
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "paws and thighs"
+    },
+    {
+      "file": "layer_head.png",
+      "name": "head",
+      "parent": "neck_and_torso",
+      "attachment": "skull_base",
+      "zIndex": 60,
+      "originPx": {
+        "x": 374,
+        "y": 0
+      },
+      "pivotNormalized": {
+        "x": 0.5,
+        "y": 0.85
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "concealed neck insertion"
+    }
+  ]
+}

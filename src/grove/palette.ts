@@ -14,6 +14,8 @@ export interface GrovePalette {
   stone: string;
   leaf: string;
   leafDark: string;
+  /** Brighter leaf tone for shoulder blobs — always a clear step above `leaf`. */
+  leafAccent: string;
   bark: string;
   skyGlow: string;
   shadow: string;
@@ -29,12 +31,12 @@ const CLIMATE_FROM_TAG: Record<TagKey, Climate> = {
   rest: 'tundra',
 };
 
-const CLIMATE_TONES: Record<Climate, Pick<GrovePalette, 'water' | 'sand' | 'grass' | 'meadow' | 'rock'>> = {
-  temperate: { water: '#6EB8B0', sand: '#E6D8AE', grass: '#7DB866', meadow: '#8FBE4A', rock: '#C4B7A0' },
-  desert: { water: '#7FC3C4', sand: '#F0DCAE', grass: '#E2C489', meadow: '#D0A86A', rock: '#C99A70' },
-  tropical: { water: '#5FCFD4', sand: '#F4EAD2', grass: '#8FC47A', meadow: '#6FAE66', rock: '#C3BDA8' },
-  volcanic: { water: '#5C7788', sand: '#8E8378', grass: '#6D6A63', meadow: '#575551', rock: '#4A4744' },
-  tundra: { water: '#A9C4CD', sand: '#DCD8CC', grass: '#B6BFAE', meadow: '#A3AC9C', rock: '#B0B2AE' },
+const CLIMATE_TONES: Record<Climate, Pick<GrovePalette, 'water' | 'sand' | 'grass' | 'meadow' | 'rock' | 'bark'>> = {
+  temperate: { water: '#6EB8B0', sand: '#E6D8AE', grass: '#7DB866', meadow: '#8FBE4A', rock: '#C4B7A0', bark: '#8A6F52' },
+  desert:    { water: '#7FC3C4', sand: '#F0DCAE', grass: '#E2C489', meadow: '#D0A86A', rock: '#C99A70', bark: '#9E7A58' },
+  tropical:  { water: '#5FCFD4', sand: '#F4EAD2', grass: '#8FC47A', meadow: '#6FAE66', rock: '#C3BDA8', bark: '#6B5040' },
+  volcanic:  { water: '#5C7788', sand: '#8E8378', grass: '#6D6A63', meadow: '#575551', rock: '#4A4744', bark: '#4A4442' },
+  tundra:    { water: '#A9C4CD', sand: '#DCD8CC', grass: '#B6BFAE', meadow: '#A3AC9C', rock: '#B0B2AE', bark: '#8B8680' },
 };
 
 export function climateFromTag(tag: TagKey): Climate {
@@ -63,16 +65,19 @@ export function grovePalette(climate: Climate, mood: HourMood, season: SeasonNam
   let grass = base.grass;
   let meadow = base.meadow;
   let rock = base.rock;
+  let bark = base.bark;
 
   if (season === 'autumn') {
     grass = mix(grass, '#C6A95E', 0.32);
     meadow = mix(meadow, '#D4A24A', 0.36);
+    bark = mix(bark, '#7A5C3A', 0.15);
   } else if (season === 'winter') {
     sand = mix(sand, '#EFF5F8', 0.55);
     grass = mix(grass, '#EFF5F8', 0.72);
     meadow = mix(meadow, '#EFF5F8', 0.78);
     rock = mix(rock, '#EFF5F8', 0.48);
     water = mix(water, '#C9DDE6', 0.5);
+    bark = mix(bark, '#B0ACA6', 0.22);
   } else if (season === 'spring') {
     grass = mix(grass, '#B5DC84', 0.18);
     meadow = mix(meadow, '#C5E48C', 0.16);
@@ -84,9 +89,11 @@ export function grovePalette(climate: Climate, mood: HourMood, season: SeasonNam
     grass = shade(grass, -0.24);
     meadow = shade(meadow, -0.22);
     rock = shade(rock, -0.2);
+    bark = shade(bark, -0.22);
   } else if (mood === 'gold') {
     sand = mix(sand, '#F6C9A4', 0.18);
     grass = mix(grass, '#E0C36A', 0.12);
+    bark = mix(bark, '#C49860', 0.10);
   } else if (mood === 'dusk') {
     grass = mix(grass, '#B8A8D2', 0.08);
     water = mix(water, '#8A7CB0', 0.12);
@@ -94,6 +101,8 @@ export function grovePalette(climate: Climate, mood: HourMood, season: SeasonNam
 
   const dirtLeft = mood === 'night' ? '#3A2A22' : '#6E513E';
   const dirtRight = mood === 'night' ? '#2A1C16' : '#563E2F';
+
+  const leaf = season === 'autumn' ? '#D4A24A' : season === 'winter' ? '#D8E2E6' : season === 'spring' ? '#F2B8C8' : '#5BA665';
 
   return {
     water,
@@ -105,9 +114,10 @@ export function grovePalette(climate: Climate, mood: HourMood, season: SeasonNam
     dirtLeft,
     dirtRight,
     stone: mood === 'night' ? '#4C5C54' : '#7A8B82',
-    leaf: season === 'autumn' ? '#D4A24A' : season === 'winter' ? '#D8E2E6' : season === 'spring' ? '#F2B8C8' : '#5BA665',
+    leaf,
     leafDark: season === 'autumn' ? '#B08C3E' : season === 'winter' ? '#B7C4CA' : season === 'spring' ? '#D98CA6' : '#3D7A46',
-    bark: '#8A6F52',
+    leafAccent: shade(leaf, 0.28),
+    bark,
     skyGlow:
       mood === 'night'
         ? 'rgba(188,208,255,0.16)'

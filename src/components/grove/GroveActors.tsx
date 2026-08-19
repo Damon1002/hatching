@@ -2,12 +2,60 @@ import React from 'react';
 import { Circle, Group, Image as SkiaImage, Oval, Path, useImage } from '@shopify/react-native-skia';
 import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
 
+import { groveLocomotion, resolveRubyClip, sampleRubyPose, type RubyClipControl } from '../../dragon/rubyPuppet';
+export type { RubyClipControl };
 import { shade } from '../../grove/color';
 import { sx, sy, type IsoCamera } from '../../grove/iso';
 import { GROVE_LOOP_MS } from '../../grove/types';
 import type { GroveCreature, GroveTree, GroveTuft } from '../../grove/types';
 
 const TAU = Math.PI * 2;
+
+/**
+ * Generate a closed Skia path string for an organic blob shape.
+ * Uses 3 sine harmonics seeded from `seed` to deform a base ellipse,
+ * then connects points with quadratic bezier curves for smoothness.
+ */
+function blobPath(
+  cx: number,
+  cy: number,
+  rx: number,
+  ry: number,
+  seed: number,
+  segments: number = 12,
+): string {
+  const p1 = (seed * 2.31) % TAU;
+  const p2 = (seed * 1.47) % TAU;
+  const p3 = (seed * 3.82) % TAU;
+
+  const pts: { x: number; y: number }[] = [];
+  for (let i = 0; i < segments; i++) {
+    const theta = (i / segments) * TAU;
+    const wobble =
+      1 + 0.12 * Math.sin(3 * theta + p1)
+        + 0.08 * Math.sin(2 * theta + p2)
+        + 0.06 * Math.sin(5 * theta + p3);
+    pts.push({
+      x: cx + Math.cos(theta) * rx * wobble,
+      y: cy + Math.sin(theta) * ry * wobble,
+    });
+  }
+
+  // Build smooth closed path using quadratic beziers through midpoints
+  const mid = (a: { x: number; y: number }, b: { x: number; y: number }) => ({
+    x: (a.x + b.x) / 2,
+    y: (a.y + b.y) / 2,
+  });
+
+  const first = mid(pts[pts.length - 1], pts[0]);
+  let d = `M${first.x.toFixed(1)} ${first.y.toFixed(1)}`;
+  for (let i = 0; i < pts.length; i++) {
+    const next = mid(pts[i], pts[(i + 1) % pts.length]);
+    d += ` Q${pts[i].x.toFixed(1)} ${pts[i].y.toFixed(1)} ${next.x.toFixed(1)} ${next.y.toFixed(1)}`;
+  }
+  d += ' Z';
+  return d;
+}
 
 export function GroveTreeSprite({
   tree,
@@ -16,6 +64,7 @@ export function GroveTreeSprite({
   time,
   leaf,
   leafDark,
+  leafAccent,
   bark,
   snowy,
 }: {
@@ -25,6 +74,7 @@ export function GroveTreeSprite({
   time: SharedValue<number>;
   leaf: string;
   leafDark: string;
+  leafAccent: string;
   bark: string;
   snowy: boolean;
 }) {
@@ -32,22 +82,53 @@ export function GroveTreeSprite({
   const originY = sy(tree.x + 0.5, tree.y + 0.5, z, camera);
   const s = camera.tw * tree.scale;
   const phase = tree.phase;
+  const growth = tree.growth;
   const transform = useDerivedValue(() => [{ rotate: Math.sin((time.value / GROVE_LOOP_MS) * TAU + phase) * 0.035 }]);
+
+  // Trunk height grows with maturity
+  const trunkH = s * (growth === 3 ? 0.60 : growth === 2 ? 0.52 : 0.44);
+
+  // Crown center anchored relative to trunk top so bottom of crown overlaps trunk
+  const crownY = originY - trunkH - s * 0.19;
+
+  // Unique blob seed per tree (from phase, which is already seeded from position)
+  const blobSeed = phase;
+
+  // Main crown blobs
+  const darkCrown = blobPath(originX, crownY, s * 0.33, s * 0.29, blobSeed);
+  const lightCrown = blobPath(originX, crownY - s * 0.06, s * 0.25, s * 0.21, blobSeed + 1.7);
+
+  // Shoulder blobs for growth 2 and 3 — sit at the trunk-crown junction
+  const shoulder1 = growth >= 2
+    ? blobPath(originX + s * 0.22, crownY + s * 0.14, s * 0.20, s * 0.17, blobSeed + 3.1)
+    : null;
+  const shoulder2 = growth >= 3
+    ? blobPath(originX - s * 0.24, crownY + s * 0.10, s * 0.18, s * 0.16, blobSeed + 5.3)
+    : null;
+
+  // Snow cap path (sits on top of main crown)
+  const snowCap = snowy
+    ? blobPath(originX, crownY - s * 0.10, s * 0.19, s * 0.08, blobSeed + 7.2, 8)
+    : null;
 
   return (
     <Group transform={transform} origin={{ x: originX, y: originY }}>
+      {/* Trunk — taller with growth */}
       <Path
-        path={`M${originX} ${originY} L${originX} ${originY - s * 0.44}`}
+        path={`M${originX} ${originY} L${originX} ${originY - trunkH}`}
         color={bark}
         style="stroke"
         strokeWidth={Math.max(2, s * 0.075)}
         strokeCap="round"
       />
-      <Oval x={originX - s * 0.33} y={originY - s * 0.92} width={s * 0.66} height={s * 0.58} color={leafDark} />
-      <Oval x={originX - s * 0.26} y={originY - s * 0.98} width={s * 0.5} height={s * 0.42} color={leaf} />
-      {snowy ? (
-        <Oval x={originX - s * 0.22} y={originY - s * 1.02} width={s * 0.38} height={s * 0.16} color="#F4F8FA" />
-      ) : null}
+      {/* Shoulder blobs (behind main crown) — leafAccent color */}
+      {shoulder2 ? <Path path={shoulder2} color={leafAccent} /> : null}
+      {shoulder1 ? <Path path={shoulder1} color={leafAccent} /> : null}
+      {/* Main crown — dark blob for depth, light blob on top */}
+      <Path path={darkCrown} color={leafDark} />
+      <Path path={lightCrown} color={leaf} />
+      {/* Snow cap */}
+      {snowCap ? <Path path={snowCap} color="#F4F8FA" /> : null}
     </Group>
   );
 }
@@ -94,11 +175,6 @@ export function GroveTuftSprite({
 
 const EGG_SOURCE = require('../../../assets/eggs/dragon-egg-red.png');
 const EGG_ASPECT = 979 / 708;
-
-const RUBY_SIT = require('../../../assets/dragon/ruby/postures/p6_relaxed_sit.png');
-const RUBY_HOP = require('../../../assets/dragon/ruby/postures/p5_happy_hop.png');
-const RUBY_CHEER = require('../../../assets/dragon/ruby/postures/p10_excited_cheer.png');
-const RUBY_WINK = require('../../../assets/dragon/ruby/postures/p7_cute_wink.png');
 
 export function GroveEgg({
   x,
@@ -163,6 +239,8 @@ export function GroveCreatureSprite({
   camera,
   time,
   speciesId = 'baby_sky_drake',
+  dragonClip = 'auto',
+  dragonSize = 0.25,
 }: {
   creature: GroveCreature;
   homeZ: number;
@@ -170,6 +248,8 @@ export function GroveCreatureSprite({
   camera: IsoCamera;
   time: SharedValue<number>;
   speciesId?: string;
+  dragonClip?: RubyClipControl;
+  dragonSize?: number;
 }) {
   if (speciesId === 'emberwing') {
     return (
@@ -179,6 +259,8 @@ export function GroveCreatureSprite({
         destZ={destZ}
         camera={camera}
         time={time}
+        clip={dragonClip}
+        sizeMul={dragonSize}
       />
     );
   }
@@ -190,31 +272,46 @@ export function GroveCreatureSprite({
       destZ={destZ}
       camera={camera}
       time={time}
+      sizeMul={dragonSize}
     />
   );
 }
 
-// Modular Rig Sprite Parts from reference deconstruction sheet
-const IMG_TORSO = require('../../../assets/dragon/ruby/rig_parts/torso.png');
-const IMG_NECK0 = require('../../../assets/dragon/ruby/rig_parts/neck_0.png');
-const IMG_NECK1 = require('../../../assets/dragon/ruby/rig_parts/neck_1.png');
-const IMG_NECK2 = require('../../../assets/dragon/ruby/rig_parts/neck_2.png');
-const IMG_NECK3 = require('../../../assets/dragon/ruby/rig_parts/neck_3.png');
-const IMG_HEAD_IDLE = require('../../../assets/dragon/ruby/rig_parts/head_idle.png');
-const IMG_HEAD_CHEER = require('../../../assets/dragon/ruby/rig_parts/head_cheer.png');
-const IMG_HEAD_WINK = require('../../../assets/dragon/ruby/rig_parts/head_wink.png');
-const IMG_TAIL0 = require('../../../assets/dragon/ruby/rig_parts/tail_0.png');
-const IMG_TAIL1 = require('../../../assets/dragon/ruby/rig_parts/tail_1.png');
-const IMG_TAIL2 = require('../../../assets/dragon/ruby/rig_parts/tail_2.png');
-const IMG_TAIL3 = require('../../../assets/dragon/ruby/rig_parts/tail_3.png');
-const IMG_TAIL4 = require('../../../assets/dragon/ruby/rig_parts/tail_4.png');
-const IMG_WING_L_BONE = require('../../../assets/dragon/ruby/rig_parts/wing_left_bone.png');
-const IMG_WING_L_MEM = require('../../../assets/dragon/ruby/rig_parts/wing_left_membrane.png');
-const IMG_WING_R_BONE = require('../../../assets/dragon/ruby/rig_parts/wing_right_bone.png');
-const IMG_WING_R_MEM = require('../../../assets/dragon/ruby/rig_parts/wing_right_membrane.png');
-const IMG_THIGH = require('../../../assets/dragon/ruby/rig_parts/back_thigh.png');
-const IMG_PAW_BACK = require('../../../assets/dragon/ruby/rig_parts/paw_back.png');
-const IMG_PAW_FRONT = require('../../../assets/dragon/ruby/rig_parts/paw_front.png');
+// Registered puppet layers from red-dragon-puppet-layers/layer_manifest.json.
+const PUPPET_BACK_WING = require('../../../assets/dragon/ruby/puppet/layer_back_wing.png');
+const PUPPET_FRONT_WING = require('../../../assets/dragon/ruby/puppet/layer_front_wing.png');
+const PUPPET_HEAD = require('../../../assets/dragon/ruby/puppet/layer_head.png');
+const PUPPET_LEG_LEFT = require('../../../assets/dragon/ruby/puppet/layer_leg_left.png');
+const PUPPET_LEG_RIGHT = require('../../../assets/dragon/ruby/puppet/layer_leg_right.png');
+const PUPPET_TORSO = require('../../../assets/dragon/ruby/puppet/layer_neck_and_torso.png');
+const PUPPET_TAIL = require('../../../assets/dragon/ruby/puppet/layer_tail.png');
+
+const PUPPET_CANVAS = { w: 1359, h: 1158 };
+const PUPPET_ANCHOR = { x: 928, y: 1110 };
+const PUPPET_HEIGHT_TILES = 1.48;
+
+const PUPPET_LAYERS = {
+  backWing: { origin: { x: 820, y: 350 }, size: { w: 420, h: 300 }, pivot: { x: 0.17, y: 0.27 } },
+  tail: { origin: { x: 65, y: 555 }, size: { w: 850, h: 535 }, pivot: { x: 0.92, y: 0.48 } },
+  frontWing: { origin: { x: 215, y: 350 }, size: { w: 665, h: 440 }, pivot: { x: 0.88, y: 0.22 } },
+  torso: { origin: { x: 565, y: 320 }, size: { w: 625, h: 815 }, pivot: { x: 0.55, y: 0.62 } },
+  legLeft: { origin: { x: 649, y: 714 }, size: { w: 294, h: 412 }, pivot: { x: 0.5924, y: 0.1722 } },
+  legRight: { origin: { x: 927, y: 718 }, size: { w: 284, h: 398 }, pivot: { x: 0.3881, y: 0.1753 } },
+  head: { origin: { x: 535, y: 5 }, size: { w: 805, h: 535 }, pivot: { x: 0.53, y: 0.84 } },
+} as const;
+
+type PuppetLayerSpec = (typeof PUPPET_LAYERS)[keyof typeof PUPPET_LAYERS];
+
+function puppetLayout(layer: PuppetLayerSpec, scale: number) {
+  return {
+    x: (layer.origin.x - PUPPET_ANCHOR.x) * scale,
+    y: (layer.origin.y - PUPPET_ANCHOR.y) * scale,
+    w: layer.size.w * scale,
+    h: layer.size.h * scale,
+    ox: (layer.origin.x + layer.size.w * layer.pivot.x - PUPPET_ANCHOR.x) * scale,
+    oy: (layer.origin.y + layer.size.h * layer.pivot.y - PUPPET_ANCHOR.y) * scale,
+  };
+}
 
 function RubyDragonCreature({
   creature,
@@ -222,34 +319,24 @@ function RubyDragonCreature({
   destZ,
   camera,
   time,
+  clip = 'auto',
+  sizeMul = 1,
 }: {
   creature: GroveCreature;
   homeZ: number;
   destZ: number;
   camera: IsoCamera;
   time: SharedValue<number>;
+  clip?: RubyClipControl;
+  sizeMul?: number;
 }) {
-  // Load modular image pieces
-  const imgTorso = useImage(IMG_TORSO);
-  const imgNeck0 = useImage(IMG_NECK0);
-  const imgNeck1 = useImage(IMG_NECK1);
-  const imgNeck2 = useImage(IMG_NECK2);
-  const imgNeck3 = useImage(IMG_NECK3);
-  const imgHeadIdle = useImage(IMG_HEAD_IDLE);
-  const imgHeadCheer = useImage(IMG_HEAD_CHEER);
-  const imgHeadWink = useImage(IMG_HEAD_WINK);
-  const imgTail0 = useImage(IMG_TAIL0);
-  const imgTail1 = useImage(IMG_TAIL1);
-  const imgTail2 = useImage(IMG_TAIL2);
-  const imgTail3 = useImage(IMG_TAIL3);
-  const imgTail4 = useImage(IMG_TAIL4);
-  const imgWingLBone = useImage(IMG_WING_L_BONE);
-  const imgWingLMem = useImage(IMG_WING_L_MEM);
-  const imgWingRBone = useImage(IMG_WING_R_BONE);
-  const imgWingRMem = useImage(IMG_WING_R_MEM);
-  const imgThigh = useImage(IMG_THIGH);
-  const imgPawBack = useImage(IMG_PAW_BACK);
-  const imgPawFront = useImage(IMG_PAW_FRONT);
+  const imgBackWing = useImage(PUPPET_BACK_WING);
+  const imgFrontWing = useImage(PUPPET_FRONT_WING);
+  const imgHead = useImage(PUPPET_HEAD);
+  const imgLegLeft = useImage(PUPPET_LEG_LEFT);
+  const imgLegRight = useImage(PUPPET_LEG_RIGHT);
+  const imgTorso = useImage(PUPPET_TORSO);
+  const imgTail = useImage(PUPPET_TAIL);
 
   const tw = camera.tw;
   const ox = camera.ox;
@@ -259,403 +346,133 @@ function RubyDragonCreature({
   const destX = creature.destX;
   const destY = creature.destY;
   const phase = creature.phase;
-  const s = tw * 0.42;
+  const scale = (tw * PUPPET_HEIGHT_TILES * sizeMul) / PUPPET_CANVAS.h;
+  const backWing = puppetLayout(PUPPET_LAYERS.backWing, scale);
+  const tail = puppetLayout(PUPPET_LAYERS.tail, scale);
+  const frontWing = puppetLayout(PUPPET_LAYERS.frontWing, scale);
+  const torso = puppetLayout(PUPPET_LAYERS.torso, scale);
+  const legLeft = puppetLayout(PUPPET_LAYERS.legLeft, scale);
+  const legRight = puppetLayout(PUPPET_LAYERS.legRight, scale);
+  const head = puppetLayout(PUPPET_LAYERS.head, scale);
 
-  // 1. DragonRoot Transform (Isometric motion, leap arc, facing, aerodynamic tilt)
   const transform = useDerivedValue(() => {
     const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
-    let f = 0;
-    let facing = 1;
-    if (u < 0.08) {
-      f = workletSmooth(u / 0.08);
-      facing = destX >= homeX ? 1 : -1;
-    } else if (u < 0.7) {
-      f = 1;
-      facing = destX >= homeX ? 1 : -1;
-    } else if (u < 0.78) {
-      f = 1 - workletSmooth((u - 0.7) / 0.08);
-      facing = homeX >= destX ? 1 : -1;
-    } else {
-      facing = homeX >= destX ? 1 : -1;
-    }
-    const cx = homeX + (destX - homeX) * f + 0.5;
-    const cy = homeY + (destY - homeY) * f + 0.5;
-    const z = homeZ + (destZ - homeZ) * f;
-    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
-    const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
-    const air = hopping ? Math.sin(hopT * Math.PI) : 0;
+    const loc = groveLocomotion(u);
+    const resolved = resolveRubyClip(loc.clip, clip);
+    const stride = resolved === 'walk' && loc.clip === 'idle' ? u * 4 : loc.stride;
+    const pose = sampleRubyPose(resolved, stride, (time.value / GROVE_LOOP_MS) * TAU + phase);
+    const facing = loc.outBound ? (destX >= homeX ? 1 : -1) : homeX >= destX ? 1 : -1;
+    const cx = homeX + (destX - homeX) * loc.travel + 0.5;
+    const cy = homeY + (destY - homeY) * loc.travel + 0.5;
+    const z = homeZ + (destZ - homeZ) * loc.travel;
     const px = Math.round(ox + (cx - cy) * tw * 0.5);
-    const py = Math.round(oy + (cx + cy) * tw * 0.25 - z * tw) - air * tw * 0.34;
-    const tilt = hopping ? (facing === 1 ? -0.14 : 0.14) * Math.sin(hopT * Math.PI) : 0;
-    const breathe = !hopping ? 1 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase) * 0.018 : 1;
+    const py = Math.round(oy + (cx + cy) * tw * 0.25 - z * tw) + pose.rootBob * scale;
+    const breathe = resolved === 'idle' ? 1 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 1.4 + phase) * 0.006 : 1;
     return [
       { translateX: px },
       { translateY: py },
       { scaleX: facing * breathe },
       { scaleY: breathe },
-      { rotate: tilt },
+      { rotate: pose.rootTilt * (facing === 1 ? 1 : -1) },
     ];
   });
 
-  // Dynamic Ground Shadow
   const shadowTransform = useDerivedValue(() => {
     const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
-    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
-    const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
-    const air = hopping ? Math.sin(hopT * Math.PI) : 0;
-    return [{ translateX: air * tw * 0.14 }, { scale: 1 - air * 0.28 }];
+    const loc = groveLocomotion(u);
+    const resolved = resolveRubyClip(loc.clip, clip);
+    const stride = resolved === 'walk' && loc.clip === 'idle' ? u * 4 : loc.stride;
+    const pose = sampleRubyPose(resolved, stride, (time.value / GROVE_LOOP_MS) * TAU + phase);
+    const squash = 1 - Math.min(0.04, pose.rootBob / 400);
+    return [{ scaleX: 1 + (1 - squash) * 0.12 }, { scaleY: squash }];
   });
 
-  // Torso Breathing Expansion
-  const bodyBreathe = useDerivedValue(() => {
-    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
-    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
-    if (hopping) return [{ scale: 1 }];
-    const b = Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase);
-    return [
-      { scaleY: 1 + b * 0.025 },
-      { scaleX: 1 - b * 0.012 },
-    ];
-  });
-
-  // 2. Parametric 4-Joint Neck FK Chain
-  const neck0Rot = useDerivedValue(() => {
-    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
-    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
-    const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
-    const air = hopping ? Math.sin(hopT * Math.PI) : 0;
-    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase;
-    return [{ rotate: air * 0.1 + Math.sin(t) * 0.035 }];
-  });
-
-  const neck1Rot = useDerivedValue(() => {
-    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
-    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
-    const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
-    const air = hopping ? Math.sin(hopT * Math.PI) : 0;
-    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase - 0.25;
-    return [{ rotate: air * 0.12 + Math.sin(t) * 0.045 }];
-  });
-
-  const neck2Rot = useDerivedValue(() => {
-    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
-    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
-    const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
-    const air = hopping ? Math.sin(hopT * Math.PI) : 0;
-    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase - 0.5;
-    return [{ rotate: air * 0.14 + Math.sin(t) * 0.05 }];
-  });
-
-  const neck3Rot = useDerivedValue(() => {
-    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
-    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
-    const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
-    const air = hopping ? Math.sin(hopT * Math.PI) : 0;
-    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase - 0.75;
-    return [{ rotate: air * 0.1 + Math.sin(t) * 0.04 }];
-  });
-
-  // Head Counterbalance Bob
-  const headRot = useDerivedValue(() => {
-    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
-    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
-    const hopT = u < 0.08 ? u / 0.08 : u >= 0.7 && u < 0.78 ? (u - 0.7) / 0.08 : 0;
-    const air = hopping ? Math.sin(hopT * Math.PI) : 0;
-    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.2 + phase - 1.0;
-    return [{ rotate: -air * 0.15 + Math.sin(t) * 0.035 }];
-  });
-
-  // 3. Parametric 5-Joint Tail Traveling Wave Chain
-  const tail0Rot = useDerivedValue(() => {
-    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.8 + phase;
-    return [{ rotate: Math.sin(t) * 0.1 }];
-  });
-  const tail1Rot = useDerivedValue(() => {
-    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.8 + phase - 0.35;
-    return [{ rotate: Math.sin(t) * 0.14 }];
-  });
-  const tail2Rot = useDerivedValue(() => {
-    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.8 + phase - 0.7;
-    return [{ rotate: Math.sin(t) * 0.18 }];
-  });
-  const tail3Rot = useDerivedValue(() => {
-    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.8 + phase - 1.05;
-    return [{ rotate: Math.sin(t) * 0.22 }];
-  });
-  const tail4Rot = useDerivedValue(() => {
-    const t = (time.value / GROVE_LOOP_MS) * TAU * 2.8 + phase - 1.4;
-    return [{ rotate: Math.sin(t) * 0.26 }];
-  });
-
-  // 4. 2-Bone Flapping Wings (FK Upper arm + Forearm drag)
-  const wingUpperL = useDerivedValue(() => {
-    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
-    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
-    const freq = hopping ? 12 : 3.6;
-    const amp = hopping ? 0.45 : 0.24;
-    const w = Math.sin((time.value / GROVE_LOOP_MS) * TAU * freq + phase);
-    return [
-      { rotate: -0.18 + w * amp },
-      { scaleY: 0.82 + 0.25 * w },
-    ];
-  });
-  const wingUpperR = useDerivedValue(() => {
-    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
-    const hopping = u < 0.08 || (u >= 0.7 && u < 0.78);
-    const freq = hopping ? 12 : 3.6;
-    const amp = hopping ? 0.48 : 0.26;
-    const w = Math.sin((time.value / GROVE_LOOP_MS) * TAU * freq + phase);
-    return [
-      { rotate: -0.15 + w * amp },
-      { scaleY: 0.85 + 0.28 * w },
-    ];
-  });
-
-  const isHoppingSV = useDerivedValue(() => {
-    const u = (((time.value % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
-    return u < 0.08 || (u >= 0.7 && u < 0.78) ? 1 : 0;
-  });
+  const backWingT = useDerivedValue(() => jointWorld(time.value, clip, phase, scale).backWing);
+  const frontWingT = useDerivedValue(() => jointWorld(time.value, clip, phase, scale).frontWing);
+  const tailT = useDerivedValue(() => jointWorld(time.value, clip, phase, scale).tail);
+  const torsoT = useDerivedValue(() => jointWorld(time.value, clip, phase, scale).torso);
+  const legLeftT = useDerivedValue(() => jointWorld(time.value, clip, phase, scale).legLeft);
+  const legRightT = useDerivedValue(() => jointWorld(time.value, clip, phase, scale).legRight);
+  const headT = useDerivedValue(() => jointWorld(time.value, clip, phase, scale).head);
 
   return (
     <Group transform={transform}>
-      {/* 1. Dynamic Ground Shadow */}
       <Group transform={shadowTransform}>
-        <Oval x={-s * 0.7} y={-s * 0.1} width={s * 1.4} height={s * 0.32} color="rgba(35,10,22,0.32)" />
-      </Group>
-
-      {/* 2. Left Wing (Back Wing behind body) */}
-      {imgWingLMem && (
-        <Group transform={wingUpperL} origin={{ x: -s * 0.08, y: -s * 0.55 }}>
-          <SkiaImage
-            image={imgWingLMem}
-            x={-s * 0.72}
-            y={-s * 0.65}
-            width={s * 1.15}
-            height={s * 0.82}
-            fit="contain"
-            opacity={0.88}
-          />
-          {imgWingLBone && (
-            <SkiaImage
-              image={imgWingLBone}
-              x={-s * 0.58}
-              y={-s * 0.75}
-              width={s * 0.95}
-              height={s * 0.68}
-              fit="contain"
-            />
-          )}
-        </Group>
-      )}
-
-      {/* 3. Parametric 5-Segment Tail FK Chain with Reference Sprites */}
-      <Group transform={tail0Rot} origin={{ x: -s * 0.35, y: -s * 0.25 }}>
-        {imgTail0 && (
-          <SkiaImage
-            image={imgTail0}
-            x={-s * 0.65}
-            y={-s * 0.48}
-            width={s * 0.78}
-            height={s * 0.58}
-            fit="contain"
-          />
-        )}
-        <Group transform={tail1Rot} origin={{ x: -s * 0.45, y: -s * 0.25 }}>
-          {imgTail1 && (
-            <SkiaImage
-              image={imgTail1}
-              x={-s * 0.36}
-              y={-s * 0.42}
-              width={s * 0.38}
-              height={s * 0.48}
-              fit="contain"
-            />
-          )}
-          <Group transform={tail2Rot} origin={{ x: -s * 0.65, y: -s * 0.25 }}>
-            {imgTail2 && (
-              <SkiaImage
-                image={imgTail2}
-                x={-s * 0.32}
-                y={-s * 0.35}
-                width={s * 0.34}
-                height={s * 0.38}
-                fit="contain"
-              />
-            )}
-            <Group transform={tail3Rot} origin={{ x: -s * 0.85, y: -s * 0.25 }}>
-              {imgTail3 && (
-                <SkiaImage
-                  image={imgTail3}
-                  x={-s * 0.3}
-                  y={-s * 0.28}
-                  width={s * 0.32}
-                  height={s * 0.3}
-                  fit="contain"
-                />
-              )}
-              <Group transform={tail4Rot} origin={{ x: -s * 1.05, y: -s * 0.25 }}>
-                {imgTail4 && (
-                  <SkiaImage
-                    image={imgTail4}
-                    x={-s * 0.52}
-                    y={-s * 0.25}
-                    width={s * 0.55}
-                    height={s * 0.25}
-                    fit="contain"
-                  />
-                )}
-              </Group>
-            </Group>
-          </Group>
-        </Group>
-      </Group>
-
-      {/* 4. Hind Left Leg (Large Muscular Thigh & Claws) */}
-      {imgThigh && (
-        <SkiaImage
-          image={imgThigh}
-          x={-s * 0.48}
-          y={-s * 0.45}
-          width={s * 0.55}
-          height={s * 0.78}
-          fit="contain"
+        <Oval
+          x={-tw * 0.42 * sizeMul}
+          y={-tw * 0.06 * sizeMul}
+          width={tw * 0.84 * sizeMul}
+          height={tw * 0.2 * sizeMul}
+          color="rgba(35,10,22,0.32)"
         />
-      )}
-      {imgPawBack && (
-        <SkiaImage
-          image={imgPawBack}
-          x={-s * 0.45}
-          y={-s * 0.15}
-          width={s * 0.38}
-          height={s * 0.32}
-          fit="contain"
-        />
-      )}
-
-      {/* 5. Main Torso Body from Reference */}
-      <Group transform={bodyBreathe} origin={{ x: 0, y: -s * 0.35 }}>
-        {imgTorso && (
-          <SkiaImage
-            image={imgTorso}
-            x={-s * 0.52}
-            y={-s * 0.75}
-            width={s * 0.98}
-            height={s * 1.08}
-            fit="contain"
-          />
-        )}
       </Group>
 
-      {/* 6. Parametric 4-Joint Neck FK Chain & Head with Reference Sprites */}
-      <Group transform={neck0Rot} origin={{ x: s * 0.12, y: -s * 0.58 }}>
-        {imgNeck0 && (
-          <SkiaImage
-            image={imgNeck0}
-            x={-s * 0.05}
-            y={-s * 0.75}
-            width={s * 0.42}
-            height={s * 0.72}
-            fit="contain"
-          />
-        )}
-        <Group transform={neck1Rot} origin={{ x: s * 0.13, y: -s * 0.78 }}>
-          {imgNeck1 && (
-            <SkiaImage
-              image={imgNeck1}
-              x={-s * 0.03}
-              y={-s * 0.75}
-              width={s * 0.42}
-              height={s * 0.72}
-              fit="contain"
-            />
-          )}
-          <Group transform={neck2Rot} origin={{ x: s * 0.16, y: -s * 0.98 }}>
-            {imgNeck2 && (
-              <SkiaImage
-                image={imgNeck2}
-                x={-s * 0.02}
-                y={-s * 0.82}
-                width={s * 0.4}
-                height={s * 0.82}
-                fit="contain"
-              />
-            )}
-            <Group transform={neck3Rot} origin={{ x: s * 0.2, y: -s * 1.18 }}>
-              {imgNeck3 && (
-                <SkiaImage
-                  image={imgNeck3}
-                  x={-s * 0.02}
-                  y={-s * 0.8}
-                  width={s * 0.38}
-                  height={s * 0.8}
-                  fit="contain"
-                />
-              )}
-              {/* 7. Head Hierarchy (Parented to Top of Neck with its own Pivot) */}
-              <Group transform={headRot} origin={{ x: s * 0.22, y: -s * 1.34 }}>
-                {isHoppingSV.value === 1 && imgHeadCheer ? (
-                  <SkiaImage
-                    image={imgHeadCheer}
-                    x={-s * 0.15}
-                    y={-s * 1.62}
-                    width={s * 0.98}
-                    height={s * 0.76}
-                    fit="contain"
-                  />
-                ) : imgHeadIdle ? (
-                  <SkiaImage
-                    image={imgHeadIdle}
-                    x={-s * 0.15}
-                    y={-s * 1.62}
-                    width={s * 0.98}
-                    height={s * 0.75}
-                    fit="contain"
-                  />
-                ) : null}
-              </Group>
-            </Group>
-          </Group>
+      {imgBackWing ? (
+        <Group transform={backWingT} origin={{ x: backWing.ox, y: backWing.oy }}>
+          <SkiaImage image={imgBackWing} x={backWing.x} y={backWing.y} width={backWing.w} height={backWing.h} fit="fill" />
         </Group>
+      ) : null}
+
+      {imgTail ? (
+        <Group transform={tailT} origin={{ x: tail.ox, y: tail.oy }}>
+          <SkiaImage image={imgTail} x={tail.x} y={tail.y} width={tail.w} height={tail.h} fit="fill" />
+        </Group>
+      ) : null}
+
+      {imgFrontWing ? (
+        <Group transform={frontWingT} origin={{ x: frontWing.ox, y: frontWing.oy }}>
+          <SkiaImage image={imgFrontWing} x={frontWing.x} y={frontWing.y} width={frontWing.w} height={frontWing.h} fit="fill" />
+        </Group>
+      ) : null}
+
+      <Group transform={torsoT} origin={{ x: torso.ox, y: torso.oy }}>
+        {imgTorso ? (
+          <SkiaImage image={imgTorso} x={torso.x} y={torso.y} width={torso.w} height={torso.h} fit="fill" />
+        ) : null}
       </Group>
 
-      {/* 8. Hero Front Right Wing */}
-      {imgWingRMem && (
-        <Group transform={wingUpperR} origin={{ x: 0, y: -s * 0.55 }}>
-          <SkiaImage
-            image={imgWingRMem}
-            x={-s * 0.15}
-            y={-s * 0.65}
-            width={s * 1.18}
-            height={s * 0.86}
-            fit="contain"
-            opacity={0.96}
-          />
-          {imgWingRBone && (
-            <SkiaImage
-              image={imgWingRBone}
-              x={-s * 0.15}
-              y={-s * 0.75}
-              width={s * 0.98}
-              height={s * 0.68}
-              fit="contain"
-            />
-          )}
+      {imgLegLeft ? (
+        <Group transform={legLeftT} origin={{ x: legLeft.ox, y: legLeft.oy }}>
+          <SkiaImage image={imgLegLeft} x={legLeft.x} y={legLeft.y} width={legLeft.w} height={legLeft.h} fit="fill" />
         </Group>
-      )}
+      ) : null}
 
-      {/* 9. Front Right Paw */}
-      {imgPawFront && (
-        <SkiaImage
-          image={imgPawFront}
-          x={s * 0.12}
-          y={-s * 0.16}
-          width={s * 0.32}
-          height={s * 0.38}
-          fit="contain"
-        />
-      )}
+      {imgLegRight ? (
+        <Group transform={legRightT} origin={{ x: legRight.ox, y: legRight.oy }}>
+          <SkiaImage image={imgLegRight} x={legRight.x} y={legRight.y} width={legRight.w} height={legRight.h} fit="fill" />
+        </Group>
+      ) : null}
+
+      {imgHead ? (
+        <Group transform={headT} origin={{ x: head.ox, y: head.oy }}>
+          <SkiaImage image={imgHead} x={head.x} y={head.y} width={head.w} height={head.h} fit="fill" />
+        </Group>
+      ) : null}
     </Group>
   );
+}
+
+function jointWorld(clock: number, clip: RubyClipControl, phase: number, scale: number) {
+  'worklet';
+  const u = (((clock % GROVE_LOOP_MS) + GROVE_LOOP_MS) % GROVE_LOOP_MS) / GROVE_LOOP_MS;
+  const loc = groveLocomotion(u);
+  const resolved = resolveRubyClip(loc.clip, clip);
+  const stride = resolved === 'walk' && loc.clip === 'idle' ? u * 4 : loc.stride;
+  const pose = sampleRubyPose(resolved, stride, (clock / GROVE_LOOP_MS) * TAU + phase);
+  const toT = (joint: { rotate: number; x: number; y: number }) => [
+    { translateX: joint.x * scale },
+    { translateY: joint.y * scale },
+    { rotate: joint.rotate },
+  ];
+  return {
+    backWing: toT(pose.backWing),
+    frontWing: toT(pose.frontWing),
+    tail: toT(pose.tail),
+    torso: toT(pose.torso),
+    legLeft: toT(pose.legLeft),
+    legRight: toT(pose.legRight),
+    head: toT(pose.head),
+  };
 }
 
 function SkyDrakeCreature({
@@ -664,12 +481,14 @@ function SkyDrakeCreature({
   destZ,
   camera,
   time,
+  sizeMul = 1,
 }: {
   creature: GroveCreature;
   homeZ: number;
   destZ: number;
   camera: IsoCamera;
   time: SharedValue<number>;
+  sizeMul?: number;
 }) {
   const tw = camera.tw;
   const ox = camera.ox;
@@ -679,7 +498,7 @@ function SkyDrakeCreature({
   const destX = creature.destX;
   const destY = creature.destY;
   const phase = creature.phase;
-  const s = tw * 0.32;
+  const s = tw * 0.32 * sizeMul;
 
   const mainColor = creature.color;
   const darkColor = shade(mainColor, -0.28);

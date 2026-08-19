@@ -1,0 +1,13 @@
+{
+  "meanAbsoluteError255": 1.5365,
+  "rootMeanSquareError255": 16.5525,
+  "changedPixelFraction": 0.019247,
+  "schemaVersion": 1,
+  "sourceImage": "source.png",
+  "layerCount": 6,
+  "referenceCanvas": {
+    "width": 1423,
+    "height": 1222
+  },
+  "note": "Numerical difference assists visual QA; generated concealed anatomy can make nonzero values valid."
+}

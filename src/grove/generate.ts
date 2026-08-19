@@ -8,6 +8,8 @@ import {
   type GroveCreature,
   type GroveTier,
   type GroveTile,
+  type GroveTree,
+  type GroveTuft,
   type GroveWorld,
   type TileKind,
 } from './types';
@@ -139,7 +141,7 @@ export function generateGrove(input: {
     if (inGrid(nx, ny)) blocked.add(`${nx},${ny}`);
   }
 
-  const trees = [];
+  const trees: { x: number; y: number; scale: number; phase: number; growth: 1 | 2 | 3 }[] = [];
   const tufts = [];
   const density = clamp(0.16 + ((quota - 16) / 48) * 0.2, 0.16, 0.38);
   for (const tile of landTiles) {
@@ -147,11 +149,15 @@ export function generateGrove(input: {
     if (blocked.has(key) || tile.kind === 'sand') continue;
     const plantRand = mulberry32(elemSeed(seed, 0x2c1b + tile.y * GROVE_N + tile.x));
     if ((tile.kind === 'grass' || tile.kind === 'meadow') && plantRand() < density) {
+      const distToEgg = Math.abs(tile.x - eggTile.x) + Math.abs(tile.y - eggTile.y);
+      const maturity = sessionsCompleted * 0.5 - distToEgg * 0.8;
+      const growth: 1 | 2 | 3 = maturity > 4 ? 3 : maturity > 1.5 ? 2 : 1;
       trees.push({
         x: tile.x,
         y: tile.y,
         scale: rr(plantRand, 0.82, 1.18),
         phase: plantRand() * Math.PI * 2,
+        growth,
       });
     } else if (chance(plantRand, 0.28)) {
       const buds = ['#E88FA2', '#F2C96A', '#E8E2EA', '#C79BD6'];
@@ -275,3 +281,87 @@ export function landBounds(tiles: GroveTile[]): { x0: number; y0: number; x1: nu
   if (x1 < 0) return { x0: 0, y0: 0, x1: GROVE_N - 1, y1: GROVE_N - 1 };
   return { x0, y0, x1, y1 };
 }
+
+export interface MeadowWorld {
+  trees: GroveTree[];
+  tufts: GroveTuft[];
+  dragonHome: { x: number; y: number };
+  dragonDest: { x: number; y: number };
+}
+
+/**
+ * Procedurally generates dynamic focus-time-driven trees and creature paths for a grid-based meadow land.
+ */
+export function generateMeadowWorld(input: {
+  seed: number;
+  focusMinutes: number;
+  sessionsCompleted: number;
+  tag: TagKey;
+  gridSize?: number;
+}): MeadowWorld {
+  const { seed, focusMinutes, sessionsCompleted } = input;
+  const gridSize = input.gridSize ?? 5;
+  const rand = mulberry32(elemSeed(seed, 0x93b7));
+
+  // Determine tree quota based on focusMinutes
+  let treeCount = 0;
+  if (focusMinutes >= 90) treeCount = 5;
+  else if (focusMinutes >= 60) treeCount = 4;
+  else if (focusMinutes >= 35) treeCount = 3;
+  else if (focusMinutes >= 20) treeCount = 2;
+  else if (focusMinutes >= 5) treeCount = 1;
+
+  // Center tile is reserved for dragon / egg
+  const center = Math.floor(gridSize / 2);
+  const dragonHome = { x: center, y: center };
+  const dragonDest = { x: center + 1, y: center };
+
+  // Candidate tiles for trees (avoiding center and dragon walking path)
+  const candidates: { x: number; y: number }[] = [];
+  for (let y = 0; y < gridSize; y++) {
+    for (let x = 0; x < gridSize; x++) {
+      if ((x === center && y === center) || (x === center + 1 && y === center)) continue;
+      candidates.push({ x, y });
+    }
+  }
+
+  // Deterministically shuffle candidate tiles using seed
+  for (let i = candidates.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+  }
+
+  const trees: GroveTree[] = [];
+  const selectedTiles = candidates.slice(0, treeCount);
+
+  selectedTiles.forEach((tile, index) => {
+    const treeRand = mulberry32(elemSeed(seed, 0x4a12 + tile.y * 31 + tile.x));
+    // Determine growth stage based on index and focusMinutes
+    let growth: 1 | 2 | 3 = 1;
+    if (index === 0) {
+      growth = focusMinutes >= 45 ? 3 : focusMinutes >= 20 ? 2 : 1;
+    } else if (index === 1) {
+      growth = focusMinutes >= 60 ? 3 : focusMinutes >= 35 ? 2 : 1;
+    } else if (index === 2) {
+      growth = focusMinutes >= 90 ? 3 : focusMinutes >= 50 ? 2 : 1;
+    } else {
+      growth = focusMinutes >= 90 ? 2 : 1;
+    }
+
+    trees.push({
+      x: tile.x,
+      y: tile.y,
+      scale: rr(treeRand, 0.85, 1.15),
+      phase: treeRand() * Math.PI * 2,
+      growth,
+    });
+  });
+
+  return {
+    trees,
+    tufts: [],
+    dragonHome,
+    dragonDest,
+  };
+}
+

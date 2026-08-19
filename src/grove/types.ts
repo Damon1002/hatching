@@ -24,6 +24,8 @@ export interface GroveTree {
   y: number;
   scale: number;
   phase: number;
+  /** Visual maturity: 1 = sapling, 2 = young (1 shoulder blob), 3 = mature (2 shoulder blobs). */
+  growth: 1 | 2 | 3;
 }
 
 export interface GroveTuft {

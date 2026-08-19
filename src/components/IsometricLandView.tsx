@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
-import { Canvas, Circle, Group, Path, useClock } from '@shopify/react-native-skia';
+import { Canvas, Group, Path, useClock } from '@shopify/react-native-skia';
 import { useDerivedValue, useReducedMotion, useSharedValue } from 'react-native-reanimated';
 
 import {
@@ -11,11 +11,14 @@ import {
   GroveTuftSprite,
   WaterGlint,
 } from './grove/GroveActors';
+import { SunnyMeadowLand } from './grove/SunnyMeadowLand';
+import type { RubyClipControl } from '../dragon/rubyPuppet';
 import { shade, withAlpha } from '../grove/color';
 import { generateGrove, landBounds, visibleTiles } from '../grove/generate';
 import { aerial, CRUST, diamondPath, faceColors, facePath, fitCamera, WATER_Z } from '../grove/iso';
 import { grovePalette, lidColor } from '../grove/palette';
 import type { TagKey } from '../theme';
+import type { LandStyleKey } from '../types';
 
 export interface IsometricLandViewProps {
   seed: number;
@@ -25,6 +28,9 @@ export interface IsometricLandViewProps {
   sessionsCompleted?: number;
   tag?: TagKey;
   speciesId?: string;
+  dragonClip?: RubyClipControl;
+  dragonSize?: number;
+  landStyle?: LandStyleKey;
 }
 
 type DrawItem =
@@ -43,6 +49,9 @@ export function IsometricLandView({
   sessionsCompleted = 0,
   tag = 'work',
   speciesId = 'baby_sky_drake',
+  dragonClip = 'auto',
+  dragonSize = 0.25,
+  landStyle = 'sunny_meadow',
 }: IsometricLandViewProps) {
   const { width: windowWidth } = useWindowDimensions();
   const sceneWidth = Math.min(windowWidth - 24, 380);
@@ -116,145 +125,154 @@ export function IsometricLandView({
   const creatureHome = world.tiles[world.creature.homeY][world.creature.homeX];
   const creatureDest = world.tiles[world.creature.destY][world.creature.destX];
 
+  const isSunnyMeadow = landStyle === 'sunny_meadow';
+  const meadowBbox = useMemo(() => ({ x0: 0, y0: 0, x1: 4, y1: 4 }), []);
+  const activeCamera = useMemo(() => {
+    if (isSunnyMeadow) {
+      return fitCamera(meadowBbox, sceneWidth, sceneHeight);
+    }
+    return camera;
+  }, [camera, isSunnyMeadow, meadowBbox, sceneHeight, sceneWidth]);
+
   return (
     <View style={[styles.container, { width: sceneWidth, height: sceneHeight }]} accessibilityLabel="Dragon grove island">
-      <View
-        style={[
-          styles.sunlightAura,
-          {
-            width: sceneWidth * 0.84,
-            height: sceneWidth * 0.84,
-            borderRadius: sceneWidth * 0.42,
-            backgroundColor: palette.skyGlow,
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.groundShadow,
-          {
-            width: sceneWidth * 0.74,
-            height: Math.max(38, sceneHeight * 0.16),
-            borderRadius: sceneHeight * 0.08,
-            backgroundColor: palette.shadow,
-          },
-        ]}
-      />
       <Canvas style={{ width: sceneWidth, height: sceneHeight }}>
-        <Circle cx={sceneWidth * 0.72} cy={sceneHeight * 0.16} r={sceneWidth * 0.18} color={palette.skyGlow} />
-        {items.map((item) => {
-          if (item.kind === 'column') {
-            const tile = world.tiles[item.y][item.x];
-            const right = item.x + 1 < world.n ? world.tiles[item.y][item.x + 1] : null;
-            const down = item.y + 1 < world.n ? world.tiles[item.y + 1][item.x] : null;
-            const zt = tile.kind === 'water' ? WATER_Z : tile.height;
-            const rightShown = right !== null && visibleKeys.has(`${item.x + 1},${item.y}`);
-            const downShown = down !== null && visibleKeys.has(`${item.x},${item.y + 1}`);
-            const zr = !rightShown ? -CRUST : right.kind === 'water' ? WATER_Z : right.height;
-            const zd = !downShown ? -CRUST : down.kind === 'water' ? WATER_Z : down.height;
-            const lid = aerial(lidColor(tile.kind, palette), tile.x, tile.y, bbox, palette.haze);
-            const faces = faceColors(tile.kind === 'water' ? palette.water : lid);
-            const leftFace = zr < zt ? facePath(item.x + 1, item.y, item.x + 1, item.y + 1, zt, zr, camera) : null;
-            const rightFace = zd < zt ? facePath(item.x, item.y + 1, item.x + 1, item.y + 1, zt, zd, camera) : null;
-            const stone =
-              tile.kind !== 'water' && leftFace
-                ? facePath(item.x + 1, item.y, item.x + 1, item.y + 1, zt - (zt + CRUST) * 0.38, zt - (zt + CRUST) * 0.62, camera)
-                : null;
-            return (
-              <Group key={item.key}>
-                {leftFace ? <Path path={leftFace} color={tile.kind === 'water' ? faces.left : palette.dirtLeft} /> : null}
-                {rightFace ? <Path path={rightFace} color={tile.kind === 'water' ? faces.right : palette.dirtRight} /> : null}
-                {stone ? <Path path={stone} color={palette.stone} opacity={0.78} /> : null}
-                <Path path={diamondPath(item.x, item.y, zt, camera)} color={lid} />
-                {tile.kind !== 'water' && (item.x + item.y) % 2 === 0 ? (
-                  <Path path={diamondPath(item.x, item.y, zt, camera)} color={shade(lid, -0.04)} />
-                ) : null}
-                {tile.worn > 0 ? (
-                  <Path path={diamondPath(item.x, item.y, zt, camera)} color={withAlpha(palette.sand, tile.worn)} />
-                ) : null}
-              </Group>
-            );
-          }
-          if (item.kind === 'tree') {
-            const tree = world.trees[item.index];
-            return (
-              <GroveTreeSprite
-                key={item.key}
-                tree={tree}
-                z={world.tiles[tree.y][tree.x].height}
-                camera={camera}
-                time={time}
-                leaf={palette.leaf}
-                leafDark={palette.leafDark}
-                bark={palette.bark}
-                snowy={world.season === 'winter'}
-              />
-            );
-          }
-          if (item.kind === 'tuft') {
-            const tuft = world.tufts[item.index];
-            return (
-              <GroveTuftSprite
-                key={item.key}
-                tuft={tuft}
-                z={world.tiles[tuft.y][tuft.x].height}
-                camera={camera}
-                time={time}
-                color={shade(palette.leafDark, -0.08)}
-                winter={world.season === 'winter'}
-              />
-            );
-          }
-          if (item.kind === 'ember') {
-            return (
-              <EmberMote
-                key={item.key}
-                x={world.egg.x}
-                y={world.egg.y}
-                z={eggTile.height}
-                camera={camera}
-                progress={progressSV}
-                focusing={focusingSV}
-                time={time}
-              />
-            );
-          }
-          if (item.kind === 'egg') {
-            return (
-              <GroveEgg
-                key={item.key}
-                x={world.egg.x}
-                y={world.egg.y}
-                z={eggTile.height}
-                camera={camera}
-                time={time}
-                progress={progressSV}
-                focusing={focusingSV}
-              />
-            );
-          }
-          return (
-            <GroveCreatureSprite
-              key={item.key}
-              creature={world.creature}
-              homeZ={creatureHome.height}
-              destZ={creatureDest.height}
-              camera={camera}
-              time={time}
-              speciesId={speciesId}
-            />
-          );
-        })}
-        {waterTiles.map((tile) => (
-          <WaterGlint
-            key={`g-${tile.x}-${tile.y}`}
-            x={tile.x}
-            y={tile.y}
-            camera={camera}
+        {isSunnyMeadow ? (
+          <SunnyMeadowLand
+            camera={activeCamera}
+            seed={seed}
             time={time}
-            phase={tile.x * 0.8 + tile.y * 0.55}
+            gridSize={5}
+            focusMinutes={focusMinutes}
+            sessionsCompleted={sessionsCompleted}
+            tag={tag}
+            speciesId={speciesId}
+            dragonClip={dragonClip}
+            dragonSize={dragonSize}
+            progressSV={progressSV}
+            focusingSV={focusingSV}
+            palette={palette}
           />
-        ))}
+        ) : (
+          <>
+            {items.map((item) => {
+              if (item.kind === 'column') {
+                const tile = world.tiles[item.y][item.x];
+                const right = item.x + 1 < world.n ? world.tiles[item.y][item.x + 1] : null;
+                const down = item.y + 1 < world.n ? world.tiles[item.y + 1][item.x] : null;
+                const zt = tile.kind === 'water' ? WATER_Z : tile.height;
+                const rightShown = right !== null && visibleKeys.has(`${item.x + 1},${item.y}`);
+                const downShown = down !== null && visibleKeys.has(`${item.x},${item.y + 1}`);
+                const zr = !rightShown ? -CRUST : right.kind === 'water' ? WATER_Z : right.height;
+                const zd = !downShown ? -CRUST : down.kind === 'water' ? WATER_Z : down.height;
+                const lid = aerial(lidColor(tile.kind, palette), tile.x, tile.y, bbox, palette.haze);
+                const faces = faceColors(tile.kind === 'water' ? palette.water : lid);
+                const leftFace = zr < zt ? facePath(item.x + 1, item.y, item.x + 1, item.y + 1, zt, zr, camera) : null;
+                const rightFace = zd < zt ? facePath(item.x, item.y + 1, item.x + 1, item.y + 1, zt, zd, camera) : null;
+                const stone =
+                  tile.kind !== 'water' && leftFace
+                    ? facePath(item.x + 1, item.y, item.x + 1, item.y + 1, zt - (zt + CRUST) * 0.38, zt - (zt + CRUST) * 0.62, camera)
+                    : null;
+                return (
+                  <Group key={item.key}>
+                    {leftFace ? <Path path={leftFace} color={tile.kind === 'water' ? faces.left : palette.dirtLeft} /> : null}
+                    {rightFace ? <Path path={rightFace} color={tile.kind === 'water' ? faces.right : palette.dirtRight} /> : null}
+                    {stone ? <Path path={stone} color={palette.stone} opacity={0.78} /> : null}
+                    <Path path={diamondPath(item.x, item.y, zt, camera)} color={lid} />
+                    {tile.kind !== 'water' && (item.x + item.y) % 2 === 0 ? (
+                      <Path path={diamondPath(item.x, item.y, zt, camera)} color={shade(lid, -0.04)} />
+                    ) : null}
+                    {tile.worn > 0 ? (
+                      <Path path={diamondPath(item.x, item.y, zt, camera)} color={withAlpha(palette.sand, tile.worn)} />
+                    ) : null}
+                  </Group>
+                );
+              }
+              if (item.kind === 'tree') {
+                const tree = world.trees[item.index];
+                return (
+                  <GroveTreeSprite
+                    key={item.key}
+                    tree={tree}
+                    z={world.tiles[tree.y][tree.x].height}
+                    camera={camera}
+                    time={time}
+                    leaf={palette.leaf}
+                    leafDark={palette.leafDark}
+                    leafAccent={palette.leafAccent}
+                    bark={palette.bark}
+                    snowy={world.season === 'winter'}
+                  />
+                );
+              }
+              if (item.kind === 'tuft') {
+                const tuft = world.tufts[item.index];
+                return (
+                  <GroveTuftSprite
+                    key={item.key}
+                    tuft={tuft}
+                    z={world.tiles[tuft.y][tuft.x].height}
+                    camera={camera}
+                    time={time}
+                    color={shade(palette.leafDark, -0.08)}
+                    winter={world.season === 'winter'}
+                  />
+                );
+              }
+              if (item.kind === 'ember') {
+                return (
+                  <EmberMote
+                    key={item.key}
+                    x={world.egg.x}
+                    y={world.egg.y}
+                    z={eggTile.height}
+                    camera={camera}
+                    progress={progressSV}
+                    focusing={focusingSV}
+                    time={time}
+                  />
+                );
+              }
+              if (item.kind === 'egg') {
+                return (
+                  <GroveEgg
+                    key={item.key}
+                    x={world.egg.x}
+                    y={world.egg.y}
+                    z={eggTile.height}
+                    camera={camera}
+                    time={time}
+                    progress={progressSV}
+                    focusing={focusingSV}
+                  />
+                );
+              }
+              return (
+                <GroveCreatureSprite
+                  key={item.key}
+                  creature={world.creature}
+                  homeZ={creatureHome.height}
+                  destZ={creatureDest.height}
+                  camera={camera}
+                  time={time}
+                  speciesId={speciesId}
+                  dragonClip={dragonClip}
+                  dragonSize={dragonSize}
+                />
+              );
+            })}
+            {waterTiles.map((tile) => (
+              <WaterGlint
+                key={`g-${tile.x}-${tile.y}`}
+                x={tile.x}
+                y={tile.y}
+                camera={camera}
+                time={time}
+                phase={tile.x * 0.8 + tile.y * 0.55}
+              />
+            ))}
+          </>
+        )}
       </Canvas>
     </View>
   );
@@ -265,18 +283,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-  },
-  sunlightAura: {
-    position: 'absolute',
-    width: 280,
-    height: 280,
-    borderRadius: 140,
-  },
-  groundShadow: {
-    position: 'absolute',
-    bottom: 18,
-    width: 260,
-    height: 44,
-    borderRadius: 22,
   },
 });

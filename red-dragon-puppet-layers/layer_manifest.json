@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "character": "red_dragon",
+  "sourceImage": "source.png",
+  "perspectiveConvention": "front/back refer to visual depth; back wing is the partially hidden image-right wing",
+  "referenceCanvas": {
+    "width": 1359,
+    "height": 1158
+  },
+  "generationMode": "built-in image editing with deterministic checkerboard removal",
+  "layers": [
+    {
+      "file": "layer_back_wing.png",
+      "name": "back_wing",
+      "parent": "neck_and_torso",
+      "attachment": "back_shoulder",
+      "zIndex": 10,
+      "originPx": {
+        "x": 820,
+        "y": 350
+      },
+      "pivotNormalized": {
+        "x": 0.17,
+        "y": 0.27
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "entire concealed inner wing and shoulder root; visible image-right fragment used as reference"
+    },
+    {
+      "file": "layer_tail.png",
+      "name": "tail",
+      "parent": "neck_and_torso",
+      "attachment": "tail_root",
+      "zIndex": 20,
+      "originPx": {
+        "x": 65,
+        "y": 555
+      },
+      "pivotNormalized": {
+        "x": 0.92,
+        "y": 0.48
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "concealed pelvis root"
+    },
+    {
+      "file": "layer_front_wing.png",
+      "name": "front_wing",
+      "parent": "neck_and_torso",
+      "attachment": "front_shoulder",
+      "zIndex": 25,
+      "originPx": {
+        "x": 215,
+        "y": 350
+      },
+      "pivotNormalized": {
+        "x": 0.88,
+        "y": 0.22
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "concealed shoulder anchor"
+    },
+    {
+      "file": "layer_neck_and_torso.png",
+      "name": "neck_and_torso",
+      "parent": null,
+      "attachment": "body_root",
+      "zIndex": 30,
+      "originPx": {
+        "x": 565,
+        "y": 320
+      },
+      "pivotNormalized": {
+        "x": 0.55,
+        "y": 0.62
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "contours concealed by head, wing roots, hips, and tail root"
+    },
+    {
+      "file": "layer_legs.png",
+      "name": "legs",
+      "parent": "neck_and_torso",
+      "attachment": "hip_center",
+      "zIndex": 50,
+      "originPx": {
+        "x": 645,
+        "y": 710
+      },
+      "pivotNormalized": {
+        "x": 0.5,
+        "y": 0.16
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "concealed upper thighs and hip overlap"
+    },
+    {
+      "file": "layer_head.png",
+      "name": "head",
+      "parent": "neck_and_torso",
+      "attachment": "skull_base",
+      "zIndex": 60,
+      "originPx": {
+        "x": 535,
+        "y": 5
+      },
+      "pivotNormalized": {
+        "x": 0.53,
+        "y": 0.84
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "concealed neck insertion"
+    }
+  ]
+}

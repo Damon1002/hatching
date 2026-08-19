@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "character": "red_dragon",
+  "sourceImage": "view.png",
+  "perspectiveConvention": "three quarter back view",
+  "referenceCanvas": {
+    "width": 1359,
+    "height": 1158
+  },
+  "generationMode": "built-in image editing with deterministic layer extraction",
+  "layers": [
+    {
+      "file": "layer_back_wing.png",
+      "name": "back_wing",
+      "parent": "neck_and_torso",
+      "attachment": "back_shoulder",
+      "zIndex": 10,
+      "originPx": {
+        "x": 303,
+        "y": 375
+      },
+      "pivotNormalized": {
+        "x": 0.2,
+        "y": 0.3
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "far wing anchor"
+    },
+    {
+      "file": "layer_tail.png",
+      "name": "tail",
+      "parent": "neck_and_torso",
+      "attachment": "tail_root",
+      "zIndex": 20,
+      "originPx": {
+        "x": 137,
+        "y": 589
+      },
+      "pivotNormalized": {
+        "x": 0.9,
+        "y": 0.5
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "pelvis root"
+    },
+    {
+      "file": "layer_front_wing.png",
+      "name": "front_wing",
+      "parent": "neck_and_torso",
+      "attachment": "front_shoulder",
+      "zIndex": 25,
+      "originPx": {
+        "x": 303,
+        "y": 373
+      },
+      "pivotNormalized": {
+        "x": 0.8,
+        "y": 0.25
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "hero wing shoulder joint"
+    },
+    {
+      "file": "layer_neck_and_torso.png",
+      "name": "neck_and_torso",
+      "parent": null,
+      "attachment": "body_root",
+      "zIndex": 30,
+      "originPx": {
+        "x": 448,
+        "y": 288
+      },
+      "pivotNormalized": {
+        "x": 0.5,
+        "y": 0.65
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "3/4 back neck and torso with dorsal spine"
+    },
+    {
+      "file": "layer_legs.png",
+      "name": "legs",
+      "parent": "neck_and_torso",
+      "attachment": "hip_center",
+      "zIndex": 50,
+      "originPx": {
+        "x": 538,
+        "y": 609
+      },
+      "pivotNormalized": {
+        "x": 0.5,
+        "y": 0.2
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "paws and hips from behind"
+    },
+    {
+      "file": "layer_head.png",
+      "name": "head",
+      "parent": "neck_and_torso",
+      "attachment": "skull_base",
+      "zIndex": 60,
+      "originPx": {
+        "x": 423,
+        "y": 0
+      },
+      "pivotNormalized": {
+        "x": 0.55,
+        "y": 0.82
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "back of skull crest and neck insertion"
+    }
+  ]
+}

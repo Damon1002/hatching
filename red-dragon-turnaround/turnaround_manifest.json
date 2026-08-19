@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "turnaround",
+  "character": "red_dragon",
+  "sourceImage": "source.png",
+  "sourceViewId": "three_quarter",
+  "facing": "right",
+  "pose": "sit",
+  "referenceCanvas": {
+    "width": 1359,
+    "height": 1158
+  },
+  "groundY": 1040,
+  "perspectiveConvention": "view ids are camera yaw; layer front/back names are from visual depth",
+  "generationMode": "image-to-image edits chained from the source with deterministic layer segmentation",
+  "views": [
+    {
+      "id": "front",
+      "yawDegrees": 0,
+      "folder": "views/front",
+      "viewImage": "view.png",
+      "derivedFrom": "source.png",
+      "reconstructed": true
+    },
+    {
+      "id": "three_quarter",
+      "yawDegrees": 45,
+      "folder": "views/three_quarter",
+      "viewImage": "view.png",
+      "derivedFrom": "source.png",
+      "reconstructed": false
+    },
+    {
+      "id": "side",
+      "yawDegrees": 90,
+      "folder": "views/side",
+      "viewImage": "view.png",
+      "derivedFrom": "source.png",
+      "reconstructed": true
+    },
+    {
+      "id": "three_quarter_back",
+      "yawDegrees": 135,
+      "folder": "views/three_quarter_back",
+      "viewImage": "view.png",
+      "derivedFrom": "source.png",
+      "reconstructed": true
+    },
+    {
+      "id": "back",
+      "yawDegrees": 180,
+      "folder": "views/back",
+      "viewImage": "view.png",
+      "derivedFrom": "source.png",
+      "reconstructed": true
+    }
+  ]
+}

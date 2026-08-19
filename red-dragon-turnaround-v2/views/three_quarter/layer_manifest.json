@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 2,
+  "character": "red_dragon",
+  "sourceImage": "source.png",
+  "perspectiveConvention": "front/back names refer to visual depth in this legacy-compatible rig",
+  "referenceCanvas": {
+    "width": 1423,
+    "height": 1222
+  },
+  "generationMode": "image-to-image yaw masters with deterministic source-pixel layer cleanup",
+  "layers": [
+    {
+      "file": "layer_back_wing.png",
+      "name": "back_wing",
+      "parent": "neck_and_torso",
+      "attachment": "back_shoulder",
+      "zIndex": 10,
+      "originPx": {
+        "x": 844,
+        "y": 375
+      },
+      "pivotNormalized": {
+        "x": 0.17,
+        "y": 0.27
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "entire concealed inner wing and shoulder root; visible image-right fragment used as reference",
+      "sourceTreatment": "visible pixels preserved from the accepted yaw; detached neighboring fragments removed; legacy concealed completion retained where present"
+    },
+    {
+      "file": "layer_tail.png",
+      "name": "tail",
+      "parent": "neck_and_torso",
+      "attachment": "tail_root",
+      "zIndex": 20,
+      "originPx": {
+        "x": 98,
+        "y": 593
+      },
+      "pivotNormalized": {
+        "x": 0.92,
+        "y": 0.48
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "concealed pelvis root",
+      "sourceTreatment": "visible pixels preserved from the accepted yaw; detached neighboring fragments removed; legacy concealed completion retained where present"
+    },
+    {
+      "file": "layer_neck_and_torso.png",
+      "name": "neck_and_torso",
+      "parent": null,
+      "attachment": "body_root",
+      "zIndex": 30,
+      "originPx": {
+        "x": 598,
+        "y": 355
+      },
+      "pivotNormalized": {
+        "x": 0.55,
+        "y": 0.62
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "contours concealed by head, wing roots, hips, and tail root",
+      "sourceTreatment": "visible pixels preserved from the accepted yaw; detached neighboring fragments removed; legacy concealed completion retained where present"
+    },
+    {
+      "file": "layer_front_wing.png",
+      "name": "front_wing",
+      "parent": "neck_and_torso",
+      "attachment": "front_shoulder",
+      "zIndex": 25,
+      "originPx": {
+        "x": 244,
+        "y": 380
+      },
+      "pivotNormalized": {
+        "x": 0.88,
+        "y": 0.22
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "concealed shoulder anchor",
+      "sourceTreatment": "visible pixels preserved from the accepted yaw; detached neighboring fragments removed; legacy concealed completion retained where present"
+    },
+    {
+      "file": "layer_legs.png",
+      "name": "legs",
+      "parent": "neck_and_torso",
+      "attachment": "hip_center",
+      "zIndex": 50,
+      "originPx": {
+        "x": 673,
+        "y": 738
+      },
+      "pivotNormalized": {
+        "x": 0.5,
+        "y": 0.16
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "concealed upper thighs and hip overlap",
+      "sourceTreatment": "visible pixels preserved from the accepted yaw; detached neighboring fragments removed; legacy concealed completion retained where present"
+    },
+    {
+      "file": "layer_head.png",
+      "name": "head",
+      "parent": "neck_and_torso",
+      "attachment": "skull_base",
+      "zIndex": 60,
+      "originPx": {
+        "x": 565,
+        "y": 36
+      },
+      "pivotNormalized": {
+        "x": 0.53,
+        "y": 0.84
+      },
+      "reconstructed": true,
+      "reconstructedRegion": "concealed neck insertion",
+      "sourceTreatment": "visible pixels preserved from the accepted yaw; detached neighboring fragments removed; legacy concealed completion retained where present"
+    }
+  ]
+}

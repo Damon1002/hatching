@@ -1,0 +1,4 @@
+interface:
+  display_name: "Puppet Layer Builder"
+  short_description: "Build layered five-view character turnarounds"
+  default_prompt: "Use $puppet-layer-builder to generate a pose-locked front, 3/4, side, 3/4-back, and back turnaround from this character, with a complete validated transparent PNG layer package for every view."

@@ -1,4 +1,4 @@
-import { DragonSpecies, TagInfo } from '../types';
+import { DragonSpecies, LandBiome, TagInfo } from '../types';
 
 export const FOCUS_TAGS: TagInfo[] = [
   { key: 'work', label: '工作', emoji: '🌿', colorKey: 'work' },
@@ -220,5 +220,30 @@ export const SPECIES_CATALOG: DragonSpecies[] = [
     unlocked: true,
     isVip: true,
     category: 'plant',
+  },
+];
+
+export const LAND_CATALOG: LandBiome[] = [
+  {
+    id: 'sunny_meadow',
+    name: '阳光原野 Sunny Meadow',
+    subtitle: '金辉黏土 · 雏菊草甸 25格',
+    element: '大地 · 晨光',
+    description: '铺满嫩绿青草与野雏菊的明媚25格方块浮岛。浮岛基岩由温润的金褐黏土构成，边缘点缀着波浪草边。',
+    icon: '🌾',
+    color: '#B6DA20',
+    unlocked: true,
+    isVip: false,
+  },
+  {
+    id: 'terraced_grove',
+    name: '灵洲浮岛 Terraced Grove',
+    subtitle: '多层阶梯 · 经典心流林地',
+    element: '源力 · 苍翠',
+    description: '由心流能量构筑的多层阶梯浮岛。微风拂过水面泛起粼粼微光，灵树随专注时光悄然生长。',
+    icon: '🏝️',
+    color: '#7DB866',
+    unlocked: true,
+    isVip: false,
   },
 ];
