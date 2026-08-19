@@ -1,0 +1,18 @@
+# Cursor AI Rules for Hatching Project
+
+Always consult the repository skills before generating or editing code:
+
+1. **Flora 3-Form Growth Workflow**: `.agents/skills/flora-3form-growth-workflow/SKILL.md`
+   - Form 1 (Basic): 10m - 59m focus time
+   - Form 2 (Advanced): 60m - 119m focus time
+   - Form 3 (Majestic): 120m - 180m max focus time
+
+2. **Isometric Land Biomes**: `.agents/skills/isometric-land-biome-workflow/SKILL.md`
+   - Ground tiles and flora must render first as a solid foundation plane.
+   - Upright actors (Trees, Dragons) are depth-sorted by `(x + y) * 2 + layerOffset`.
+   - Never interleave ground tiles into the actor depth-sort array.
+
+3. **Rendering & Animations**: `.agents/skills/grove-sprite-rendering/SKILL.md`
+   - Skia for 2D GPU rendering.
+   - Reanimated worklets for 120 FPS puppet kinematics.
+   - Run `npx tsc --noEmit` to verify type integrity.

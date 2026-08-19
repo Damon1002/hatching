@@ -28,10 +28,10 @@ export type RubyLocomotion = {
 };
 
 const TAU = Math.PI * 2;
-const WALK_OUT_END = 0.26;
-const WALK_BACK_START = 0.52;
+const WALK_OUT_END = 0.28;
+const WALK_BACK_START = 0.50;
 const WALK_BACK_END = 0.78;
-const WALK_CYCLES = 3;
+const WALK_CYCLES = 3.5;
 
 function joint(rotate = 0, x = 0, y = 0): RubyJoint {
   'worklet';
@@ -42,11 +42,6 @@ function smooth01(t: number): number {
   'worklet';
   const x = t < 0 ? 0 : t > 1 ? 1 : t;
   return x * x * (3 - 2 * x);
-}
-
-function lagSin(theta: number, lag: number): number {
-  'worklet';
-  return Math.sin(theta - lag);
 }
 
 export function groveLocomotion(loop01: number): RubyLocomotion {
@@ -71,43 +66,78 @@ export function resolveRubyClip(autoClip: RubyClip, control: RubyClipControl = '
   return control === 'auto' ? autoClip : control;
 }
 
+/**
+ * Real-time Kinematic Worklet for lively, expressive 2.5D dragon puppet animation.
+ * Features high-stepping leg gaits, energetic wing balance flapping, wave tail wagging,
+ * and curious head bobbing.
+ */
 export function sampleRubyPose(clip: RubyClip, stride: number, idlePhase: number): RubyPose {
   'worklet';
-  const breathe = Math.sin(idlePhase);
+  const breathe = Math.sin(idlePhase * 1.6);
+  const breathSlow = Math.sin(idlePhase * 0.8);
 
   if (clip === 'walk') {
+    // Walk cycle angular phase
     const th = stride * WALK_CYCLES * TAU;
+    // Settle curve ensures smooth ease-in from standstill and ease-out to stop
     const settle = Math.sin(stride * Math.PI);
-    const hips = lagSin(th, 0) * settle;
-    const chest = lagSin(th, 0.4) * settle;
-    const headFollow = lagSin(th, 0.85) * settle;
-    const tailFollow = lagSin(th, 2.55) * settle;
-    const wingBalance = lagSin(th, 0.55) * settle;
-    const rearStep = Math.max(0, lagSin(th, 0.15)) * settle;
-    const frontStep = Math.max(0, lagSin(th, Math.PI + 0.15)) * settle;
+
+    // 1. Primary Leg Locomotion (High-stepping, alternating leg swings)
+    // Left Leg (rear leg)
+    const leftSwing = Math.sin(th) * 0.45 * settle;
+    const leftLift = -Math.max(0, Math.sin(th)) * 42 * settle;
+    const leftPush = Math.cos(th) * 20 * settle;
+
+    // Right Leg (front leg, anti-phase by PI)
+    const rightSwing = Math.sin(th + Math.PI) * 0.48 * settle;
+    const rightLift = -Math.max(0, Math.sin(th + Math.PI)) * 48 * settle;
+    const rightPush = Math.cos(th + Math.PI) * 22 * settle;
+
+    // 2. Body Dynamics (Step bobbing & waddle tilt)
+    const stepBob = -Math.abs(Math.sin(th)) * 22 * settle;
+    const waddleTilt = Math.sin(th) * 0.085 * settle;
+    const torsoCompression = Math.sin(th * 2) * 8 * settle;
+
+    // 3. Wing Flapping (Flaps rhythmically to assist balance during locomotion)
+    const wingFlap = Math.sin(th * 2 - 0.3) * 0.35 * settle;
+    const backWingFlap = -Math.sin(th * 2 - 0.5) * 0.30 * settle;
+
+    // 4. Tail Follow-Through (Sinusoidal wave lag behind hip motion)
+    const tailSwing = Math.sin(th - 1.2) * 0.38 * settle;
+    const tailBounce = Math.cos(th * 2 - 0.8) * 18 * settle;
+
+    // 5. Head Dynamics (Curious bobbing & pecking pitch)
+    const headNod = Math.sin(th * 2 + 0.4) * 0.20 * settle;
+    const headBob = Math.sin(th * 2) * 10 * settle;
+
     return {
-      rootTilt: hips * 0.018,
-      rootBob: Math.abs(chest) * 8,
-      backWing: joint(wingBalance * -0.02 + breathe * 0.008),
-      frontWing: joint(wingBalance * 0.028 + breathe * 0.01),
-      tail: joint(tailFollow * 0.032 + breathe * 0.012),
-      torso: joint(0, hips * 3, chest * 2 + breathe * 1.5),
-      legLeft: joint(hips * 0.035, hips * 2, -rearStep * 16),
-      legRight: joint(-hips * 0.05, -hips * 3, -frontStep * 22),
-      head: joint(headFollow * -0.02 + breathe * 0.012, 0, Math.abs(headFollow) * -3),
+      rootTilt: waddleTilt,
+      rootBob: stepBob,
+      backWing: joint(backWingFlap + breathe * 0.03, 0, backWingFlap * 12),
+      frontWing: joint(wingFlap + breathe * 0.035, 0, -wingFlap * 15),
+      tail: joint(tailSwing + breathSlow * 0.05, 0, tailBounce),
+      torso: joint(waddleTilt * 0.5, 0, torsoCompression + breathe * 2.5),
+      legLeft: joint(leftSwing, leftPush, leftLift),
+      legRight: joint(rightSwing, rightPush, rightLift),
+      head: joint(headNod + breathe * 0.04, 0, headBob),
     };
   }
 
-  const curious = Math.sin(idlePhase * 0.55);
+  // IDLE POSE (Gentle living creature breathing, subtle curious head tilt, soft tail wag)
+  const idleCurious = Math.sin(idlePhase * 0.5);
+  const idleWingTwitch = Math.sin(idlePhase * 2.2) * (Math.sin(idlePhase * 0.3) > 0.4 ? 0.10 : 0.03);
+  const idleTailSway = Math.sin(idlePhase * 0.9) * 0.14;
+  const idleHeadLook = Math.sin(idlePhase * 0.7) * 0.08;
+
   return {
-    rootTilt: curious * 0.006,
-    rootBob: 0,
-    backWing: joint(Math.sin(idlePhase * 0.9 + 0.4) * 0.016),
-    frontWing: joint(Math.sin(idlePhase * 0.9) * 0.02),
-    tail: joint(Math.sin(idlePhase * 0.7) * 0.026),
-    torso: joint(0, 0, breathe * 2.2),
-    legLeft: joint(curious * 0.008),
-    legRight: joint(curious * -0.01),
-    head: joint(breathe * 0.014 + curious * 0.012),
+    rootTilt: idleCurious * 0.018,
+    rootBob: breathe * 2.0,
+    backWing: joint(-idleWingTwitch * 0.8 + breathe * 0.03),
+    frontWing: joint(idleWingTwitch + breathe * 0.04),
+    tail: joint(idleTailSway + breathSlow * 0.06, 0, Math.sin(idlePhase * 1.4) * 4),
+    torso: joint(0, 0, breathe * 4.0),
+    legLeft: joint(idleCurious * 0.02),
+    legRight: joint(-idleCurious * 0.02),
+    head: joint(idleHeadLook + breathe * 0.05, 0, -breathe * 3),
   };
 }
