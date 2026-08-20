@@ -96,63 +96,84 @@ export function GroveTreeSprite({
   const phase = tree.phase;
   const targetGrowth = tree.growth; // Target unlocked form (1 = Basic, 2 = Advanced, 3 = Majestic)
 
-  // Determine active visual form during live growth or idle island state
-  const liveForm = useDerivedValue(() => {
-    if (!focusing || focusing.value < 0.05 || !progress) {
-      return targetGrowth;
-    }
-    const p = progress.value;
-    if (targetGrowth === 1) return 1;
-    if (targetGrowth === 2) return p >= 0.45 ? 2 : 1;
-    // Target growth 3
-    if (p < 0.35) return 1;
-    if (p < 0.70) return 2;
-    return 3;
-  });
-
-  // Smooth continuous live growth scale curve with spring pop & bloom transitions
-  const liveScale = useDerivedValue(() => {
+  // 1. Continuous Live Growth Scale (Sprouts continuously from 0.35x up to 1.0x)
+  const liveGrowthScale = useDerivedValue(() => {
     if (!focusing || focusing.value < 0.05 || !progress) {
       return 1.0;
     }
     const p = progress.value;
-    if (targetGrowth === 1) {
-      // Form 1: Springs from sprout (0.35x) to full sapling (1.0x)
-      return 0.35 + p * 0.65;
-    }
-    if (targetGrowth === 2) {
-      // Form 2: Form 1 phase (0.35x -> 1.0x) then pop & bloom into Form 2
-      if (p < 0.45) {
-        return 0.35 + (p / 0.45) * 0.65;
-      }
-      const t2 = (p - 0.45) / 0.55;
-      // Rewarding organic bloom pulse on transition
-      return 1.0 + t2 * 0.35 + Math.sin(t2 * Math.PI) * 0.08;
-    }
-    // Form 3: 3 complete growth tiers (Sprout -> Sapling -> Lush -> Ancient Majestic)
-    if (p < 0.35) {
-      return 0.35 + (p / 0.35) * 0.65;
-    }
-    if (p < 0.70) {
-      const t2 = (p - 0.35) / 0.35;
-      return 1.0 + t2 * 0.35 + Math.sin(t2 * Math.PI) * 0.06;
-    }
-    const t3 = (p - 0.70) / 0.30;
-    return 1.35 + t3 * 0.40 + Math.sin(t3 * Math.PI) * 0.09;
+    // Linear continuous growth curve with ease-out elasticity
+    return 0.35 + p * 0.65;
   });
 
-  // Base scale multiplier for active form
-  const formScale = targetGrowth === 3 ? 1.75 : targetGrowth === 2 ? 1.35 : 0.95;
-  const spriteW = s * formScale;
-  const spriteH = spriteW;
+  // 2. Continuous Phase Morphing Opacities (Alpha Blending between Form 1, Form 2, and Form 3)
+  const opacityForm1 = useDerivedValue(() => {
+    if (!focusing || focusing.value < 0.05 || !progress) {
+      return targetGrowth === 1 ? 1.0 : 0.0;
+    }
+    const p = progress.value;
+    if (targetGrowth === 1) return 1.0;
+    if (targetGrowth === 2) {
+      if (p < 0.35) return 1.0;
+      if (p > 0.60) return 0.0;
+      const t = (p - 0.35) / 0.25;
+      return 1.0 - t * t * (3 - 2 * t);
+    }
+    // Target growth 3
+    if (p < 0.25) return 1.0;
+    if (p > 0.45) return 0.0;
+    const t = (p - 0.25) / 0.20;
+    return 1.0 - t * t * (3 - 2 * t);
+  });
 
-  // Standard Ground Anchor: Center bottom of trunk base at (X: 50%, Y: 90%)
-  const spriteX = originX - spriteW * 0.50;
-  const spriteY = originY - spriteH * 0.90;
+  const opacityForm2 = useDerivedValue(() => {
+    if (!focusing || focusing.value < 0.05 || !progress) {
+      return targetGrowth === 2 ? 1.0 : 0.0;
+    }
+    const p = progress.value;
+    if (targetGrowth === 1) return 0.0;
+    if (targetGrowth === 2) {
+      if (p < 0.35) return 0.0;
+      if (p > 0.60) return 1.0;
+      const t = (p - 0.35) / 0.25;
+      return t * t * (3 - 2 * t);
+    }
+    // Target growth 3
+    if (p < 0.25) return 0.0;
+    if (p < 0.45) {
+      const t = (p - 0.25) / 0.20;
+      return t * t * (3 - 2 * t);
+    }
+    if (p <= 0.65) return 1.0;
+    if (p > 0.85) return 0.0;
+    const t = (p - 0.65) / 0.20;
+    return 1.0 - t * t * (3 - 2 * t);
+  });
+
+  const opacityForm3 = useDerivedValue(() => {
+    if (!focusing || focusing.value < 0.05 || !progress) {
+      return targetGrowth === 3 ? 1.0 : 0.0;
+    }
+    const p = progress.value;
+    if (targetGrowth !== 3) return 0.0;
+    if (p < 0.65) return 0.0;
+    if (p > 0.85) return 1.0;
+    const t = (p - 0.65) / 0.20;
+    return t * t * (3 - 2 * t);
+  });
+
+  // Base dimensions for the 3 visual forms
+  const w1 = s * 0.95;
+  const w2 = s * 1.35;
+  const w3 = s * 1.75;
+
+  // Maximum active width for ground shadow
+  const maxW = targetGrowth === 3 ? w3 : targetGrowth === 2 ? w2 : w1;
+  const shadowRadius = maxW * 0.26;
 
   const transform = useDerivedValue(() => {
     const sway = Math.sin((time.value / GROVE_LOOP_MS) * TAU + phase) * 0.038;
-    const scale = liveScale.value;
+    const scale = liveGrowthScale.value;
     return [
       { scaleX: scale },
       { scaleY: scale },
@@ -160,19 +181,10 @@ export function GroveTreeSprite({
     ];
   });
 
-  const activeImage = targetGrowth === 3 ? imgForm3 : targetGrowth === 2 ? imgForm2 : imgForm1;
-  const shadowRadius = spriteW * 0.26;
-
   // Floating ambient magic firefly particles for Form 3
-  const mote1Y = useDerivedValue(() => originY - spriteH * 0.55 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 1.5 + phase) * 8);
-  const mote2Y = useDerivedValue(() => originY - spriteH * 0.70 + Math.cos((time.value / GROVE_LOOP_MS) * TAU * 1.2 + phase + 1.5) * 10);
-  const moteOpacity = useDerivedValue(() => (targetGrowth === 3 ? 0.65 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2) * 0.25 : 0));
-
-  // Fallback procedural geometry if image is loading
-  const trunkH = s * (targetGrowth === 3 ? 0.60 : targetGrowth === 2 ? 0.52 : 0.44);
-  const crownY = originY - trunkH - s * 0.19;
-  const darkCrown = blobPath(originX, crownY, s * 0.33, s * 0.29, phase);
-  const lightCrown = blobPath(originX, crownY - s * 0.06, s * 0.25, s * 0.21, phase + 1.7);
+  const mote1Y = useDerivedValue(() => originY - w3 * 0.55 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 1.5 + phase) * 8);
+  const mote2Y = useDerivedValue(() => originY - w3 * 0.70 + Math.cos((time.value / GROVE_LOOP_MS) * TAU * 1.2 + phase + 1.5) * 10);
+  const moteOpacity = useDerivedValue(() => opacityForm3.value * (0.65 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2) * 0.25));
 
   return (
     <Group>
@@ -185,40 +197,56 @@ export function GroveTreeSprite({
         color="rgba(30, 48, 12, 0.26)"
       />
 
-      {/* 2. 2.5D Painterly Sprite with Hardware GPU Wind Sway & Auto-Growth */}
-      {activeImage ? (
-        <Group transform={transform} origin={{ x: originX, y: originY }}>
-          <SkiaImage
-            image={activeImage}
-            x={spriteX}
-            y={spriteY}
-            width={spriteW}
-            height={spriteH}
-            fit="contain"
-          />
-        </Group>
-      ) : (
-        /* Vector Fallback */
-        <Group transform={transform} origin={{ x: originX, y: originY }}>
-          <Path
-            path={`M${originX} ${originY} L${originX} ${originY - trunkH}`}
-            color={bark}
-            style="stroke"
-            strokeWidth={Math.max(2, s * 0.075)}
-            strokeCap="round"
-          />
-          <Path path={darkCrown} color={leafDark} />
-          <Path path={lightCrown} color={leaf} />
-        </Group>
-      )}
+      {/* 2. 2.5D Painterly Sprite with Hardware GPU Wind Sway & Seamless Continuous Morphing */}
+      <Group transform={transform} origin={{ x: originX, y: originY }}>
+        {/* Form 1: Basic Sapling */}
+        {imgForm1 ? (
+          <Group opacity={opacityForm1}>
+            <SkiaImage
+              image={imgForm1}
+              x={originX - w1 * 0.50}
+              y={originY - w1 * 0.90}
+              width={w1}
+              height={w1}
+              fit="contain"
+            />
+          </Group>
+        ) : null}
 
-      {/* 3. Glowing Fairy Firefly Motes for Form 3 (Majestic) */}
-      {targetGrowth === 3 ? (
-        <Group opacity={moteOpacity}>
-          <Circle cx={originX - spriteW * 0.25} cy={mote1Y} r={s * 0.045} color="#FFE66D" />
-          <Circle cx={originX + spriteW * 0.28} cy={mote2Y} r={s * 0.038} color="#FFD166" />
-        </Group>
-      ) : null}
+        {/* Form 2: Advanced Lush Oak */}
+        {imgForm2 ? (
+          <Group opacity={opacityForm2}>
+            <SkiaImage
+              image={imgForm2}
+              x={originX - w2 * 0.50}
+              y={originY - w2 * 0.90}
+              width={w2}
+              height={w2}
+              fit="contain"
+            />
+          </Group>
+        ) : null}
+
+        {/* Form 3: Majestic Ancient Oak */}
+        {imgForm3 ? (
+          <Group opacity={opacityForm3}>
+            <SkiaImage
+              image={imgForm3}
+              x={originX - w3 * 0.50}
+              y={originY - w3 * 0.90}
+              width={w3}
+              height={w3}
+              fit="contain"
+            />
+          </Group>
+        ) : null}
+      </Group>
+
+      {/* 3. Glowing Fairy Firefly Motes for Form 3 (Fades in seamlessly with Form 3) */}
+      <Group opacity={moteOpacity}>
+        <Circle cx={originX - w3 * 0.25} cy={mote1Y} r={s * 0.045} color="#FFE66D" />
+        <Circle cx={originX + w3 * 0.28} cy={mote2Y} r={s * 0.038} color="#FFD166" />
+      </Group>
     </Group>
   );
 }
