@@ -57,10 +57,6 @@ function blobPath(
   return d;
 }
 
-const OAK_SPRITE_FORM_1 = require('../../../assets/plants/broadleaf_oak/form_1_basic.png');
-const OAK_SPRITE_FORM_2 = require('../../../assets/plants/broadleaf_oak/form_2_advanced.png');
-const OAK_SPRITE_FORM_3 = require('../../../assets/plants/broadleaf_oak/form_3_majestic.png');
-
 export function GroveTreeSprite({
   tree,
   z,
@@ -86,93 +82,83 @@ export function GroveTreeSprite({
   progress?: SharedValue<number>;
   focusing?: SharedValue<number>;
 }) {
-  const imgForm1 = useImage(OAK_SPRITE_FORM_1);
-  const imgForm2 = useImage(OAK_SPRITE_FORM_2);
-  const imgForm3 = useImage(OAK_SPRITE_FORM_3);
-
   const originX = sx(tree.x + 0.5, tree.y + 0.5, camera);
   const originY = sy(tree.x + 0.5, tree.y + 0.5, z, camera);
   const s = camera.tw * tree.scale;
   const phase = tree.phase;
   const targetGrowth = tree.growth; // Target unlocked form (1 = Basic, 2 = Advanced, 3 = Majestic)
 
-  // 1. Continuous Live Growth Scale (Sprouts continuously from 0.35x up to 1.0x)
+  // 1. Continuous Live Growth Scale (Continuous sprout -> sapling -> lush -> ancient)
   const liveGrowthScale = useDerivedValue(() => {
     if (!focusing || focusing.value < 0.05 || !progress) {
       return 1.0;
     }
     const p = progress.value;
-    // Linear continuous growth curve with ease-out elasticity
     return 0.35 + p * 0.65;
   });
 
-  // 2. Continuous Phase Morphing Opacities (Alpha Blending between Form 1, Form 2, and Form 3)
-  const opacityForm1 = useDerivedValue(() => {
+  // 2. Physical Branch & Shoulder Lobe Inflation Curves (0.0 to 1.0)
+  const shoulderInflation = useDerivedValue(() => {
     if (!focusing || focusing.value < 0.05 || !progress) {
-      return targetGrowth === 1 ? 1.0 : 0.0;
-    }
-    const p = progress.value;
-    if (targetGrowth === 1) return 1.0;
-    if (targetGrowth === 2) {
-      if (p < 0.35) return 1.0;
-      if (p > 0.60) return 0.0;
-      const t = (p - 0.35) / 0.25;
-      return 1.0 - t * t * (3 - 2 * t);
-    }
-    // Target growth 3
-    if (p < 0.25) return 1.0;
-    if (p > 0.45) return 0.0;
-    const t = (p - 0.25) / 0.20;
-    return 1.0 - t * t * (3 - 2 * t);
-  });
-
-  const opacityForm2 = useDerivedValue(() => {
-    if (!focusing || focusing.value < 0.05 || !progress) {
-      return targetGrowth === 2 ? 1.0 : 0.0;
+      return targetGrowth >= 2 ? 1.0 : 0.0;
     }
     const p = progress.value;
     if (targetGrowth === 1) return 0.0;
     if (targetGrowth === 2) {
       if (p < 0.35) return 0.0;
-      if (p > 0.60) return 1.0;
-      const t = (p - 0.35) / 0.25;
+      const t = Math.min(1.0, (p - 0.35) / 0.35);
       return t * t * (3 - 2 * t);
     }
     // Target growth 3
     if (p < 0.25) return 0.0;
-    if (p < 0.45) {
-      const t = (p - 0.25) / 0.20;
+    if (p < 0.55) {
+      const t = (p - 0.25) / 0.30;
       return t * t * (3 - 2 * t);
     }
-    if (p <= 0.65) return 1.0;
-    if (p > 0.85) return 0.0;
-    const t = (p - 0.65) / 0.20;
-    return 1.0 - t * t * (3 - 2 * t);
+    return 1.0;
   });
 
-  const opacityForm3 = useDerivedValue(() => {
+  const majesticTierInflation = useDerivedValue(() => {
     if (!focusing || focusing.value < 0.05 || !progress) {
       return targetGrowth === 3 ? 1.0 : 0.0;
     }
     const p = progress.value;
     if (targetGrowth !== 3) return 0.0;
     if (p < 0.65) return 0.0;
-    if (p > 0.85) return 1.0;
-    const t = (p - 0.65) / 0.20;
+    const t = Math.min(1.0, (p - 0.65) / 0.30);
     return t * t * (3 - 2 * t);
   });
 
-  // Base dimensions for the 3 visual forms
-  const w1 = s * 0.95;
-  const w2 = s * 1.35;
-  const w3 = s * 1.75;
+  // Dynamic scale multipliers based on unlocked form
+  const formScale = targetGrowth === 3 ? 1.65 : targetGrowth === 2 ? 1.30 : 0.95;
+  const treeSize = s * formScale;
 
-  // Maximum active width for ground shadow
-  const maxW = targetGrowth === 3 ? w3 : targetGrowth === 2 ? w2 : w1;
-  const shadowRadius = maxW * 0.26;
+  // Trunk height dynamically expands with maturity
+  const trunkH = treeSize * (targetGrowth === 3 ? 0.62 : targetGrowth === 2 ? 0.54 : 0.44);
+  const crownY = originY - trunkH - treeSize * 0.18;
 
+  // Multi-Lobe Procedural Vector Canopy Shapes (Seeded from tree position & phase)
+  const darkCrown = blobPath(originX, crownY, treeSize * 0.34, treeSize * 0.30, phase);
+  const lightCrown = blobPath(originX, crownY - treeSize * 0.07, treeSize * 0.27, treeSize * 0.23, phase + 1.7);
+  const crownTop = blobPath(originX, crownY - treeSize * 0.18, treeSize * 0.22, treeSize * 0.18, phase + 4.2);
+
+  // Side Shoulder Canopies (Form 2 & Form 3)
+  const shoulderRight = blobPath(originX + treeSize * 0.24, crownY + treeSize * 0.12, treeSize * 0.21, treeSize * 0.17, phase + 3.1);
+  const shoulderLeft = blobPath(originX - treeSize * 0.25, crownY + treeSize * 0.10, treeSize * 0.19, treeSize * 0.16, phase + 5.3);
+
+  // Form 3 Spreading Ancient Root Flares
+  const rootFlareLeft = `M ${originX} ${originY - trunkH * 0.25} Q ${originX - treeSize * 0.18} ${originY - trunkH * 0.05} ${originX - treeSize * 0.28} ${originY}`;
+  const rootFlareRight = `M ${originX} ${originY - trunkH * 0.25} Q ${originX + treeSize * 0.18} ${originY - trunkH * 0.05} ${originX + treeSize * 0.28} ${originY}`;
+
+  // Winter Snow Cap
+  const snowCap = snowy ? blobPath(originX, crownY - treeSize * 0.12, treeSize * 0.20, treeSize * 0.09, phase + 7.2, 8) : null;
+
+  // Ground Shadow
+  const shadowRadius = treeSize * 0.28;
+
+  // GPU Reanimated Wind Sway Transform
   const transform = useDerivedValue(() => {
-    const sway = Math.sin((time.value / GROVE_LOOP_MS) * TAU + phase) * 0.038;
+    const sway = Math.sin((time.value / GROVE_LOOP_MS) * TAU + phase) * 0.035;
     const scale = liveGrowthScale.value;
     return [
       { scaleX: scale },
@@ -181,72 +167,69 @@ export function GroveTreeSprite({
     ];
   });
 
-  // Floating ambient magic firefly particles for Form 3
-  const mote1Y = useDerivedValue(() => originY - w3 * 0.55 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 1.5 + phase) * 8);
-  const mote2Y = useDerivedValue(() => originY - w3 * 0.70 + Math.cos((time.value / GROVE_LOOP_MS) * TAU * 1.2 + phase + 1.5) * 10);
-  const moteOpacity = useDerivedValue(() => opacityForm3.value * (0.65 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2) * 0.25));
+  // Form 3 Floating Fairy Fireflies
+  const mote1Y = useDerivedValue(() => crownY - treeSize * 0.10 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 1.5 + phase) * 8);
+  const mote2Y = useDerivedValue(() => crownY + treeSize * 0.05 + Math.cos((time.value / GROVE_LOOP_MS) * TAU * 1.2 + phase + 1.5) * 10);
+  const moteOpacity = useDerivedValue(() => majesticTierInflation.value * (0.75 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2) * 0.25));
 
   return (
     <Group>
-      {/* 1. Soft Ground Shadow at base of trunk */}
+      {/* 1. Soft Ground Shadow */}
       <Oval
         x={originX - shadowRadius * 1.0}
         y={originY - shadowRadius * 0.32}
         width={shadowRadius * 2.0}
         height={shadowRadius * 0.64}
-        color="rgba(30, 48, 12, 0.26)"
+        color="rgba(25, 45, 12, 0.25)"
       />
 
-      {/* 2. 2.5D Painterly Sprite with Hardware GPU Wind Sway & Seamless Continuous Morphing */}
+      {/* 2. Procedural Vector Tree with GPU Wind Sway & Continuous Sprouting */}
       <Group transform={transform} origin={{ x: originX, y: originY }}>
-        {/* Form 1: Basic Sapling */}
-        {imgForm1 ? (
-          <Group opacity={opacityForm1}>
-            <SkiaImage
-              image={imgForm1}
-              x={originX - w1 * 0.50}
-              y={originY - w1 * 0.90}
-              width={w1}
-              height={w1}
-              fit="contain"
-            />
+        {/* Ancient Root Flares (Form 3) */}
+        {targetGrowth === 3 ? (
+          <Group opacity={majesticTierInflation}>
+            <Path path={rootFlareLeft} color={bark} style="stroke" strokeWidth={Math.max(2.5, treeSize * 0.07)} strokeCap="round" />
+            <Path path={rootFlareRight} color={bark} style="stroke" strokeWidth={Math.max(2.5, treeSize * 0.07)} strokeCap="round" />
           </Group>
         ) : null}
 
-        {/* Form 2: Advanced Lush Oak */}
-        {imgForm2 ? (
-          <Group opacity={opacityForm2}>
-            <SkiaImage
-              image={imgForm2}
-              x={originX - w2 * 0.50}
-              y={originY - w2 * 0.90}
-              width={w2}
-              height={w2}
-              fit="contain"
-            />
+        {/* Textured Trunk with Dynamic Maturity Height */}
+        <Path
+          path={`M${originX} ${originY} L${originX} ${originY - trunkH}`}
+          color={bark}
+          style="stroke"
+          strokeWidth={Math.max(2.5, treeSize * 0.082)}
+          strokeCap="round"
+        />
+
+        {/* Side Shoulder Branch Canopies (Form 2 & 3 - Physically Inflates on Progress) */}
+        <Group opacity={shoulderInflation}>
+          <Path path={shoulderLeft} color={leafAccent} />
+          <Path path={shoulderRight} color={leafAccent} />
+        </Group>
+
+        {/* Main Central Crown (Form 1, 2, 3 - Shadow & Highlight Layers) */}
+        <Path path={darkCrown} color={leafDark} />
+        <Path path={lightCrown} color={leaf} />
+
+        {/* Grand Crown Top Tier (Form 3) */}
+        {targetGrowth === 3 ? (
+          <Group opacity={majesticTierInflation}>
+            <Path path={crownTop} color={leafAccent} />
           </Group>
         ) : null}
 
-        {/* Form 3: Majestic Ancient Oak */}
-        {imgForm3 ? (
-          <Group opacity={opacityForm3}>
-            <SkiaImage
-              image={imgForm3}
-              x={originX - w3 * 0.50}
-              y={originY - w3 * 0.90}
-              width={w3}
-              height={w3}
-              fit="contain"
-            />
-          </Group>
-        ) : null}
+        {/* Seasonal Snow Cap */}
+        {snowCap ? <Path path={snowCap} color="#F4F8FA" /> : null}
       </Group>
 
-      {/* 3. Glowing Fairy Firefly Motes for Form 3 (Fades in seamlessly with Form 3) */}
-      <Group opacity={moteOpacity}>
-        <Circle cx={originX - w3 * 0.25} cy={mote1Y} r={s * 0.045} color="#FFE66D" />
-        <Circle cx={originX + w3 * 0.28} cy={mote2Y} r={s * 0.038} color="#FFD166" />
-      </Group>
+      {/* 3. Glowing Ambient Fairy Firefly Motes (Form 3) */}
+      {targetGrowth === 3 ? (
+        <Group opacity={moteOpacity}>
+          <Circle cx={originX - treeSize * 0.24} cy={mote1Y} r={s * 0.045} color="#FFE66D" />
+          <Circle cx={originX + treeSize * 0.26} cy={mote2Y} r={s * 0.038} color="#FFD166" />
+        </Group>
+      ) : null}
     </Group>
   );
 }
