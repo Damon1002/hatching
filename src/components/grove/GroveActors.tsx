@@ -19,6 +19,9 @@ const TAU = Math.PI * 2;
 /**
  * Generates an umbrella canopy tier with rounded scalloped petal lobes matching the pagoda style.
  */
+/**
+ * Generates an umbrella canopy tier with rounded scalloped petal lobes matching the pagoda style.
+ */
 function scallopTierPath(
   cx: number,
   cy: number,
@@ -33,10 +36,10 @@ function scallopTierPath(
   const d: string[] = [`M ${cx - topRx} ${topY}`];
 
   // Top neck curve
-  d.push(`Q ${cx} ${topY - topRx * 0.22} ${cx + topRx} ${topY}`);
+  d.push(`Q ${cx} ${topY - topRx * 0.25} ${cx + topRx} ${topY}`);
 
   // Right flank down to right corner
-  d.push(`Q ${cx + rx * 1.03} ${cy - height * 0.42} ${cx + rx} ${cy}`);
+  d.push(`Q ${cx + rx * 1.02} ${cy - height * 0.4} ${cx + rx} ${cy}`);
 
   // Scalloped bottom hem from right (angle 0) across front to left (angle PI)
   for (let i = 0; i < numPetals; i++) {
@@ -45,7 +48,7 @@ function scallopTierPath(
     const tMid = (tStart + tEnd) / 2.0;
 
     const tipR = rx + petalDepth;
-    const tipRy = ry + petalDepth * 0.75;
+    const tipRy = ry + petalDepth * 0.65;
     const tipX = cx + tipR * Math.cos(tMid);
     const tipY = cy + tipRy * Math.sin(tMid);
 
@@ -56,7 +59,7 @@ function scallopTierPath(
   }
 
   // Left flank back to top neck
-  d.push(`Q ${cx - rx * 1.03} ${cy - height * 0.42} ${cx - topRx} ${topY}`);
+  d.push(`Q ${cx - rx * 1.02} ${cy - height * 0.4} ${cx - topRx} ${topY}`);
   d.push('Z');
   return d.join(' ');
 }
@@ -72,9 +75,7 @@ function topDomePath(cx: number, cy: number, rx: number, ry: number): string {
  * Generates the translucent jelly ribbon band highlight on the top dome.
  */
 function jellyHighlightBandPath(cx: number, cy: number, rx: number, ry: number): string {
-  const topY = cy - ry * 0.88;
-  const botY = cy - ry * 0.52;
-  return `M ${cx - rx * 0.72} ${topY} Q ${cx} ${topY - ry * 0.25} ${cx + rx * 0.72} ${topY} Q ${cx + rx * 0.82} ${botY} ${cx + rx * 0.72} ${botY} Q ${cx} ${botY - ry * 0.22} ${cx - rx * 0.72} ${botY} Z`;
+  return `M ${cx - rx * 0.75} ${cy - ry * 0.85} Q ${cx} ${cy - ry * 1.05} ${cx + rx * 0.75} ${cy - ry * 0.85} Q ${cx + rx * 0.85} ${cy - ry * 0.4} ${cx + rx * 0.72} ${cy - ry * 0.4} Q ${cx} ${cy - ry * 0.58} ${cx - rx * 0.72} ${cy - ry * 0.4} Z`;
 }
 
 /**
@@ -91,15 +92,15 @@ function flaredTrunkPath(
   const d: string[] = [`M ${cx - trunkW * 0.5} ${topY}`];
 
   // Left flank curving down to left root toe
-  d.push(`Q ${cx - trunkW * 0.42} ${cy - trunkH * 0.45} ${cx - flareW} ${cy}`);
+  d.push(`Q ${cx - trunkW * 0.35} ${cy - trunkH * 0.4} ${cx - flareW} ${cy}`);
 
   // 5 Root toe claws along the ground
-  d.push(`Q ${cx - flareW * 0.65} ${cy + flareW * 0.14} ${cx - flareW * 0.35} ${cy + flareW * 0.07}`);
-  d.push(`Q ${cx} ${cy + flareW * 0.18} ${cx + flareW * 0.35} ${cy + flareW * 0.07}`);
-  d.push(`Q ${cx + flareW * 0.65} ${cy + flareW * 0.14} ${cx + flareW} ${cy}`);
+  d.push(`Q ${cx - flareW * 0.6} ${cy + flareW * 0.12} ${cx - flareW * 0.3} ${cy + flareW * 0.06}`);
+  d.push(`Q ${cx} ${cy + flareW * 0.16} ${cx + flareW * 0.3} ${cy + flareW * 0.06}`);
+  d.push(`Q ${cx + flareW * 0.6} ${cy + flareW * 0.12} ${cx + flareW} ${cy}`);
 
   // Right flank curving back up to trunk neck
-  d.push(`Q ${cx + trunkW * 0.42} ${cy - trunkH * 0.45} ${cx + trunkW * 0.5} ${topY}`);
+  d.push(`Q ${cx + trunkW * 0.35} ${cy - trunkH * 0.4} ${cx + trunkW * 0.5} ${topY}`);
   d.push('Z');
   return d.join(' ');
 }
@@ -174,53 +175,56 @@ export function GroveTreeSprite({
     return t * t * (3 - 2 * t);
   });
 
-  // Scaling factors
-  const formScale = targetGrowth === 3 ? 1.65 : targetGrowth === 2 ? 1.30 : 0.95;
+  // Scaled down to 1/3 of previous size so it sits perfectly on the isometric tile
+  const formScale = targetGrowth === 3 ? 0.58 : targetGrowth === 2 ? 0.46 : 0.36;
   const treeSize = s * formScale;
 
   // Trunk Geometry
   const trunkW = treeSize * 0.16;
-  const trunkH = treeSize * (targetGrowth === 3 ? 0.38 : targetGrowth === 2 ? 0.34 : 0.30);
-  const flareW = treeSize * (targetGrowth === 3 ? 0.32 : targetGrowth === 2 ? 0.25 : 0.18);
+  const trunkH = treeSize * (targetGrowth === 3 ? 0.28 : targetGrowth === 2 ? 0.25 : 0.22);
+  const flareW = treeSize * (targetGrowth === 3 ? 0.26 : targetGrowth === 2 ? 0.22 : 0.18);
   const trunkShape = flaredTrunkPath(originX, originY, trunkW, trunkH, flareW);
 
-  // Vertical Tier Stacking Coordinates (Base to Top)
-  const tier4Y = originY - trunkH - treeSize * 0.04;
-  const tier3Y = tier4Y - treeSize * 0.16;
-  const tier2Y = tier3Y - treeSize * 0.15;
-  const tier1Y = tier2Y - treeSize * 0.14;
-  const domeY = tier1Y - treeSize * 0.12;
+  // Vertical Tier Stacking Coordinates (Proportions matching reference)
+  const tier4Y = originY - trunkH - treeSize * 0.02;
+  const tier3Y = tier4Y - treeSize * 0.12;
+  const tier2Y = tier3Y - treeSize * 0.11;
+  const tier1Y = tier2Y - treeSize * 0.10;
+  const domeY = tier1Y - treeSize * 0.09;
 
   // Parametric Scalloped Tier Paths
-  const t4Path = scallopTierPath(originX, tier4Y, treeSize * 0.78, treeSize * 0.22, treeSize * 0.26, treeSize * 0.62, 17, treeSize * 0.08);
-  const t3Path = scallopTierPath(originX, tier3Y, treeSize * 0.64, treeSize * 0.19, treeSize * 0.23, treeSize * 0.48, 13, treeSize * 0.07);
-  const t2Path = scallopTierPath(originX, tier2Y, treeSize * 0.50, treeSize * 0.16, treeSize * 0.20, treeSize * 0.36, 11, treeSize * 0.06);
-  const t1Path = scallopTierPath(originX, tier1Y, treeSize * 0.38, treeSize * 0.13, treeSize * 0.17, treeSize * 0.26, 9, treeSize * 0.05);
-  const domePath = topDomePath(originX, domeY, treeSize * 0.25, treeSize * 0.20);
-  const jellyBand = jellyHighlightBandPath(originX, domeY, treeSize * 0.25, treeSize * 0.20);
+  const t4Path = scallopTierPath(originX, tier4Y, treeSize * 0.62, treeSize * 0.17, treeSize * 0.19, treeSize * 0.44, 17, treeSize * 0.06);
+  const t3Path = scallopTierPath(originX, tier3Y, treeSize * 0.50, treeSize * 0.14, treeSize * 0.17, treeSize * 0.35, 13, treeSize * 0.05);
+  const t2Path = scallopTierPath(originX, tier2Y, treeSize * 0.39, treeSize * 0.11, treeSize * 0.15, treeSize * 0.27, 11, treeSize * 0.045);
+  const t1Path = scallopTierPath(originX, tier1Y, treeSize * 0.29, treeSize * 0.09, treeSize * 0.13, treeSize * 0.20, 9, treeSize * 0.04);
+  
+  const domeRx = treeSize * 0.20;
+  const domeRy = treeSize * 0.18;
+  const domePath = topDomePath(originX, domeY, domeRx, domeRy);
+  const jellyBand = jellyHighlightBandPath(originX, domeY, domeRx, domeRy);
 
-  // Reference Golden Amber Palette
-  const colorDome = '#FFDF38';
+  // Reference Palette
+  const colorDome = '#FFDF28';
   const colorTier1 = '#F2BF15';
-  const colorTier2 = '#EAA512';
-  const colorTier3 = '#E08C0F';
-  const colorTier4 = '#D26D0A';
+  const colorTier2 = '#E99E10';
+  const colorTier3 = '#DB7E0C';
+  const colorTier4 = '#C9610B';
 
   const strokeDome = '#E5B800';
-  const strokeTier1 = '#D49D08';
-  const strokeTier2 = '#CB8208';
-  const strokeTier3 = '#B86806';
-  const strokeTier4 = '#A64A04';
+  const strokeTier1 = '#C99805';
+  const strokeTier2 = '#BF7505';
+  const strokeTier3 = '#AC5B05';
+  const strokeTier4 = '#9B4504';
 
-  const colorTrunk = '#5C3214';
-  const strokeTrunk = '#3E1F09';
+  const colorTrunk = '#532F15';
+  const strokeTrunk = '#381C08';
 
-  // Ground Shadow
-  const shadowRadius = treeSize * 0.35;
+  // Ground Shadow (Compact proportional shadow)
+  const shadowRadius = treeSize * 0.32;
 
   // Reanimated GPU Wind Sway
   const transform = useDerivedValue(() => {
-    const sway = Math.sin((time.value / GROVE_LOOP_MS) * TAU + phase) * 0.032;
+    const sway = Math.sin((time.value / GROVE_LOOP_MS) * TAU + phase) * 0.028;
     const scale = liveGrowthScale.value;
     return [
       { scaleX: scale },
@@ -230,8 +234,8 @@ export function GroveTreeSprite({
   });
 
   // Floating Golden Firefly Particles for Form 3
-  const mote1Y = useDerivedValue(() => domeY - treeSize * 0.15 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 1.5 + phase) * 8);
-  const mote2Y = useDerivedValue(() => tier2Y + Math.cos((time.value / GROVE_LOOP_MS) * TAU * 1.2 + phase + 1.5) * 10);
+  const mote1Y = useDerivedValue(() => domeY - treeSize * 0.15 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 1.5 + phase) * 6);
+  const mote2Y = useDerivedValue(() => tier2Y + Math.cos((time.value / GROVE_LOOP_MS) * TAU * 1.2 + phase + 1.5) * 7);
   const moteOpacity = useDerivedValue(() => tier4Inflation.value * (0.75 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2) * 0.25));
 
   return (
@@ -249,27 +253,27 @@ export function GroveTreeSprite({
       <Group transform={transform} origin={{ x: originX, y: originY }}>
         {/* Flared Stylized Wood Trunk with Root Toes */}
         <Path path={trunkShape} color={colorTrunk} />
-        <Path path={trunkShape} color={strokeTrunk} style="stroke" strokeWidth={2.2} />
+        <Path path={trunkShape} color={strokeTrunk} style="stroke" strokeWidth={1.5} />
 
         {/* Vertical Trunk Grain Lines */}
         <Path
-          path={`M ${originX - trunkW * 0.15} ${originY - trunkH} Q ${originX - trunkW * 0.2} ${originY - trunkH * 0.4} ${originX - flareW * 0.4} ${originY}`}
+          path={`M ${originX - trunkW * 0.15} ${originY - trunkH} Q ${originX - trunkW * 0.2} ${originY - trunkH * 0.4} ${originX - flareW * 0.35} ${originY}`}
           color={strokeTrunk}
           style="stroke"
-          strokeWidth={1.5}
+          strokeWidth={1.0}
         />
         <Path
-          path={`M ${originX + trunkW * 0.15} ${originY - trunkH} Q ${originX + trunkW * 0.2} ${originY - trunkH * 0.4} ${originX + flareW * 0.4} ${originY}`}
+          path={`M ${originX + trunkW * 0.15} ${originY - trunkH} Q ${originX + trunkW * 0.2} ${originY - trunkH * 0.4} ${originX + flareW * 0.35} ${originY}`}
           color={strokeTrunk}
           style="stroke"
-          strokeWidth={1.5}
+          strokeWidth={1.0}
         />
 
         {/* Tier 4: Bottom Grand Skirt (Form 3) */}
         {targetGrowth === 3 ? (
           <Group opacity={tier4Inflation}>
             <Path path={t4Path} color={colorTier4} />
-            <Path path={t4Path} color={strokeTier4} style="stroke" strokeWidth={1.8} />
+            <Path path={t4Path} color={strokeTier4} style="stroke" strokeWidth={1.2} />
           </Group>
         ) : null}
 
@@ -277,36 +281,36 @@ export function GroveTreeSprite({
         {targetGrowth >= 2 ? (
           <Group opacity={tier3Inflation}>
             <Path path={t3Path} color={colorTier3} />
-            <Path path={t3Path} color={strokeTier3} style="stroke" strokeWidth={1.8} />
+            <Path path={t3Path} color={strokeTier3} style="stroke" strokeWidth={1.2} />
           </Group>
         ) : null}
 
         {/* Tier 2: Mid Frills (Form 1, 2, 3) */}
         <Path path={t2Path} color={colorTier2} />
-        <Path path={t2Path} color={strokeTier2} style="stroke" strokeWidth={1.8} />
+        <Path path={t2Path} color={strokeTier2} style="stroke" strokeWidth={1.2} />
 
         {/* Tier 1: Upper-Mid Frills (Form 1, 2, 3) */}
         <Path path={t1Path} color={colorTier1} />
-        <Path path={t1Path} color={strokeTier1} style="stroke" strokeWidth={1.8} />
+        <Path path={t1Path} color={strokeTier1} style="stroke" strokeWidth={1.2} />
 
         {/* Top Tier: Glossy Jelly Dome Cap */}
         <Path path={domePath} color={colorDome} />
-        <Path path={domePath} color={strokeDome} style="stroke" strokeWidth={1.8} />
+        <Path path={domePath} color={strokeDome} style="stroke" strokeWidth={1.2} />
 
         {/* Top Dome Translucent Jelly Ribbon Highlight */}
-        <Path path={jellyBand} color="rgba(255, 252, 210, 0.45)" />
+        <Path path={jellyBand} color="rgba(255, 252, 200, 0.55)" />
 
         {/* Specular Droplet Highlight Beads */}
-        <Circle cx={originX + treeSize * 0.07} cy={domeY - treeSize * 0.10} r={treeSize * 0.034} color="rgba(255, 255, 255, 0.85)" />
-        <Circle cx={originX - domeY * 0.0 - treeSize * 0.08} cy={domeY - treeSize * 0.07} r={treeSize * 0.024} color="rgba(255, 255, 255, 0.65)" />
-        <Circle cx={originX + treeSize * 0.02} cy={domeY - treeSize * 0.05} r={treeSize * 0.016} color="rgba(255, 255, 255, 0.70)" />
+        <Circle cx={originX + domeRx * 0.4} cy={domeY - domeRy * 0.95} r={domeRx * 0.16} color="rgba(255, 255, 255, 0.85)" />
+        <Circle cx={originX - domeRx * 0.38} cy={domeY - domeRy * 0.75} r={domeRx * 0.11} color="rgba(255, 255, 255, 0.65)" />
+        <Circle cx={originX + domeRx * 0.15} cy={domeY - domeRy * 0.55} r={domeRx * 0.08} color="rgba(255, 255, 255, 0.75)" />
       </Group>
 
       {/* 3. Floating Fairy Firefly Motes (Form 3) */}
       {targetGrowth === 3 ? (
         <Group opacity={moteOpacity}>
-          <Circle cx={originX - treeSize * 0.30} cy={mote1Y} r={s * 0.045} color="#FFE66D" />
-          <Circle cx={originX + treeSize * 0.32} cy={mote2Y} r={s * 0.038} color="#FFD166" />
+          <Circle cx={originX - treeSize * 0.28} cy={mote1Y} r={s * 0.035} color="#FFE66D" />
+          <Circle cx={originX + treeSize * 0.30} cy={mote2Y} r={s * 0.028} color="#FFD166" />
         </Group>
       ) : null}
     </Group>
