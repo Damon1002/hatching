@@ -776,6 +776,8 @@ export function SunnyMeadowLand({
               leafAccent={activePalette.leafAccent ?? MEADOW_COLORS.leafAccent}
               bark={activePalette.bark ?? MEADOW_COLORS.bark}
               snowy={false}
+              progress={activeProgressSV}
+              focusing={activeFocusingSV}
             />
           );
         }

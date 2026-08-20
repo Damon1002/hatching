@@ -71,6 +71,8 @@ export function GroveTreeSprite({
   leafAccent,
   bark,
   snowy,
+  progress,
+  focusing,
 }: {
   tree: GroveTree;
   z: number;
@@ -81,6 +83,8 @@ export function GroveTreeSprite({
   leafAccent: string;
   bark: string;
   snowy: boolean;
+  progress?: SharedValue<number>;
+  focusing?: SharedValue<number>;
 }) {
   const imgForm1 = useImage(OAK_SPRITE_FORM_1);
   const imgForm2 = useImage(OAK_SPRITE_FORM_2);
@@ -90,10 +94,55 @@ export function GroveTreeSprite({
   const originY = sy(tree.x + 0.5, tree.y + 0.5, z, camera);
   const s = camera.tw * tree.scale;
   const phase = tree.phase;
-  const growth = tree.growth; // 1 = Basic (10-59m), 2 = Advanced (60-119m), 3 = Majestic (120-180m)
+  const targetGrowth = tree.growth; // Target unlocked form (1 = Basic, 2 = Advanced, 3 = Majestic)
 
-  // 3-Form Progression Scale Multiplier matching Forest App Mechanics
-  const formScale = growth === 3 ? 1.75 : growth === 2 ? 1.35 : 0.95;
+  // Determine active visual form during live growth or idle island state
+  const liveForm = useDerivedValue(() => {
+    if (!focusing || focusing.value < 0.05 || !progress) {
+      return targetGrowth;
+    }
+    const p = progress.value;
+    if (targetGrowth === 1) return 1;
+    if (targetGrowth === 2) return p >= 0.45 ? 2 : 1;
+    // Target growth 3
+    if (p < 0.35) return 1;
+    if (p < 0.70) return 2;
+    return 3;
+  });
+
+  // Smooth continuous live growth scale curve with spring pop & bloom transitions
+  const liveScale = useDerivedValue(() => {
+    if (!focusing || focusing.value < 0.05 || !progress) {
+      return 1.0;
+    }
+    const p = progress.value;
+    if (targetGrowth === 1) {
+      // Form 1: Springs from sprout (0.35x) to full sapling (1.0x)
+      return 0.35 + p * 0.65;
+    }
+    if (targetGrowth === 2) {
+      // Form 2: Form 1 phase (0.35x -> 1.0x) then pop & bloom into Form 2
+      if (p < 0.45) {
+        return 0.35 + (p / 0.45) * 0.65;
+      }
+      const t2 = (p - 0.45) / 0.55;
+      // Rewarding organic bloom pulse on transition
+      return 1.0 + t2 * 0.35 + Math.sin(t2 * Math.PI) * 0.08;
+    }
+    // Form 3: 3 complete growth tiers (Sprout -> Sapling -> Lush -> Ancient Majestic)
+    if (p < 0.35) {
+      return 0.35 + (p / 0.35) * 0.65;
+    }
+    if (p < 0.70) {
+      const t2 = (p - 0.35) / 0.35;
+      return 1.0 + t2 * 0.35 + Math.sin(t2 * Math.PI) * 0.06;
+    }
+    const t3 = (p - 0.70) / 0.30;
+    return 1.35 + t3 * 0.40 + Math.sin(t3 * Math.PI) * 0.09;
+  });
+
+  // Base scale multiplier for active form
+  const formScale = targetGrowth === 3 ? 1.75 : targetGrowth === 2 ? 1.35 : 0.95;
   const spriteW = s * formScale;
   const spriteH = spriteW;
 
@@ -101,15 +150,26 @@ export function GroveTreeSprite({
   const spriteX = originX - spriteW * 0.50;
   const spriteY = originY - spriteH * 0.90;
 
-  const transform = useDerivedValue(() => [
-    { rotate: Math.sin((time.value / GROVE_LOOP_MS) * TAU + phase) * 0.038 },
-  ]);
+  const transform = useDerivedValue(() => {
+    const sway = Math.sin((time.value / GROVE_LOOP_MS) * TAU + phase) * 0.038;
+    const scale = liveScale.value;
+    return [
+      { scaleX: scale },
+      { scaleY: scale },
+      { rotate: sway },
+    ];
+  });
 
-  const activeImage = growth === 3 ? imgForm3 : growth === 2 ? imgForm2 : imgForm1;
+  const activeImage = targetGrowth === 3 ? imgForm3 : targetGrowth === 2 ? imgForm2 : imgForm1;
   const shadowRadius = spriteW * 0.26;
 
+  // Floating ambient magic firefly particles for Form 3
+  const mote1Y = useDerivedValue(() => originY - spriteH * 0.55 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 1.5 + phase) * 8);
+  const mote2Y = useDerivedValue(() => originY - spriteH * 0.70 + Math.cos((time.value / GROVE_LOOP_MS) * TAU * 1.2 + phase + 1.5) * 10);
+  const moteOpacity = useDerivedValue(() => (targetGrowth === 3 ? 0.65 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2) * 0.25 : 0));
+
   // Fallback procedural geometry if image is loading
-  const trunkH = s * (growth === 3 ? 0.60 : growth === 2 ? 0.52 : 0.44);
+  const trunkH = s * (targetGrowth === 3 ? 0.60 : targetGrowth === 2 ? 0.52 : 0.44);
   const crownY = originY - trunkH - s * 0.19;
   const darkCrown = blobPath(originX, crownY, s * 0.33, s * 0.29, phase);
   const lightCrown = blobPath(originX, crownY - s * 0.06, s * 0.25, s * 0.21, phase + 1.7);
@@ -125,7 +185,7 @@ export function GroveTreeSprite({
         color="rgba(30, 48, 12, 0.26)"
       />
 
-      {/* 2. 2.5D Painterly Sprite with Hardware GPU Wind Sway */}
+      {/* 2. 2.5D Painterly Sprite with Hardware GPU Wind Sway & Auto-Growth */}
       {activeImage ? (
         <Group transform={transform} origin={{ x: originX, y: originY }}>
           <SkiaImage
@@ -151,6 +211,14 @@ export function GroveTreeSprite({
           <Path path={lightCrown} color={leaf} />
         </Group>
       )}
+
+      {/* 3. Glowing Fairy Firefly Motes for Form 3 (Majestic) */}
+      {targetGrowth === 3 ? (
+        <Group opacity={moteOpacity}>
+          <Circle cx={originX - spriteW * 0.25} cy={mote1Y} r={s * 0.045} color="#FFE66D" />
+          <Circle cx={originX + spriteW * 0.28} cy={mote2Y} r={s * 0.038} color="#FFD166" />
+        </Group>
+      ) : null}
     </Group>
   );
 }
