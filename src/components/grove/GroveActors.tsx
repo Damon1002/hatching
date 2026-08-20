@@ -58,26 +58,18 @@ export function GroveTreeSprite({
     return 0.35 + progress.value * 0.65;
   });
 
-  // 2. Multi-Layer Alpha Dissolve Morphing between Form 1, 2, and 3
+  // 2. Solid-Backing Morphing Opacities (Guarantees 100% solid opacity with zero background leakage)
+  // Form 1 stays 100% solid backing until Form 2 is fully opaque
   const opacityForm1 = useDerivedValue(() => {
     if (!focusing || focusing.value < 0.05 || !progress) {
       return targetGrowth === 1 ? 1.0 : 0.0;
     }
     const p = progress.value;
     if (targetGrowth === 1) return 1.0;
-    if (targetGrowth === 2) {
-      if (p < 0.35) return 1.0;
-      if (p > 0.60) return 0.0;
-      const t = (p - 0.35) / 0.25;
-      return 1.0 - t * t * (3 - 2 * t);
-    }
-    // Form 3
-    if (p < 0.25) return 1.0;
-    if (p > 0.45) return 0.0;
-    const t = (p - 0.25) / 0.20;
-    return 1.0 - t * t * (3 - 2 * t);
+    return p < 0.45 ? 1.0 : 0.0;
   });
 
+  // Form 2 fades in over Form 1 (0 -> 1 during p in [0.25, 0.45]), and acts as 100% solid backing until Form 3 is opaque
   const opacityForm2 = useDerivedValue(() => {
     if (!focusing || focusing.value < 0.05 || !progress) {
       return targetGrowth === 2 ? 1.0 : 0.0;
@@ -85,9 +77,9 @@ export function GroveTreeSprite({
     const p = progress.value;
     if (targetGrowth === 1) return 0.0;
     if (targetGrowth === 2) {
-      if (p < 0.35) return 0.0;
-      if (p > 0.60) return 1.0;
-      const t = (p - 0.35) / 0.25;
+      if (p < 0.25) return 0.0;
+      if (p >= 0.45) return 1.0;
+      const t = (p - 0.25) / 0.20;
       return t * t * (3 - 2 * t);
     }
     // Form 3
@@ -96,12 +88,10 @@ export function GroveTreeSprite({
       const t = (p - 0.25) / 0.20;
       return t * t * (3 - 2 * t);
     }
-    if (p <= 0.65) return 1.0;
-    if (p > 0.85) return 0.0;
-    const t = (p - 0.65) / 0.20;
-    return 1.0 - t * t * (3 - 2 * t);
+    return p < 0.85 ? 1.0 : 0.0;
   });
 
+  // Form 3 fades in over Form 2 (0 -> 1 during p in [0.65, 0.85]) and remains 100% solid
   const opacityForm3 = useDerivedValue(() => {
     if (!focusing || focusing.value < 0.05 || !progress) {
       return targetGrowth === 3 ? 1.0 : 0.0;
@@ -109,7 +99,7 @@ export function GroveTreeSprite({
     const p = progress.value;
     if (targetGrowth !== 3) return 0.0;
     if (p < 0.65) return 0.0;
-    if (p > 0.85) return 1.0;
+    if (p >= 0.85) return 1.0;
     const t = (p - 0.65) / 0.20;
     return t * t * (3 - 2 * t);
   });
