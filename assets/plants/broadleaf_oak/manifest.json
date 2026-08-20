@@ -1,0 +1,33 @@
+{
+  "id": "broadleaf_oak",
+  "name": "阔叶古橡 Broadleaf Oak",
+  "subtitle": "灵洲苍翠生命之树",
+  "element": "森林 · 苍翠",
+  "anchor": { "x": 0.50, "y": 0.90 },
+  "forms": {
+    "1": {
+      "key": "basic",
+      "label": "基础幼态",
+      "minMinutes": 10,
+      "maxMinutes": 59,
+      "scale": 0.95,
+      "file": "form_1_basic.png"
+    },
+    "2": {
+      "key": "advanced",
+      "label": "繁茂成态",
+      "minMinutes": 60,
+      "maxMinutes": 119,
+      "scale": 1.35,
+      "file": "form_2_advanced.png"
+    },
+    "3": {
+      "key": "majestic",
+      "label": "极境神木",
+      "minMinutes": 120,
+      "maxMinutes": 180,
+      "scale": 1.75,
+      "file": "form_3_majestic.png"
+    }
+  }
+}

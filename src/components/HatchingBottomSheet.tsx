@@ -14,6 +14,7 @@ import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FOCUS_TAGS, LAND_CATALOG, SPECIES_CATALOG } from '../data/species';
+import { durationToGrowthForm } from '../grove/generate';
 import { colors, radii, shadows, spacing, type, TagKey } from '../theme';
 import { DragonSpecies, LandStyleKey, TagInfo } from '../types';
 import { SunnyMeadowThumbnail, TerracedGroveThumbnail } from './grove/LandThumbnails';
@@ -154,6 +155,12 @@ export function HatchingBottomSheet({
                 <View style={styles.speciesGrid}>
                   {displayedSpecies.map((species) => {
                     const isSelected = species.id === selectedSpecies.id;
+                    const activeGrowthForm: 1 | 2 | 3 = durationToGrowthForm(selectedDuration);
+                    const cellImage =
+                      species.forms && activeGrowthForm in species.forms
+                        ? species.forms[activeGrowthForm].image
+                        : species.image;
+
                     return (
                       <TouchableOpacity
                         key={species.id}
@@ -172,8 +179,8 @@ export function HatchingBottomSheet({
                         )}
 
                         {/* Species Avatar */}
-                        {species.image ? (
-                          <Image source={species.image} style={styles.speciesImage} resizeMode="contain" />
+                        {cellImage ? (
+                          <Image source={cellImage} style={styles.speciesImage} resizeMode="contain" />
                         ) : (
                           <View style={[styles.speciesEmojiCircle, { backgroundColor: species.color + '25' }]}>
                             <Text style={styles.speciesEmoji}>{species.icon}</Text>
@@ -186,7 +193,26 @@ export function HatchingBottomSheet({
 
                 {/* Focused Time Section */}
                 <View style={styles.timeSection}>
-                  <Text style={styles.sectionTitle}>Focused Time</Text>
+                  <View style={styles.timeSectionHeaderRow}>
+                    <Text style={styles.sectionTitle}>Focused Time</Text>
+                    {/* Dynamic Growth Tier Badge (Forest App mechanism) */}
+                    <View style={[
+                      styles.growthFormBadge,
+                      durationToGrowthForm(selectedDuration) === 3
+                        ? styles.growthFormBadgeMajestic
+                        : durationToGrowthForm(selectedDuration) === 2
+                          ? styles.growthFormBadgeAdvanced
+                          : styles.growthFormBadgeBasic,
+                    ]}>
+                      <Text style={styles.growthFormBadgeText}>
+                        {durationToGrowthForm(selectedDuration) === 3
+                          ? '👑 极境神木 (120m+)'
+                          : durationToGrowthForm(selectedDuration) === 2
+                            ? '🌳 繁茂成态 (60m-119m)'
+                            : '🌱 基础幼态 (10m-59m)'}
+                      </Text>
+                    </View>
+                  </View>
 
                   {/* Sprout & Dot Tick Ruler */}
                   <View style={styles.rulerContainer}>
@@ -537,12 +563,40 @@ const styles = StyleSheet.create({
   timeSection: {
     marginTop: 18,
   },
+  timeSectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginBottom: 8,
+  },
   sectionTitle: {
     fontSize: 15.5,
     fontWeight: '700',
     color: '#274C40',
-    paddingHorizontal: 20,
-    marginBottom: 8,
+  },
+  growthFormBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 3.5,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  growthFormBadgeBasic: {
+    backgroundColor: '#EBF7EE',
+    borderColor: '#78C98B',
+  },
+  growthFormBadgeAdvanced: {
+    backgroundColor: '#E7F4FD',
+    borderColor: '#5FA8E6',
+  },
+  growthFormBadgeMajestic: {
+    backgroundColor: '#FFF7E5',
+    borderColor: '#F2B93B',
+  },
+  growthFormBadgeText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#24523B',
   },
   rulerContainer: {
     alignItems: 'center',

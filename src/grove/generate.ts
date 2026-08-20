@@ -282,6 +282,18 @@ export function landBounds(tiles: GroveTile[]): { x0: number; y0: number; x1: nu
   return { x0, y0, x1, y1 };
 }
 
+/**
+ * Maps focus duration directly to the 3-form growth progression (Forest app mechanism).
+ * - Form 1: Basic (10m - 59m)
+ * - Form 2: Advanced (60m - 119m)
+ * - Form 3: Majestic (120m - 180m max)
+ */
+export function durationToGrowthForm(minutes: number): 1 | 2 | 3 {
+  if (minutes >= 120) return 3;
+  if (minutes >= 60) return 2;
+  return 1;
+}
+
 export interface MeadowWorld {
   trees: GroveTree[];
   tufts: GroveTuft[];
@@ -336,16 +348,10 @@ export function generateMeadowWorld(input: {
 
   selectedTiles.forEach((tile, index) => {
     const treeRand = mulberry32(elemSeed(seed, 0x4a12 + tile.y * 31 + tile.x));
-    // Determine growth stage based on index and focusMinutes
-    let growth: 1 | 2 | 3 = 1;
-    if (index === 0) {
-      growth = focusMinutes >= 45 ? 3 : focusMinutes >= 20 ? 2 : 1;
-    } else if (index === 1) {
-      growth = focusMinutes >= 60 ? 3 : focusMinutes >= 35 ? 2 : 1;
-    } else if (index === 2) {
-      growth = focusMinutes >= 90 ? 3 : focusMinutes >= 50 ? 2 : 1;
-    } else {
-      growth = focusMinutes >= 90 ? 2 : 1;
+    // The primary flagship tree reflects the user's active session growth form (1, 2, or 3)
+    let growth: 1 | 2 | 3 = durationToGrowthForm(focusMinutes);
+    if (index > 0) {
+      growth = index === 1 && focusMinutes >= 90 ? 2 : 1;
     }
 
     trees.push({

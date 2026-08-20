@@ -19,6 +19,15 @@ export interface SessionRecord {
   dateStr: string;
 }
 
+export interface PlantFormData {
+  key: 'basic' | 'advanced' | 'majestic';
+  label: string;
+  minMinutes: number;
+  maxMinutes: number;
+  image: any;
+  scale?: number;
+}
+
 export interface DragonSpecies {
   id: string;
   name: string;
@@ -33,6 +42,11 @@ export interface DragonSpecies {
   category?: 'dragon' | 'plant' | 'land' | 'special';
   badge?: string;
   image?: any;
+  forms?: {
+    1: PlantFormData;
+    2: PlantFormData;
+    3: PlantFormData;
+  };
 }
 
 export interface DailyGroveItem {

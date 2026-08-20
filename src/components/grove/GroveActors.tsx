@@ -57,6 +57,10 @@ function blobPath(
   return d;
 }
 
+const OAK_SPRITE_FORM_1 = require('../../../assets/plants/broadleaf_oak/form_1_basic.png');
+const OAK_SPRITE_FORM_2 = require('../../../assets/plants/broadleaf_oak/form_2_advanced.png');
+const OAK_SPRITE_FORM_3 = require('../../../assets/plants/broadleaf_oak/form_3_majestic.png');
+
 export function GroveTreeSprite({
   tree,
   z,
@@ -78,57 +82,75 @@ export function GroveTreeSprite({
   bark: string;
   snowy: boolean;
 }) {
+  const imgForm1 = useImage(OAK_SPRITE_FORM_1);
+  const imgForm2 = useImage(OAK_SPRITE_FORM_2);
+  const imgForm3 = useImage(OAK_SPRITE_FORM_3);
+
   const originX = sx(tree.x + 0.5, tree.y + 0.5, camera);
   const originY = sy(tree.x + 0.5, tree.y + 0.5, z, camera);
   const s = camera.tw * tree.scale;
   const phase = tree.phase;
-  const growth = tree.growth;
-  const transform = useDerivedValue(() => [{ rotate: Math.sin((time.value / GROVE_LOOP_MS) * TAU + phase) * 0.035 }]);
+  const growth = tree.growth; // 1 = Basic (10-59m), 2 = Advanced (60-119m), 3 = Majestic (120-180m)
 
-  // Trunk height grows with maturity
+  // 3-Form Progression Scale Multiplier matching Forest App Mechanics
+  const formScale = growth === 3 ? 1.75 : growth === 2 ? 1.35 : 0.95;
+  const spriteW = s * formScale;
+  const spriteH = spriteW;
+
+  // Standard Ground Anchor: Center bottom of trunk base at (X: 50%, Y: 90%)
+  const spriteX = originX - spriteW * 0.50;
+  const spriteY = originY - spriteH * 0.90;
+
+  const transform = useDerivedValue(() => [
+    { rotate: Math.sin((time.value / GROVE_LOOP_MS) * TAU + phase) * 0.038 },
+  ]);
+
+  const activeImage = growth === 3 ? imgForm3 : growth === 2 ? imgForm2 : imgForm1;
+  const shadowRadius = spriteW * 0.26;
+
+  // Fallback procedural geometry if image is loading
   const trunkH = s * (growth === 3 ? 0.60 : growth === 2 ? 0.52 : 0.44);
-
-  // Crown center anchored relative to trunk top so bottom of crown overlaps trunk
   const crownY = originY - trunkH - s * 0.19;
-
-  // Unique blob seed per tree (from phase, which is already seeded from position)
-  const blobSeed = phase;
-
-  // Main crown blobs
-  const darkCrown = blobPath(originX, crownY, s * 0.33, s * 0.29, blobSeed);
-  const lightCrown = blobPath(originX, crownY - s * 0.06, s * 0.25, s * 0.21, blobSeed + 1.7);
-
-  // Shoulder blobs for growth 2 and 3 — sit at the trunk-crown junction
-  const shoulder1 = growth >= 2
-    ? blobPath(originX + s * 0.22, crownY + s * 0.14, s * 0.20, s * 0.17, blobSeed + 3.1)
-    : null;
-  const shoulder2 = growth >= 3
-    ? blobPath(originX - s * 0.24, crownY + s * 0.10, s * 0.18, s * 0.16, blobSeed + 5.3)
-    : null;
-
-  // Snow cap path (sits on top of main crown)
-  const snowCap = snowy
-    ? blobPath(originX, crownY - s * 0.10, s * 0.19, s * 0.08, blobSeed + 7.2, 8)
-    : null;
+  const darkCrown = blobPath(originX, crownY, s * 0.33, s * 0.29, phase);
+  const lightCrown = blobPath(originX, crownY - s * 0.06, s * 0.25, s * 0.21, phase + 1.7);
 
   return (
-    <Group transform={transform} origin={{ x: originX, y: originY }}>
-      {/* Trunk — taller with growth */}
-      <Path
-        path={`M${originX} ${originY} L${originX} ${originY - trunkH}`}
-        color={bark}
-        style="stroke"
-        strokeWidth={Math.max(2, s * 0.075)}
-        strokeCap="round"
+    <Group>
+      {/* 1. Soft Ground Shadow at base of trunk */}
+      <Oval
+        x={originX - shadowRadius * 1.0}
+        y={originY - shadowRadius * 0.32}
+        width={shadowRadius * 2.0}
+        height={shadowRadius * 0.64}
+        color="rgba(30, 48, 12, 0.26)"
       />
-      {/* Shoulder blobs (behind main crown) — leafAccent color */}
-      {shoulder2 ? <Path path={shoulder2} color={leafAccent} /> : null}
-      {shoulder1 ? <Path path={shoulder1} color={leafAccent} /> : null}
-      {/* Main crown — dark blob for depth, light blob on top */}
-      <Path path={darkCrown} color={leafDark} />
-      <Path path={lightCrown} color={leaf} />
-      {/* Snow cap */}
-      {snowCap ? <Path path={snowCap} color="#F4F8FA" /> : null}
+
+      {/* 2. 2.5D Painterly Sprite with Hardware GPU Wind Sway */}
+      {activeImage ? (
+        <Group transform={transform} origin={{ x: originX, y: originY }}>
+          <SkiaImage
+            image={activeImage}
+            x={spriteX}
+            y={spriteY}
+            width={spriteW}
+            height={spriteH}
+            fit="contain"
+          />
+        </Group>
+      ) : (
+        /* Vector Fallback */
+        <Group transform={transform} origin={{ x: originX, y: originY }}>
+          <Path
+            path={`M${originX} ${originY} L${originX} ${originY - trunkH}`}
+            color={bark}
+            style="stroke"
+            strokeWidth={Math.max(2, s * 0.075)}
+            strokeCap="round"
+          />
+          <Path path={darkCrown} color={leafDark} />
+          <Path path={lightCrown} color={leaf} />
+        </Group>
+      )}
     </Group>
   );
 }

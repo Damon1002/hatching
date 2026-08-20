@@ -9,7 +9,51 @@ export const FOCUS_TAGS: TagInfo[] = [
   { key: 'rest', label: '冥想', emoji: '☕', colorKey: 'rest' },
 ];
 
+const OAK_FORM_1 = require('../../assets/plants/broadleaf_oak/form_1_basic.png');
+const OAK_FORM_2 = require('../../assets/plants/broadleaf_oak/form_2_advanced.png');
+const OAK_FORM_3 = require('../../assets/plants/broadleaf_oak/form_3_majestic.png');
+
 export const SPECIES_CATALOG: DragonSpecies[] = [
+  {
+    id: 'broadleaf_oak',
+    name: '阔叶古橡 Broadleaf Oak',
+    subtitle: '灵洲苍翠生命神木',
+    element: '森林 · 苍翠',
+    description: '灵洲浮岛上最具生命力的高大橡树。随专注时长由稚嫩幼苗逐步繁茂成参天神木，滋养着浮岛生灵。',
+    icon: '🌳',
+    requiredMinutes: 0,
+    color: '#529E3A',
+    unlocked: true,
+    isVip: false,
+    category: 'plant',
+    image: OAK_FORM_1,
+    forms: {
+      1: {
+        key: 'basic',
+        label: '基础幼态',
+        minMinutes: 10,
+        maxMinutes: 59,
+        image: OAK_FORM_1,
+        scale: 0.95,
+      },
+      2: {
+        key: 'advanced',
+        label: '繁茂成态',
+        minMinutes: 60,
+        maxMinutes: 119,
+        image: OAK_FORM_2,
+        scale: 1.35,
+      },
+      3: {
+        key: 'majestic',
+        label: '极境神木',
+        minMinutes: 120,
+        maxMinutes: 180,
+        image: OAK_FORM_3,
+        scale: 1.75,
+      },
+    },
+  },
   {
     id: 'dragon_egg',
     name: '原初龙蛋 Dragon Egg',
