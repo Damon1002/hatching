@@ -8,11 +8,15 @@ This repository uses standard agent instructions and specialized skills located 
 
 When adding or modifying features, always consult the corresponding skill document:
 
-1. **[Flora 3-Form Growth Workflow (Forest App Mechanism)](.agents/skills/flora-3form-growth-workflow/SKILL.md)**
-   - **Form 1 (Basic / 基础幼态)**: $10\text{m} - 59\text{m}$ focus time. Single crown, young sapling ($0.85\times - 1.0\times$ scale).
-   - **Form 2 (Advanced / 繁茂态)**: $60\text{m} - 119\text{m}$ focus time. Multi-tier branched canopy ($1.2\times - 1.4\times$ scale).
-   - **Form 3 (Majestic / 极境神木态)**: $120\text{m} - 180\text{m}$ maximum focus time. Grand ancient tree with root flairs and falling particles ($1.6\times - 1.9\times$ scale).
-   - Every plant/tree item on the land must provide/support these 3 distinct visual forms.
+1. **[Flora 3-Form Growth Workflow (Hybrid Architecture)](.agents/skills/flora-3form-growth-workflow/SKILL.md)**
+   - **Hybrid Layered Architecture**:
+     - **Layer 1 (WebP Sprite Base)**: Compressed 1024x1024 WebP (~40 KB), 100% artist original fidelity, 1 GPU draw call.
+     - **Layer 2 (Skia Parametric Overlays)**: Reanimated GPU wind sway, continuous live growth scaling (0.35x -> 1.0x), multi-layer alpha dissolve morphing, soft ground shadows, and floating golden fireflies.
+   - **Focus Tiers & Diamond Tile Proportions**:
+     - **Form 1 (Basic / 基础幼态)**: $10\text{m} - 59\text{m}$ focus time. Scale $0.48\times$ relative to tile width `camera.tw`.
+     - **Form 2 (Advanced / 繁茂态)**: $60\text{m} - 119\text{m}$ focus time. Scale $0.62\times$.
+     - **Form 3 (Majestic / 极境神木态)**: $120\text{m} - 180\text{m}$ maximum focus time. Scale $0.76\times$.
+   - **Anchor Standard**: Trunk base at $(X = 50\%, Y = 90\%)$. Every plant item must support these 3 forms.
 
 2. **[Isometric Land Biome Workflow](.agents/skills/isometric-land-biome-workflow/SKILL.md)**
    - Standard pipeline for adding new floating island lands (e.g. *Sunny Meadow*, *Terraced Grove*, *Volcanic Peak*).

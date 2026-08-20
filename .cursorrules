@@ -3,9 +3,11 @@
 Always consult the repository skills before generating or editing code:
 
 1. **Flora 3-Form Growth Workflow**: `.agents/skills/flora-3form-growth-workflow/SKILL.md`
-   - Form 1 (Basic): 10m - 59m focus time
-   - Form 2 (Advanced): 60m - 119m focus time
-   - Form 3 (Majestic): 120m - 180m max focus time
+   - Hybrid Architecture: WebP Sprite Base (~40KB, 100% artist fidelity) + Skia Parametric Vector Overlays (wind sway, live growth, fireflies).
+   - Form 1 (Basic): 10m - 59m focus time (0.48x scale)
+   - Form 2 (Advanced): 60m - 119m focus time (0.62x scale)
+   - Form 3 (Majestic): 120m - 180m max focus time (0.76x scale)
+   - Ground anchor standard: Trunk base at (X: 50%, Y: 90%).
 
 2. **Isometric Land Biomes**: `.agents/skills/isometric-land-biome-workflow/SKILL.md`
    - Ground tiles and flora must render first as a solid foundation plane.

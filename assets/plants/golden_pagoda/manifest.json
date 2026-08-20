@@ -1,0 +1,12 @@
+{
+  "id": "golden_pagoda",
+  "name": "金葵塔木 Golden Pagoda",
+  "subtitle": "灵洲璨金神木",
+  "element": "金阳 · 璀璨",
+  "anchor": { "x": 0.50, "y": 0.90 },
+  "forms": {
+    "1": { "key": "basic", "label": "基础幼态", "minMinutes": 10, "maxMinutes": 59, "scale": 0.36 },
+    "2": { "key": "advanced", "label": "繁茂成态", "minMinutes": 60, "maxMinutes": 119, "scale": 0.46 },
+    "3": { "key": "majestic", "label": "极境神木", "minMinutes": 120, "maxMinutes": 180, "scale": 0.58 }
+  }
+}

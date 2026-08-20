@@ -13,7 +13,51 @@ const OAK_FORM_1 = require('../../assets/plants/broadleaf_oak/form_1_basic.png')
 const OAK_FORM_2 = require('../../assets/plants/broadleaf_oak/form_2_advanced.png');
 const OAK_FORM_3 = require('../../assets/plants/broadleaf_oak/form_3_majestic.png');
 
+const PAGODA_FORM_1 = require('../../assets/plants/golden_pagoda/form_1_basic.webp');
+const PAGODA_FORM_2 = require('../../assets/plants/golden_pagoda/form_2_advanced.webp');
+const PAGODA_FORM_3 = require('../../assets/plants/golden_pagoda/form_3_majestic.webp');
+
 export const SPECIES_CATALOG: DragonSpecies[] = [
+  {
+    id: 'golden_pagoda',
+    name: '金葵塔木 Golden Pagoda',
+    subtitle: '灵洲璨金果冻神木',
+    element: '金阳 · 璀璨',
+    description: '灵洲浮岛上最具生命力的高贵塔木。顶冠如琥珀果冻般晶莹剔透，随着专注层层绽放出璨金花瓣伞裙。',
+    icon: '✨',
+    requiredMinutes: 0,
+    color: '#FFDF28',
+    unlocked: true,
+    isVip: false,
+    category: 'plant',
+    image: PAGODA_FORM_1,
+    forms: {
+      1: {
+        key: 'basic',
+        label: '基础幼态',
+        minMinutes: 10,
+        maxMinutes: 59,
+        image: PAGODA_FORM_1,
+        scale: 0.48,
+      },
+      2: {
+        key: 'advanced',
+        label: '繁茂成态',
+        minMinutes: 60,
+        maxMinutes: 119,
+        image: PAGODA_FORM_2,
+        scale: 0.62,
+      },
+      3: {
+        key: 'majestic',
+        label: '极境神木',
+        minMinutes: 120,
+        maxMinutes: 180,
+        image: PAGODA_FORM_3,
+        scale: 0.76,
+      },
+    },
+  },
   {
     id: 'broadleaf_oak',
     name: '阔叶古橡 Broadleaf Oak',

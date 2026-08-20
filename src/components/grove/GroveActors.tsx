@@ -11,99 +11,9 @@ import type { GroveCreature, GroveTree, GroveTuft } from '../../grove/types';
 
 const TAU = Math.PI * 2;
 
-/**
- * Generate a closed Skia path string for an organic blob shape.
- * Uses 3 sine harmonics seeded from `seed` to deform a base ellipse,
- * then connects points with quadratic bezier curves for smoothness.
- */
-/**
- * Generates an umbrella canopy tier with rounded scalloped petal lobes matching the pagoda style.
- */
-/**
- * Generates an umbrella canopy tier with rounded scalloped petal lobes matching the pagoda style.
- */
-function scallopTierPath(
-  cx: number,
-  cy: number,
-  rx: number,
-  ry: number,
-  height: number,
-  topRx: number,
-  numPetals: number,
-  petalDepth: number,
-): string {
-  const topY = cy - height;
-  const d: string[] = [`M ${cx - topRx} ${topY}`];
-
-  // Top neck curve
-  d.push(`Q ${cx} ${topY - topRx * 0.25} ${cx + topRx} ${topY}`);
-
-  // Right flank down to right corner
-  d.push(`Q ${cx + rx * 1.02} ${cy - height * 0.4} ${cx + rx} ${cy}`);
-
-  // Scalloped bottom hem from right (angle 0) across front to left (angle PI)
-  for (let i = 0; i < numPetals; i++) {
-    const tStart = (i / numPetals) * Math.PI;
-    const tEnd = ((i + 1) / numPetals) * Math.PI;
-    const tMid = (tStart + tEnd) / 2.0;
-
-    const tipR = rx + petalDepth;
-    const tipRy = ry + petalDepth * 0.65;
-    const tipX = cx + tipR * Math.cos(tMid);
-    const tipY = cy + tipRy * Math.sin(tMid);
-
-    const endX = cx + rx * Math.cos(tEnd);
-    const endY = cy + ry * Math.sin(tEnd);
-
-    d.push(`Q ${tipX.toFixed(1)} ${tipY.toFixed(1)} ${endX.toFixed(1)} ${endY.toFixed(1)}`);
-  }
-
-  // Left flank back to top neck
-  d.push(`Q ${cx - rx * 1.02} ${cy - height * 0.4} ${cx - topRx} ${topY}`);
-  d.push('Z');
-  return d.join(' ');
-}
-
-/**
- * Generates the top smooth glossy dome cap.
- */
-function topDomePath(cx: number, cy: number, rx: number, ry: number): string {
-  return `M ${cx - rx} ${cy} C ${cx - rx} ${cy - ry * 1.85} ${cx + rx} ${cy - ry * 1.85} ${cx + rx} ${cy} Q ${cx} ${cy + ry * 0.35} ${cx - rx} ${cy} Z`;
-}
-
-/**
- * Generates the translucent jelly ribbon band highlight on the top dome.
- */
-function jellyHighlightBandPath(cx: number, cy: number, rx: number, ry: number): string {
-  return `M ${cx - rx * 0.75} ${cy - ry * 0.85} Q ${cx} ${cy - ry * 1.05} ${cx + rx * 0.75} ${cy - ry * 0.85} Q ${cx + rx * 0.85} ${cy - ry * 0.4} ${cx + rx * 0.72} ${cy - ry * 0.4} Q ${cx} ${cy - ry * 0.58} ${cx - rx * 0.72} ${cy - ry * 0.4} Z`;
-}
-
-/**
- * Generates the flared wooden tree trunk with root toe claws.
- */
-function flaredTrunkPath(
-  cx: number,
-  cy: number,
-  trunkW: number,
-  trunkH: number,
-  flareW: number,
-): string {
-  const topY = cy - trunkH;
-  const d: string[] = [`M ${cx - trunkW * 0.5} ${topY}`];
-
-  // Left flank curving down to left root toe
-  d.push(`Q ${cx - trunkW * 0.35} ${cy - trunkH * 0.4} ${cx - flareW} ${cy}`);
-
-  // 5 Root toe claws along the ground
-  d.push(`Q ${cx - flareW * 0.6} ${cy + flareW * 0.12} ${cx - flareW * 0.3} ${cy + flareW * 0.06}`);
-  d.push(`Q ${cx} ${cy + flareW * 0.16} ${cx + flareW * 0.3} ${cy + flareW * 0.06}`);
-  d.push(`Q ${cx + flareW * 0.6} ${cy + flareW * 0.12} ${cx + flareW} ${cy}`);
-
-  // Right flank curving back up to trunk neck
-  d.push(`Q ${cx + trunkW * 0.35} ${cy - trunkH * 0.4} ${cx + trunkW * 0.5} ${topY}`);
-  d.push('Z');
-  return d.join(' ');
-}
+const PAGODA_FORM_1 = require('../../../assets/plants/golden_pagoda/form_1_basic.webp');
+const PAGODA_FORM_2 = require('../../../assets/plants/golden_pagoda/form_2_advanced.webp');
+const PAGODA_FORM_3 = require('../../../assets/plants/golden_pagoda/form_3_majestic.webp');
 
 export function GroveTreeSprite({
   tree,
@@ -130,13 +40,17 @@ export function GroveTreeSprite({
   progress?: SharedValue<number>;
   focusing?: SharedValue<number>;
 }) {
+  const imgForm1 = useImage(PAGODA_FORM_1);
+  const imgForm2 = useImage(PAGODA_FORM_2);
+  const imgForm3 = useImage(PAGODA_FORM_3);
+
   const originX = sx(tree.x + 0.5, tree.y + 0.5, camera);
   const originY = sy(tree.x + 0.5, tree.y + 0.5, z, camera);
   const s = camera.tw * tree.scale;
   const phase = tree.phase;
   const targetGrowth = tree.growth; // Target unlocked form (1 = Basic, 2 = Advanced, 3 = Majestic)
 
-  // 1. Continuous Live Growth Scale
+  // 1. Continuous Live Growth Scale (Sprouts continuously from 0.35x up to 1.0x)
   const liveGrowthScale = useDerivedValue(() => {
     if (!focusing || focusing.value < 0.05 || !progress) {
       return 1.0;
@@ -144,85 +58,76 @@ export function GroveTreeSprite({
     return 0.35 + progress.value * 0.65;
   });
 
-  // 2. Continuous Tier Cascading Inflation (0.0 to 1.0)
-  const tier3Inflation = useDerivedValue(() => {
+  // 2. Multi-Layer Alpha Dissolve Morphing between Form 1, 2, and 3
+  const opacityForm1 = useDerivedValue(() => {
     if (!focusing || focusing.value < 0.05 || !progress) {
-      return targetGrowth >= 2 ? 1.0 : 0.0;
+      return targetGrowth === 1 ? 1.0 : 0.0;
+    }
+    const p = progress.value;
+    if (targetGrowth === 1) return 1.0;
+    if (targetGrowth === 2) {
+      if (p < 0.35) return 1.0;
+      if (p > 0.60) return 0.0;
+      const t = (p - 0.35) / 0.25;
+      return 1.0 - t * t * (3 - 2 * t);
+    }
+    // Form 3
+    if (p < 0.25) return 1.0;
+    if (p > 0.45) return 0.0;
+    const t = (p - 0.25) / 0.20;
+    return 1.0 - t * t * (3 - 2 * t);
+  });
+
+  const opacityForm2 = useDerivedValue(() => {
+    if (!focusing || focusing.value < 0.05 || !progress) {
+      return targetGrowth === 2 ? 1.0 : 0.0;
     }
     const p = progress.value;
     if (targetGrowth === 1) return 0.0;
     if (targetGrowth === 2) {
       if (p < 0.35) return 0.0;
-      const t = Math.min(1.0, (p - 0.35) / 0.35);
+      if (p > 0.60) return 1.0;
+      const t = (p - 0.35) / 0.25;
       return t * t * (3 - 2 * t);
     }
     // Form 3
     if (p < 0.25) return 0.0;
-    if (p < 0.55) {
-      const t = (p - 0.25) / 0.30;
+    if (p < 0.45) {
+      const t = (p - 0.25) / 0.20;
       return t * t * (3 - 2 * t);
     }
-    return 1.0;
+    if (p <= 0.65) return 1.0;
+    if (p > 0.85) return 0.0;
+    const t = (p - 0.65) / 0.20;
+    return 1.0 - t * t * (3 - 2 * t);
   });
 
-  const tier4Inflation = useDerivedValue(() => {
+  const opacityForm3 = useDerivedValue(() => {
     if (!focusing || focusing.value < 0.05 || !progress) {
       return targetGrowth === 3 ? 1.0 : 0.0;
     }
     const p = progress.value;
-    if (targetGrowth !== 3 || p < 0.65) return 0.0;
-    const t = Math.min(1.0, (p - 0.65) / 0.30);
+    if (targetGrowth !== 3) return 0.0;
+    if (p < 0.65) return 0.0;
+    if (p > 0.85) return 1.0;
+    const t = (p - 0.65) / 0.20;
     return t * t * (3 - 2 * t);
   });
 
-  // Scaled down to 1/3 of previous size so it sits perfectly on the isometric tile
-  const formScale = targetGrowth === 3 ? 0.58 : targetGrowth === 2 ? 0.46 : 0.36;
+  // Scaled down to 1/3 footprint (compact, perfectly proportioned on single diamond tile)
+  const formScale = targetGrowth === 3 ? 0.76 : targetGrowth === 2 ? 0.62 : 0.48;
   const treeSize = s * formScale;
 
-  // Trunk Geometry
-  const trunkW = treeSize * 0.16;
-  const trunkH = treeSize * (targetGrowth === 3 ? 0.28 : targetGrowth === 2 ? 0.25 : 0.22);
-  const flareW = treeSize * (targetGrowth === 3 ? 0.26 : targetGrowth === 2 ? 0.22 : 0.18);
-  const trunkShape = flaredTrunkPath(originX, originY, trunkW, trunkH, flareW);
-
-  // Vertical Tier Stacking Coordinates (Proportions matching reference)
-  const tier4Y = originY - trunkH - treeSize * 0.02;
-  const tier3Y = tier4Y - treeSize * 0.12;
-  const tier2Y = tier3Y - treeSize * 0.11;
-  const tier1Y = tier2Y - treeSize * 0.10;
-  const domeY = tier1Y - treeSize * 0.09;
-
-  // Parametric Scalloped Tier Paths
-  const t4Path = scallopTierPath(originX, tier4Y, treeSize * 0.62, treeSize * 0.17, treeSize * 0.19, treeSize * 0.44, 17, treeSize * 0.06);
-  const t3Path = scallopTierPath(originX, tier3Y, treeSize * 0.50, treeSize * 0.14, treeSize * 0.17, treeSize * 0.35, 13, treeSize * 0.05);
-  const t2Path = scallopTierPath(originX, tier2Y, treeSize * 0.39, treeSize * 0.11, treeSize * 0.15, treeSize * 0.27, 11, treeSize * 0.045);
-  const t1Path = scallopTierPath(originX, tier1Y, treeSize * 0.29, treeSize * 0.09, treeSize * 0.13, treeSize * 0.20, 9, treeSize * 0.04);
-  
-  const domeRx = treeSize * 0.20;
-  const domeRy = treeSize * 0.18;
-  const domePath = topDomePath(originX, domeY, domeRx, domeRy);
-  const jellyBand = jellyHighlightBandPath(originX, domeY, domeRx, domeRy);
-
-  // Reference Palette
-  const colorDome = '#FFDF28';
-  const colorTier1 = '#F2BF15';
-  const colorTier2 = '#E99E10';
-  const colorTier3 = '#DB7E0C';
-  const colorTier4 = '#C9610B';
-
-  const strokeDome = '#E5B800';
-  const strokeTier1 = '#C99805';
-  const strokeTier2 = '#BF7505';
-  const strokeTier3 = '#AC5B05';
-  const strokeTier4 = '#9B4504';
-
-  const colorTrunk = '#532F15';
-  const strokeTrunk = '#381C08';
+  // Standard Ground Contact Anchor at (X: 50%, Y: 90%)
+  const spriteW = treeSize;
+  const spriteH = treeSize;
+  const spriteX = originX - spriteW * 0.50;
+  const spriteY = originY - spriteH * 0.90;
 
   // Ground Shadow (Compact proportional shadow)
-  const shadowRadius = treeSize * 0.32;
+  const shadowRadius = treeSize * 0.28;
 
-  // Reanimated GPU Wind Sway
+  // Reanimated GPU Wind Sway Physics
   const transform = useDerivedValue(() => {
     const sway = Math.sin((time.value / GROVE_LOOP_MS) * TAU + phase) * 0.028;
     const scale = liveGrowthScale.value;
@@ -233,86 +138,72 @@ export function GroveTreeSprite({
     ];
   });
 
-  // Floating Golden Firefly Particles for Form 3
-  const mote1Y = useDerivedValue(() => domeY - treeSize * 0.15 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 1.5 + phase) * 6);
-  const mote2Y = useDerivedValue(() => tier2Y + Math.cos((time.value / GROVE_LOOP_MS) * TAU * 1.2 + phase + 1.5) * 7);
-  const moteOpacity = useDerivedValue(() => tier4Inflation.value * (0.75 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2) * 0.25));
+  // Skia Parametric Floating Golden Fairy Fireflies for Form 3
+  const mote1Y = useDerivedValue(() => originY - spriteH * 0.65 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 1.5 + phase) * 6);
+  const mote2Y = useDerivedValue(() => originY - spriteH * 0.45 + Math.cos((time.value / GROVE_LOOP_MS) * TAU * 1.2 + phase + 1.5) * 7);
+  const moteOpacity = useDerivedValue(() => opacityForm3.value * (0.75 + Math.sin((time.value / GROVE_LOOP_MS) * TAU * 2) * 0.25));
 
   return (
     <Group>
-      {/* 1. Soft Ground Shadow */}
+      {/* 1. Skia Parametric Vector Ground Shadow */}
       <Oval
         x={originX - shadowRadius * 1.0}
         y={originY - shadowRadius * 0.30}
         width={shadowRadius * 2.0}
         height={shadowRadius * 0.60}
-        color="rgba(25, 40, 10, 0.26)"
+        color="rgba(25, 40, 10, 0.28)"
       />
 
-      {/* 2. Parametric Scalloped Tree Rig with GPU Wind Sway */}
+      {/* 2. Hybrid Layer 1: High-Fidelity WebP Sprite Base with GPU Wind Sway & Continuous Morphing */}
       <Group transform={transform} origin={{ x: originX, y: originY }}>
-        {/* Flared Stylized Wood Trunk with Root Toes */}
-        <Path path={trunkShape} color={colorTrunk} />
-        <Path path={trunkShape} color={strokeTrunk} style="stroke" strokeWidth={1.5} />
-
-        {/* Vertical Trunk Grain Lines */}
-        <Path
-          path={`M ${originX - trunkW * 0.15} ${originY - trunkH} Q ${originX - trunkW * 0.2} ${originY - trunkH * 0.4} ${originX - flareW * 0.35} ${originY}`}
-          color={strokeTrunk}
-          style="stroke"
-          strokeWidth={1.0}
-        />
-        <Path
-          path={`M ${originX + trunkW * 0.15} ${originY - trunkH} Q ${originX + trunkW * 0.2} ${originY - trunkH * 0.4} ${originX + flareW * 0.35} ${originY}`}
-          color={strokeTrunk}
-          style="stroke"
-          strokeWidth={1.0}
-        />
-
-        {/* Tier 4: Bottom Grand Skirt (Form 3) */}
-        {targetGrowth === 3 ? (
-          <Group opacity={tier4Inflation}>
-            <Path path={t4Path} color={colorTier4} />
-            <Path path={t4Path} color={strokeTier4} style="stroke" strokeWidth={1.2} />
+        {/* Form 1: Basic Sapling */}
+        {imgForm1 ? (
+          <Group opacity={opacityForm1}>
+            <SkiaImage
+              image={imgForm1}
+              x={spriteX}
+              y={spriteY}
+              width={spriteW}
+              height={spriteH}
+              fit="contain"
+            />
           </Group>
         ) : null}
 
-        {/* Tier 3: Lower-Mid Frills (Form 2 & 3) */}
-        {targetGrowth >= 2 ? (
-          <Group opacity={tier3Inflation}>
-            <Path path={t3Path} color={colorTier3} />
-            <Path path={t3Path} color={strokeTier3} style="stroke" strokeWidth={1.2} />
+        {/* Form 2: Advanced Tree */}
+        {imgForm2 ? (
+          <Group opacity={opacityForm2}>
+            <SkiaImage
+              image={imgForm2}
+              x={spriteX}
+              y={spriteY}
+              width={spriteW}
+              height={spriteH}
+              fit="contain"
+            />
           </Group>
         ) : null}
 
-        {/* Tier 2: Mid Frills (Form 1, 2, 3) */}
-        <Path path={t2Path} color={colorTier2} />
-        <Path path={t2Path} color={strokeTier2} style="stroke" strokeWidth={1.2} />
-
-        {/* Tier 1: Upper-Mid Frills (Form 1, 2, 3) */}
-        <Path path={t1Path} color={colorTier1} />
-        <Path path={t1Path} color={strokeTier1} style="stroke" strokeWidth={1.2} />
-
-        {/* Top Tier: Glossy Jelly Dome Cap */}
-        <Path path={domePath} color={colorDome} />
-        <Path path={domePath} color={strokeDome} style="stroke" strokeWidth={1.2} />
-
-        {/* Top Dome Translucent Jelly Ribbon Highlight */}
-        <Path path={jellyBand} color="rgba(255, 252, 200, 0.55)" />
-
-        {/* Specular Droplet Highlight Beads */}
-        <Circle cx={originX + domeRx * 0.4} cy={domeY - domeRy * 0.95} r={domeRx * 0.16} color="rgba(255, 255, 255, 0.85)" />
-        <Circle cx={originX - domeRx * 0.38} cy={domeY - domeRy * 0.75} r={domeRx * 0.11} color="rgba(255, 255, 255, 0.65)" />
-        <Circle cx={originX + domeRx * 0.15} cy={domeY - domeRy * 0.55} r={domeRx * 0.08} color="rgba(255, 255, 255, 0.75)" />
+        {/* Form 3: Majestic Pagoda Tree (100% Artist Original Reference Match) */}
+        {imgForm3 ? (
+          <Group opacity={opacityForm3}>
+            <SkiaImage
+              image={imgForm3}
+              x={spriteX}
+              y={spriteY}
+              width={spriteW}
+              height={spriteH}
+              fit="contain"
+            />
+          </Group>
+        ) : null}
       </Group>
 
-      {/* 3. Floating Fairy Firefly Motes (Form 3) */}
-      {targetGrowth === 3 ? (
-        <Group opacity={moteOpacity}>
-          <Circle cx={originX - treeSize * 0.28} cy={mote1Y} r={s * 0.035} color="#FFE66D" />
-          <Circle cx={originX + treeSize * 0.30} cy={mote2Y} r={s * 0.028} color="#FFD166" />
-        </Group>
-      ) : null}
+      {/* 3. Hybrid Layer 2: Skia Parametric Vector Overlays (Floating Golden Fireflies) */}
+      <Group opacity={moteOpacity}>
+        <Circle cx={originX - spriteW * 0.26} cy={mote1Y} r={s * 0.035} color="#FFE66D" />
+        <Circle cx={originX + spriteW * 0.28} cy={mote2Y} r={s * 0.028} color="#FFD166" />
+      </Group>
     </Group>
   );
 }
